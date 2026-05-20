@@ -1,151 +1,106 @@
 export function generateProtocols(
   scores: Record<string, number>,
 ) {
+
   const protocols = []
 
-  // ENERGY
-  if (scores.energy < 65) {
-    protocols.push({
-      title: 'Mitochondrial Energy Protocol',
-      priority: 'High',
-      description:
-        'Focused on ATP production, mitochondrial resilience and cellular energy optimization.',
-      recommendations: [
-        'CoQ10',
-        'PQQ',
-        'NAD+ Support',
-        'Magnesium Glycinate',
-      ],
-    })
-  }
+  // MORNING
 
-  // STRESS
-  if (scores.stress < 65) {
-    protocols.push({
-      title: 'Neuro Recovery Protocol',
-      priority: 'High',
-      description:
-        'Designed to regulate nervous system overload and optimize stress adaptation.',
-      recommendations: [
-        'Ashwagandha',
-        'L-Theanine',
-        'Magnesium',
-        'Apigenin',
-      ],
-    })
-  }
+  protocols.push({
+    title: 'Morning Activation Protocol',
 
-  // SLEEP
-  if (scores.sleep < 65) {
-    protocols.push({
-      title: 'Sleep Optimization Protocol',
-      priority: 'High',
-      description:
-        'Improves circadian rhythm alignment and deep recovery quality.',
-      recommendations: [
-        'Magnesium Threonate',
-        'Glycine',
-        'Apigenin',
-        'Melatonin Support',
-      ],
-    })
-  }
+    period: 'Morning',
 
-  // INFLAMMATION
-  if (scores.inflammation < 65) {
-    protocols.push({
-      title: 'Inflammation Reduction Protocol',
-      priority: 'Medium',
-      description:
-        'Targets systemic inflammation and recovery optimization.',
-      recommendations: [
-        'Omega-3',
-        'Curcumin',
-        'Resveratrol',
-        'Green Tea Extract',
-      ],
-    })
-  }
+    objective:
+      scores.energy < 65
+        ? 'Restore mitochondrial activation and stabilize morning energy output.'
+        : 'Maintain cognitive activation and metabolic stability.',
 
-  // GUT
-  if (scores.gut < 65) {
-    protocols.push({
-      title: 'Gut Health Optimization Protocol',
-      priority: 'Medium',
-      description:
-        'Supports microbiome resilience and digestive performance.',
-      recommendations: [
-        'Probiotics',
-        'Digestive Enzymes',
-        'Glutamine',
-        'Prebiotic Fiber',
-      ],
-    })
-  }
+    recommendations: [
+      ...(scores.energy < 65
+        ? [
+            'CoQ10',
+            'PQQ',
+            'NAD+ Support',
+          ]
+        : []),
 
-  // COGNITION
-  if (scores.cognition < 65) {
-    protocols.push({
-      title: 'Cognitive Performance Protocol',
-      priority: 'Medium',
-      description:
-        'Enhances focus, neuroprotection and cognitive resilience.',
-      recommendations: [
-        'Lion’s Mane',
-        'Alpha-GPC',
-        'Citicoline',
-        'Omega-3',
-      ],
-    })
-  }
+      ...(scores.cognition < 65
+        ? [
+            'Lion’s Mane',
+            'Citicoline',
+          ]
+        : []),
 
-  // RECOVERY
-  if (scores.recovery < 65) {
-    protocols.push({
-      title: 'Recovery Optimization Protocol',
-      priority: 'Medium',
-      description:
-        'Supports physical recovery and biological regeneration.',
-      recommendations: [
-        'Electrolytes',
-        'Creatine',
-        'Protein Optimization',
-        'Magnesium',
-      ],
-    })
-  }
+      'Morning Sunlight',
+      'Hydration Protocol',
+    ],
+  })
 
-  // LONGEVITY
-  if (scores.longevity < 70) {
-    protocols.push({
-      title: 'Longevity Foundation Protocol',
-      priority: 'Low',
-      description:
-        'General healthy aging and long-term vitality optimization.',
-      recommendations: [
-        'Vitamin D3 + K2',
-        'Omega-3',
-        'NAC',
-        'Polyphenols',
-      ],
-    })
-  }
+  // MIDDAY
 
-  // DEFAULT
-  if (protocols.length === 0) {
-    protocols.push({
-      title: 'Foundational Longevity Stack',
-      priority: 'Baseline',
-      description:
-        'Your biological profile appears relatively optimized. Focus on maintenance and long-term resilience.',
-      recommendations: [
-        'Omega-3',
-        'Magnesium',
-        'Vitamin D3',
-        'Polyphenols',
-      ],
-    })
-  }
+  protocols.push({
+    title: 'Midday Stress Regulation',
+
+    period: 'Midday',
+
+    objective:
+      scores.stress < 65
+        ? 'Reduce sympathetic overload and stabilize adaptive resilience.'
+        : 'Support sustained autonomic balance and cognitive performance.',
+
+    recommendations: [
+      ...(scores.stress < 65
+        ? [
+            'L-Theanine',
+            'Ashwagandha',
+          ]
+        : []),
+
+      ...(scores.inflammation < 65
+        ? [
+            'Curcumin',
+            'Omega-3',
+          ]
+        : []),
+
+      'Breathwork Reset',
+      'Circadian Walk',
+    ],
+  })
+
+  // EVENING
+
+  protocols.push({
+    title: 'Evening Recovery Protocol',
+
+    period: 'Evening',
+
+    objective:
+      scores.recovery < 65
+        ? 'Deepen parasympathetic recovery and regenerative efficiency.'
+        : 'Maintain restorative sleep architecture and recovery capacity.',
+
+    recommendations: [
+      ...(scores.sleep < 65
+        ? [
+            'Apigenin',
+            'Magnesium Glycinate',
+            'Glycine',
+          ]
+        : []),
+
+      ...(scores.recovery < 65
+        ? [
+            'Electrolytes',
+            'Protein Recovery',
+          ]
+        : []),
+
+      'Blue Light Reduction',
+      'Sleep Optimization',
+    ],
+  })
 
   return protocols
 }

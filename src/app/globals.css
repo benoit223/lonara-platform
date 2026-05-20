@@ -1,10 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
-
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -18,10 +19,95 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
 .pdf-export-mode * {
   color: white !important;
   background-color: black !important;
   border-color: #333 !important;
   box-shadow: none !important;
   filter: none !important;
+}
+
+/* FLOATING MOTION */
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+.animate-floatSlow {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+
+/* GLOW BREATHING */
+
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.55;
+  }
+}
+
+.animate-pulseGlow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* SLOW PULSE SCALE */
+
+@keyframes slowPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.75;
+    transform: scale(1.06);
+  }
+}
+
+.animate-slowPulse {
+  animation: slowPulse 5s ease-in-out infinite;
+}
+
+/* CINEMATIC SCAN LINE */
+
+@keyframes scanMove {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.animate-scanMove {
+  animation: scanMove 8s linear infinite;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #EAE4D5 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #0A1A28 inset !important;
+  box-shadow: 0 0 0px 1000px #0A1A28 inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: #EAE4D5;
+  border: 1px solid rgba(3, 90, 168, 0.20) !important;
 }
