@@ -25,6 +25,15 @@ export interface Product {
   systems: string[]
   ingredients: ProductIngredient[]
   usage: string
+  timing: 'morning' | 'midday' | 'evening'
+priority:
+  | 'foundation'
+  | 'optimization'
+  | 'targeted'
+
+biologicalTargets: string[]
+
+stackCompatibility: string[]
   scoreTargets: string[]
 }
 
@@ -46,6 +55,20 @@ export const products: Product[] = [
     systems: ['longevity', 'energy', 'recovery'],
     scoreTargets: ['performance', 'recovery', 'longevity'],
     usage: '2 capsules daily',
+timing: 'morning',
+
+priority: 'foundation',
+
+biologicalTargets: [
+  'Cellular resilience',
+  'Mitochondrial function',
+  'Longevity support',
+],
+
+stackCompatibility: [
+  'Neuro Balance',
+],
+
     ingredients: [
       {
         name: 'Panax Ginseng',
@@ -75,6 +98,19 @@ export const products: Product[] = [
     systems: ['cognition', 'stress', 'sleep'],
     scoreTargets: ['stress', 'cognition', 'recovery'],
     usage: '2 capsules daily',
+    timing: 'evening',
+
+priority: 'targeted',
+
+biologicalTargets: [
+  'Stress regulation',
+  'Cognitive resilience',
+  'Sleep optimization',
+],
+
+stackCompatibility: [
+  'Longevity Core',
+],
     ingredients: [
       {
         name: 'Lion’s Mane',

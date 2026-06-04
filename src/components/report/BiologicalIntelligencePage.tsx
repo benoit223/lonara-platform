@@ -63,7 +63,7 @@ export default function BiologicalIntelligencePage({
 
       <div className="absolute bottom-[10%] left-[5%] w-[420px] h-[420px] rounded-full bg-[#C7AC60]/[0.04] blur-[120px]" />
 
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('/noise.png')]" />
+      
 
       <div className="relative z-10 p-10">
 
@@ -86,7 +86,7 @@ export default function BiologicalIntelligencePage({
   />
 
   <div>
-            <p className="text-[11px] uppercase tracking-[0.35em] text-[#C7AC60]/70 mb-2">
+            <p className="text-[14px] uppercase tracking-[0.35em] text-[#C7AC60]/70 mb-2">
               Biological Intelligence
             </p>
 
@@ -157,44 +157,460 @@ export default function BiologicalIntelligencePage({
                 </div>
 
               </div>
+{/* QUANTUM BIOLOGICAL MAPPING */}
+<div className="absolute inset-0 flex items-center justify-center overflow-hidden">
 
-              {/* RADAR */}
-              <div className="absolute inset-0 flex items-center justify-center">
+  {/* ATMOSPHERIC DEPTH */}
+  <div className="absolute w-[920px] h-[920px] rounded-full bg-[rgba(231,209,154,0.05)] blur-[180px]" />
 
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 80,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                  className="relative w-[340px] h-[340px]"
-                >
+  <div className="absolute w-[620px] h-[620px] rounded-full bg-[rgba(231,209,154,0.08)] blur-[120px]" />
 
-                  {/* circles */}
-                  <div className="absolute inset-0 rounded-full border border-[#7FD6FF]/14" />
+  {/* MAIN ENGINE */}
+  <motion.div
+    animate={{
+      rotateX: [0, 5, 0],
+      rotateY: [0, -5, 0],
+    }}
+    transition={{
+      duration: 24,
+      repeat: Infinity,
+      ease: [0.65, 0, 0.35, 1],
+    }}
+    style={{
+      transformStyle: 'preserve-3d',
+      perspective: '2400px',
+    }}
+    className="relative w-[560px] h-[560px]"
+  >
 
-                  <div className="absolute inset-[40px] rounded-full border border-[#7FD6FF]/14" />
+    {/* CORE GLOW */}
+    <motion.div
+      animate={{
+        opacity: [0.22, 0.42, 0.22],
+        scale: [1, 1.015, 1],
+      }}
+      transition={{
+        duration: 14,
+        repeat: Infinity,
+        ease: [0.65, 0, 0.35, 1],
+      }}
+      className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(255,225,160,0.28),rgba(231,209,154,0.08)_42%,transparent_76%)] blur-[160px]"
+    />
 
-                  <div className="absolute inset-[80px] rounded-full border border-[#7FD6FF]/14" />
+    {/* DEPTH RINGS */}
+    <div
+      className="absolute inset-[78px] rounded-full border border-[#E7D19A]/24"
+      style={{
+        transform: 'translateZ(90px)',
+        boxShadow:
+          '0 0 80px rgba(231,209,154,0.12)',
+      }}
+    />
 
-                  <div className="absolute inset-[120px] rounded-full border border-[#7FD6FF]/14" />
+    <div
+      className="absolute inset-[126px] rounded-full border border-[#E7D19A]/16"
+      style={{
+        transform: 'translateZ(150px)',
+      }}
+    />
 
-                  {/* glow */}
-                  <div className="absolute inset-[95px] rounded-full bg-[rgba(199,172,96,0.08)] blur-[60px]" />
+    {/* FLOATING PARTICLES */}
+    <motion.div
+      animate={{
+        y: [0, -20, 0],
+        opacity: [0.18, 0.7, 0.18],
+      }}
+      transition={{
+        duration: 10,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      className="absolute top-[120px] left-[170px] w-[5px] h-[5px] rounded-full bg-[#C7AC60] blur-[1px]"
+    />
 
-                  {/* center */}
-                  <div className="absolute inset-[145px] rounded-full bg-[#C7AC60]/80 shadow-[0_0_25px_rgba(199,172,96,0.45)]" />
+    <motion.div
+      animate={{
+        y: [0, 18, 0],
+        opacity: [0.12, 0.45, 0.12],
+      }}
+      transition={{
+        duration: 13,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      className="absolute top-[340px] right-[150px] w-[4px] h-[4px] rounded-full bg-[#C7AC60]"
+    />
 
-                  {/* polygon */}
-                  <div className="absolute top-[70px] left-[70px] w-[200px] h-[200px] rotate-12 border border-[#035AA8]/30 bg-[rgba(199,172,96,0.08)] backdrop-blur-sm clip-polygon" />
+    <motion.div
+      animate={{
+        x: [0, 12, 0],
+        opacity: [0.10, 0.35, 0.10],
+      }}
+      transition={{
+        duration: 16,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      className="absolute bottom-[130px] left-[120px] w-[3px] h-[3px] rounded-full bg-[#C7AC60]"
+    />
 
-                </motion.div>
+    {/* SVG FIELD */}
+    <svg
+      viewBox="0 0 560 560"
+      className="absolute inset-0 w-full h-full"
+      style={{
+        filter:
+          'drop-shadow(0 0 80px rgba(231,209,154,0.18))',
+      }}
+    >
 
-              </div>
+      {/* OUTER FIELD */}
+      <motion.path
+        d="M280 72 C410 66 502 166 494 280 C486 410 386 502 268 494 C142 486 64 386 72 260 C82 150 168 80 280 72"
+        fill="none"
+        stroke="rgba(231,209,154,0.52)"
+        strokeWidth="1.2"
+        animate={{
+          d: [
+            'M280 72 C410 66 502 166 494 280 C486 410 386 502 268 494 C142 486 64 386 72 260 C82 150 168 80 280 72',
+            'M292 82 C426 78 510 182 486 292 C464 426 366 510 254 484 C138 456 72 366 86 246 C102 142 186 92 292 82',
+            'M280 72 C410 66 502 166 494 280 C486 410 386 502 268 494 C142 486 64 386 72 260 C82 150 168 80 280 72',
+          ],
+        }}
+        transition={{
+          duration: 34,
+          repeat: Infinity,
+          ease: [0.65, 0, 0.35, 1],
+        }}
+      />
 
-            </div>
+      {/* MID FIELD */}
+      <motion.path
+        d="M280 132 C374 126 442 194 438 280 C434 378 362 438 274 432 C178 426 126 350 132 266 C138 182 202 138 280 132"
+        fill="rgba(231,209,154,0.04)"
+        stroke="rgba(231,209,154,0.46)"
+        strokeWidth="1"
+        animate={{
+          opacity: [0.38, 0.82, 0.38],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
 
+      {/* INNER FIELD */}
+      <motion.path
+        d="M280 188 C340 184 388 228 384 280 C380 342 332 386 278 382 C214 378 182 330 186 276 C190 220 232 192 280 188"
+        fill="rgba(231,209,154,0.08)"
+        stroke="rgba(255,230,180,0.42)"
+        strokeWidth="1"
+        animate={{
+          opacity: [0.4, 0.9, 0.4],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {/* CONNECTIONS */}
+      <motion.line
+        x1="280"
+        y1="280"
+        x2="280"
+        y2={130 - ((scores.recovery || 50) * 0.35)}
+        stroke="rgba(255,230,180,0.58)"
+        strokeWidth="1"
+        strokeDasharray="8 14"
+        animate={{
+          opacity: [0.24, 0.9, 0.24],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <motion.line
+        x1="280"
+        y1="280"
+        x2={420 + ((scores.stress || 50) * 0.28)}
+        y2="210"
+        stroke="rgba(255,230,180,0.58)"
+        strokeWidth="1"
+        strokeDasharray="10 18"
+        animate={{
+          opacity: [0.20, 0.8, 0.20],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <motion.line
+        x1="280"
+        y1="280"
+        x2="388"
+        y2={410 + ((scores.cognition || 50) * 0.18)}
+        stroke="rgba(255,230,180,0.58)"
+        strokeWidth="1"
+        strokeDasharray="8 16"
+        animate={{
+          opacity: [0.22, 0.84, 0.22],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <motion.line
+        x1="280"
+        y1="280"
+        x2={180 - ((scores.inflammation || 50) * 0.25)}
+        y2="412"
+        stroke="rgba(255,230,180,0.58)"
+        strokeWidth="1"
+        strokeDasharray="9 16"
+        animate={{
+          opacity: [0.22, 0.88, 0.22],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <motion.line
+        x1="280"
+        y1="280"
+        x2="158"
+        y2={208 - ((scores.sleep || 50) * 0.22)}
+        stroke="rgba(255,230,180,0.58)"
+        strokeWidth="1"
+        strokeDasharray="8 18"
+        animate={{
+          opacity: [0.18, 0.78, 0.18],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+   {/* CENTRAL BIOLOGICAL CORE */}
+<foreignObject
+  x="210"
+  y="210"
+  width="140"
+  height="140"
+>
+  <motion.div
+    animate={{
+      opacity: [0.88, 1, 0.88],
+      rotate: [0, 1.5, 0],
+    }}
+    transition={{
+      duration: 18,
+      repeat: Infinity,
+      ease: [0.65, 0, 0.35, 1],
+    }}
+    className="relative w-full h-full rounded-full overflow-hidden border border-[#C7AC60]/40 bg-[rgba(10,18,28,0.92)] shadow-[0_0_40px_rgba(199,172,96,0.18)]"
+  >
+
+    {/* INNER GOLD GRID */}
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(199,172,96,0.18),transparent_72%)]" />
+
+    {/* BIOLOGICAL TEXTURE */}
+    <div
+      className="absolute inset-0 opacity-70"
+      style={{
+        backgroundImage: `
+          radial-gradient(circle at 30% 30%, rgba(199,172,96,0.22) 0%, transparent 18%),
+          radial-gradient(circle at 70% 40%, rgba(199,172,96,0.18) 0%, transparent 22%),
+          radial-gradient(circle at 45% 75%, rgba(199,172,96,0.16) 0%, transparent 20%),
+          linear-gradient(rgba(199,172,96,0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(199,172,96,0.08) 1px, transparent 1px)
+        `,
+        backgroundSize:
+          '100% 100%, 100% 100%, 100% 100%, 18px 18px, 18px 18px',
+      }}
+    />
+
+    {/* CENTRAL ENERGY */}
+    <motion.div
+      animate={{
+        opacity: [0.45, 0.8, 0.45],
+        scale: [1, 1.06, 1],
+      }}
+      transition={{
+        duration: 8,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      className="absolute top-1/2 left-1/2 w-[44px] h-[44px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C7AC60] blur-[12px]"
+    />
+
+    {/* MICRO NODES */}
+    <div className="absolute top-[24px] left-[42px] w-[4px] h-[4px] rounded-full bg-[#C7AC60]" />
+
+    <div className="absolute top-[58px] right-[28px] w-[3px] h-[3px] rounded-full bg-[#C7AC60]" />
+
+    <div className="absolute bottom-[30px] left-[52px] w-[5px] h-[5px] rounded-full bg-[#C7AC60]" />
+
+    <div className="absolute bottom-[46px] right-[42px] w-[3px] h-[3px] rounded-full bg-[#C7AC60]" />
+
+  </motion.div>
+</foreignObject>
+
+      {/* RECOVERY */}
+      <motion.circle
+        cx="280"
+        cy={130 - ((scores.recovery || 50) * 0.35)}
+        r={Math.max(10, (scores.recovery || 0) * 0.14)}
+        fill={
+          scores.recovery >= 80
+            ? '#C7AC60'
+            : scores.recovery >= 65
+            ? '#FFB357'
+            : '#FF4D6D'
+        }
+        animate={{
+          opacity: [0.72, 1, 0.72],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {/* STRESS */}
+      <motion.circle
+        cx={420 + ((scores.stress || 50) * 0.28)}
+        cy="210"
+        r={Math.max(10, (scores.stress || 0) * 0.14)}
+        fill={
+          scores.stress >= 80
+            ? '#C7AC60'
+            : scores.stress >= 65
+            ? '#FFB357'
+            : '#FF4D6D'
+        }
+        animate={{
+          opacity: [0.7, 1, 0.7],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {/* COGNITION */}
+      <motion.circle
+        cx="388"
+        cy={410 + ((scores.cognition || 50) * 0.18)}
+        r={Math.max(10, (scores.cognition || 0) * 0.14)}
+        fill={
+          scores.cognition >= 80
+            ? '#C7AC60'
+            : scores.cognition >= 65
+            ? '#FFB357'
+            : '#FF4D6D'
+        }
+        animate={{
+          opacity: [0.72, 1, 0.72],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {/* INFLAMMATION */}
+      <motion.circle
+        cx={180 - ((scores.inflammation || 50) * 0.25)}
+        cy="412"
+        r={Math.max(10, (scores.inflammation || 0) * 0.14)}
+        fill={
+          scores.inflammation >= 80
+            ? '#C7AC60'
+            : scores.inflammation >= 65
+            ? '#FFB357'
+            : '#FF4D6D'
+        }
+        animate={{
+          opacity: [0.72, 1, 0.72],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {/* SLEEP */}
+      <motion.circle
+        cx="158"
+        cy={208 - ((scores.sleep || 50) * 0.22)}
+        r={Math.max(10, (scores.sleep || 0) * 0.14)}
+        fill={
+          scores.sleep >= 80
+            ? '#C7AC60'
+            : scores.sleep >= 65
+            ? '#FFB357'
+            : '#FF4D6D'
+        }
+        animate={{
+          opacity: [0.72, 1, 0.72],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+    </svg>
+
+    {/* LABELS */}
+    <div className="absolute top-[54px] left-1/2 -translate-x-1/2 text-[11px] tracking-[0.42em] uppercase text-[#C7AC60]">
+      Recovery
+    </div>
+
+    <div className="absolute top-[196px] right-[26px] text-[11px] tracking-[0.42em] uppercase text-[#C7AC60]">
+      Stress
+    </div>
+
+    <div className="absolute bottom-[112px] right-[40px] text-[11px] tracking-[0.42em] uppercase text-[#C7AC60]">
+      Cognition
+    </div>
+
+    <div className="absolute bottom-[108px] left-[68px] text-[11px] tracking-[0.42em] uppercase text-[#C7AC60]">
+      Inflammation
+    </div>
+
+    <div className="absolute top-[198px] left-[72px] text-[11px] tracking-[0.42em] uppercase text-[#C7AC60]">
+      Sleep
+    </div>
+
+  </motion.div>
+
+</div>
+            
+</div>
+ 
             {/* AI CORRELATIONS */}
             <div className="relative overflow-hidden rounded-[32px] border border-[#C7AC60]/12 bg-[rgba(7,17,29,0.55)] p-8 backdrop-blur-xl">
 
@@ -332,10 +748,10 @@ export default function BiologicalIntelligencePage({
                   label="Inflammatory Burden"
                   value={
   scores.inflammation >= 80
-    ? 'Low'
-    : scores.inflammation >= 65
-    ? 'Moderate'
-    : 'Elevated'
+  ? 'Well Regulated'
+  : scores.inflammation >= 65
+  ? 'Adaptive'
+  : 'Dysregulated'
 }
                 />
 
@@ -343,10 +759,10 @@ export default function BiologicalIntelligencePage({
                   label="Cognitive Stability"
                value={
   scores.cognition >= 80
-    ? 'High'
-    : scores.cognition >= 65
-    ? 'Moderate'
-    : 'Compromised'
+  ? 'Well Regulated'
+  : scores.cognition >= 65
+  ? 'Adaptive'
+  : 'Compromised'
 }
                 />
 
@@ -500,14 +916,14 @@ function SystemCard({
   score,
 }: any) {
 
-  const scoreColor =
-    score >= 85
-      ? 'text-[#C7AC60]'
-      : score >= 70
-      ? 'text-[#C7AC60]'
-      : score >= 55
-      ? 'text-amber-300'
-      : 'text-red-300'
+const scoreColor =
+  score >= 85
+    ? 'text-[#E7D19A]'
+    : score >= 70
+    ? 'text-[#C7AC60]'
+    : score >= 55
+    ? 'text-[#FF9F43]'
+    : 'text-[#FF4D6D]'
 
   return (
 

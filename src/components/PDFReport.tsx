@@ -18,6 +18,7 @@ type PDFReportProps = {
   insights: string[]
   protocols: any[]
   longevityScore: number
+biologicalAge: number
 }
 
 const styles = StyleSheet.create({
@@ -290,6 +291,7 @@ export default function PDFReport({
   insights,
   protocols,
   longevityScore,
+  biologicalAge,
 }: PDFReportProps) {
   const reportDate = new Date().toLocaleString(
     'en-US',
@@ -302,12 +304,7 @@ export default function PDFReport({
     },
   )
 
-  const biologicalAge = Math.max(
-    18,
-    Math.round(80 - longevityScore * 0.6),
-  )
-
-  return (
+   return (
     <Document>
       <Page
         size="A4"

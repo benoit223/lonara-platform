@@ -98,6 +98,97 @@ export function generateBiologicalSignature(
         'from-amber-400 to-orange-500',
     }
   }
+// =====================================
+// PURPOSE-DRIVEN RESILIENCE
+// =====================================
+
+if (
+  scores.purpose > 82 &&
+  scores.social > 78 &&
+  scores.longevity > 75
+) {
+  return {
+    title:
+      'Purpose-Driven Resilience Profile',
+
+    description:
+      'Strong psychosocial alignment and behavioral resilience patterns support favorable neuroendocrine stability and long-term healthy aging dynamics.',
+
+    risk:
+      'Low psychosocial degeneration exposure.',
+
+    color:
+      'from-violet-400 to-fuchsia-500',
+  }
+}
+
+// =====================================
+// MOBILITY COMPROMISED
+// =====================================
+
+if (
+  scores.mobility < 55 &&
+  scores.recovery < 60
+) {
+  return {
+    title:
+      'Mobility-Compromised Longevity Profile',
+
+    description:
+      'Reduced functional mobility efficiency combined with impaired recovery capacity may negatively influence long-term physiological resilience.',
+
+    risk:
+      'Accelerated functional aging exposure.',
+
+    color:
+      'from-amber-500 to-orange-600',
+  }
+}
+// =====================================
+// SOCIAL RESILIENCE
+// =====================================
+
+if (
+  scores.social > 80 &&
+  scores.stress > 72 &&
+  scores.sleep > 72
+) {
+  return {
+    title:
+      'Socially Resilient Adaptive Profile',
+
+    description:
+      'Strong psychosocial resilience and adaptive nervous system stability support favorable systemic longevity regulation.',
+
+    risk:
+      'Low neuroadaptive instability exposure.',
+
+    color:
+      'from-cyan-400 to-indigo-500',
+  }
+}
+// =====================================
+// FAMILIAL LONGEVITY RISK
+// =====================================
+
+if (
+  scores.family < 50 &&
+  scores.inflammation < 60
+) {
+  return {
+    title:
+      'Familial Longevity Vulnerability Profile',
+
+    description:
+      'Familial predisposition patterns combined with inflammatory instability may elevate long-term biological vulnerability.',
+
+    risk:
+      'Elevated age-related disease exposure.',
+
+    color:
+      'from-rose-500 to-red-600',
+  }
+}
 
   // =====================================
   // DEFAULT

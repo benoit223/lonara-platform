@@ -12,10 +12,7 @@ const resend = new Resend(
 
 export async function POST(req: Request) {
   try {
-    console.log(
-      'SEND REPORT ROUTE HIT',
-    )
-
+  
     const body = await req.json()
 
    
@@ -28,15 +25,6 @@ export async function POST(req: Request) {
       longevityScore,
     } = body
 
-    console.log(
-      'EMAIL TARGET:',
-      email,
-    )
-
-    console.log(
-      'GENERATING PDF...',
-    )
-
   
 const pdfBuffer =
   await renderToBuffer(
@@ -48,17 +36,13 @@ const pdfBuffer =
       longevityScore={
         longevityScore
       }
+biologicalAge={
+  body.biologicalAge
+}
+
     />,
   )
 
-
-    console.log(
-      'PDF GENERATED SUCCESSFULLY',
-    )
-
-    console.log(
-      'SENDING EMAIL...',
-    )
 
     const data =
       await resend.emails.send({
@@ -112,10 +96,6 @@ const pdfBuffer =
 ],
       })
 
-    console.log(
-      'RESEND RESPONSE:',
-      data,
-    )
 
     return Response.json({
       success: true,

@@ -2,6 +2,12 @@
 
 @import "tailwindcss";
 
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -62,7 +68,7 @@ body {
 }
 
 .animate-pulseGlow {
-  animation: pulseGlow 2.5s ease-in-out infinite;
+  animation: pulseGlow 18s ease-in-out infinite;
 }
 
 /* SLOW PULSE SCALE */
@@ -81,7 +87,7 @@ body {
 }
 
 .animate-slowPulse {
-  animation: slowPulse 5s ease-in-out infinite;
+  animation: slowPulse 11s ease-in-out infinite;
 }
 
 /* CINEMATIC SCAN LINE */
@@ -110,4 +116,97 @@ select:-webkit-autofill {
   transition: background-color 9999s ease-in-out 0s;
   caret-color: #EAE4D5;
   border: 1px solid rgba(3, 90, 168, 0.20) !important;
+}
+
+/* BIOMETRIC CORE PULSE */
+
+@keyframes biometricPulse {
+
+  0% {
+    transform: scale(1);
+    opacity: 0.94;
+  }
+
+  50% {
+    transform: scale(1.012);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.94;
+  }
+}
+
+.animate-biometricPulse {
+  animation:
+    biometricPulse 7s ease-in-out infinite;
+}
+
+/* GLASS SHIMMER */
+
+@keyframes glassShimmer {
+
+  0% {
+    transform:
+      translateX(-10px)
+      translateY(0px);
+
+    opacity: 0.03;
+  }
+
+  50% {
+    transform:
+      translateX(10px)
+      translateY(2px);
+
+    opacity: 0.06;
+  }
+
+  100% {
+    transform:
+      translateX(-10px)
+      translateY(0px);
+
+    opacity: 0.03;
+  }
+}
+
+.animate-glassShimmer {
+  animation:
+    glassShimmer 9s ease-in-out infinite;
+}
+
+/* FLOATING BIOMETRIC PARTICLES */
+
+@keyframes floatingParticle {
+
+  0% {
+    transform:
+      translateY(0px)
+      translateX(0px);
+
+    opacity: 0.10;
+  }
+
+  50% {
+    transform:
+      translateY(-7px)
+      translateX(3px);
+
+    opacity: 0.22;
+  }
+
+  100% {
+    transform:
+      translateY(0px)
+      translateX(0px);
+
+    opacity: 0.10;
+  }
+}
+
+.animate-floatingParticle {
+  animation:
+    floatingParticle 16s ease-in-out infinite;
 }

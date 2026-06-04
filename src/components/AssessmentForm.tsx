@@ -1,62 +1,68 @@
 // src/components/AssessmentForm.tsx
 
 'use client'
-
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface AssessmentFormProps {
+  memberTier:
+  | 'guest'
+  | 'member'
+  | 'premium'
+  | 'executive'
 
-onStart: (
-  name: string,
-  email: string,
-  age: number,
-  sex: string,
-  height: number,
-  weight: number,
-) => void
+  onStart: (
+    accessMode: 'guest' | 'registered',
+    name: string,
+    email: string,
+    password: string,
+  ) => void
 
   onClose: () => void
 }
 
 export default function AssessmentForm({
-
+  memberTier,
   onStart,
   onClose,
-
 }: AssessmentFormProps) {
 
-  const [name, setName] =
-    useState<string>('')
+const t = useTranslations('assessment')
+const locale = useLocale()
+const [firstName, setFirstName] =
+  useState<string>('')
+
+const [lastName, setLastName] =
+  useState<string>('')
 
   const [email, setEmail] =
     useState<string>('')
 
-const [age, setAge] =
-  useState<string>('')
-
-const [sex, setSex] =
-  useState<string>('')
-
-const [height, setHeight] =
-  useState<string>('')
-
-const [weight, setWeight] =
-  useState<string>('')
-
-  const [unitSystem, setUnitSystem] =
-  useState<'metric' | 'imperial'>(
-    'metric',
-  )
-
   const [error, setError] =
     useState<string>('')
 
+const [entryMode, setEntryMode] =
+  useState<
+    'guest' |
+    'signup' |
+    'signin'
+  >('guest')
+
+const [password, setPassword] =
+  useState<string>('')
+
+const [
+  confirmPassword,
+  setConfirmPassword,
+] = useState<string>('')
+
   return (
+   <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-black/10 backdrop-blur-[3px]">
 
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-[3px] px-4 py-4">
-
-      {/* CARD */}
-      <div className="relative w-full max-w-[560px] rounded-[1.8rem] border border-[#035AA8]/14 bg-[rgba(3,10,20,0.68)] backdrop-blur-[20px] px-5 py-5 shadow-[0_0_50px_rgba(3,90,168,0.10)]">
+  {/* CONTENT */}
+  <div className="relative z-10 flex min-h-screen items-start md:items-center justify-center px-4 py-6">
+      <div className="relative w-full max-w-[1180px] rounded-[1.2rem] md:rounded-[1.8rem] border border-[#035AA8]/14 bg-[rgba(3,10,20,0.58)] backdrop-blur-[20px] px-4 md:px-8 py-6 md:py-8 shadow-[0_0_50px_rgba(3,90,168,0.10)]">
 
         {/* GLOW */}
         <div className="absolute left-[-120px] top-[-120px] h-[180px] w-[180px] rounded-full bg-[#035AA8]/8 blur-[120px]" />
@@ -64,75 +70,182 @@ const [weight, setWeight] =
         <div className="absolute right-[-80px] bottom-[-80px] h-[140px] w-[140px] rounded-full bg-[#C7AC60]/8 blur-[100px]" />
 
         {/* CLOSE */}
-       <button
-  type="button"
-  onClick={() => onClose()}
-  className="absolute right-5 top-4 z-[100] text-xl text-white/40 transition-all hover:text-white cursor-pointer"
->
-  ×
-</button>
-
-        {/* HEADER */}
-        <div className="relative z-10 mb-6">
-
-          <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#C7AC60]/85">
-            BIOLOGICAL INTAKE
-          </p>
-
-         <h2
-  className="mt-2 text-[24px] md:text-[28px] font-extralight leading-[1.05] tracking-[0.01em] text-[#EAE4D5]"
-  style={{
-    fontFamily: "'Cormorant Garamond', serif",
-  }}
->
-
-            Begin Your
-
-            <span
-  className="block text-[#C7AC60]"
-  style={{
-    fontFamily: "'Cormorant Garamond', serif",
-    fontWeight: 500,
-  }}
->
-              Longevity Assessment
-            </span>
-
-          </h2>
-
-          <p className="mt-3 max-w-[420px] text-[12px] leading-[1.6] text-white/58">
-            Advanced biological profiling designed to uncover actionable longevity insights tailored to your physiology and lifestyle.
-          </p>
-
-        </div>
+        <button
+          type="button"
+          onClick={() => onClose()}
+          className="absolute right-4 top-4 md:right-5 md:top-4 z-[100] flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/40 backdrop-blur-xl transition-all hover:border-[#C7AC60]/30 hover:bg-[#C7AC60]/10 hover:text-[#E7D19A]"
+        >
+          <span className="text-[16px] md:text-[18px] leading-none">×</span>
+        </button>
 
         {/* FORM */}
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 items-center gap-6 md:gap-10">
 
-          {/* FULL NAME */}
-          <div>
+{/* LEFT PANEL */}
+<div className="relative overflow-hidden rounded-[1.2rem] md:rounded-[1.4rem] border border-[#C7AC60]/10 bg-[rgba(255,255,255,0.02)] p-5 md:p-7 backdrop-blur-[18px]">
 
-            <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-              Full Name
-            </label>
+  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent)]" />
 
-            <input
-              type="text"
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              placeholder="Enter your full name"
-className="w-full resize-none rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
-            />
+  <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/70">
+    {t('accessMode')}
+  </p>
 
-          </div>
+  <h3
+    className="mt-2 text-[26px] md:text-[34px] leading-[1.0] text-[#EAE4D5]"
+    style={{
+      fontFamily:
+        "'Cormorant Garamond', serif",
+    }}
+  >
+    {t('enterSystem')}
+    
+  </h3>
 
+  <p className="mt-2 max-w-[420px] text-[12px] md:text-[13px] leading-[1.8] text-white/48">
+    {t('enterSubtitle')}
+  </p>
+
+  {/* OPTIONS */}
+  <div className="mt-5 md:mt-6 space-y-4">
+
+    {/* GUEST */}
+    <button
+      type="button"
+      onClick={() =>
+        setEntryMode('guest')
+      }
+      className={`w-full rounded-[1.0rem] md:rounded-[1.2rem] border p-4 md:p-5 text-left transition-all ${
+        entryMode === 'guest'
+          ? 'border-[#035AA8]/40 bg-[#035AA8]/10'
+          : 'border-white/5 bg-white/[0.02]'
+      }`}
+    >
+
+      <div className="flex items-center justify-between">
+
+        <div>
+          <p className="text-[12px] md:text-[13px] uppercase tracking-[0.16em] text-[#EAE4D5]">
+            {t('guestTitle')}
+          </p>
+
+          <p className="mt-2 text-[11px] md:text-[12px] leading-[1.6] text-white/45">
+            {t('guestSubtitle')}
+          </p>
+        </div>
+
+        <div
+          className={`h-4 w-4 rounded-full border ${
+            entryMode === 'guest'
+              ? 'border-[#035AA8] bg-[#035AA8]'
+              : 'border-white/20'
+          }`}
+        />
+      </div>
+
+     <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] md:text-[11px] text-white/40">
+
+        <div>✓ {t('guestPerk1')}</div>
+
+        <div>✓ {t('guestPerk2')}</div>
+
+        <div className="text-[#C7AC60]/60">
+          ✗ {t('guestLock1')}
+        </div>
+
+        <div className="text-[#C7AC60]/60">
+          ✗ {t('guestLock2')}
+        </div>
+
+      </div>
+
+    </button>
+
+
+
+  </div>
+
+
+
+  <div className="mt-5 md:mt-6 flex rounded-full border border-white/8 bg-white/[0.02] p-1">
+
+    <button
+      type="button"
+      onClick={() =>
+        setEntryMode('signup')
+      }
+      className={`flex-1 rounded-full px-4 py-2 text-[10px] md:text-[11px] uppercase tracking-[0.18em] transition-all ${
+        entryMode === 'signup'
+          ? 'bg-[#C7AC60] text-black'
+          : 'text-white/40'
+      }`}
+    >
+      {t('createAccount')}
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setEntryMode('signin')
+      }
+      className={`flex-1 rounded-full px-4 py-2 text-[10px] md:text-[11px] uppercase tracking-[0.18em] transition-all ${
+        entryMode === 'signin'
+          ? 'bg-[#035AA8] text-white'
+          : 'text-white/40'
+      }`}
+    >
+      {t('signIn')}
+    </button>
+
+  </div>
+
+
+
+
+</div>
+
+{/* RIGHT PANEL */}
+<div className="space-y-3">
+
+     
+  {/* FULL NAME */}
+  {entryMode !== 'signin' && (
+  <div className="grid grid-cols-2 gap-3 md:gap-4">
+
+  <div>
+    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
+      {t('firstName')}
+    </label>
+
+    <input
+      type="text"
+      value={firstName}
+      onChange={(e) => setFirstName(e.target.value)}
+      placeholder="John"
+      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
+    />
+  </div>
+
+  <div>
+    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
+      {t('lastName')}
+    </label>
+
+    <input
+      type="text"
+      value={lastName}
+      onChange={(e) => setLastName(e.target.value)}
+      placeholder="Doe"
+      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
+    />
+  </div>
+
+</div>
+)}
           {/* EMAIL */}
           <div>
 
             <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-              Email Address
+              {t('email')}
             </label>
 
             <input
@@ -141,182 +254,175 @@ className="w-full resize-none rounded-[0.9rem] border border-[#035AA8]/20 bg-whi
               onChange={(e) =>
                 setEmail(e.target.value)
               }
-              placeholder="Enter your email"
+              placeholder={t('emailPlaceholder')}
              className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
             />
 
           </div>
 
-{/* BIOMETRICS */}
 
-<div className="flex items-center justify-end gap-2 mb-1">
+{entryMode !== 'guest' && (
 
-  <button
-    type="button"
-    onClick={() =>
-      setUnitSystem('metric')
-    }
-    className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-[0.18em] transition-all ${
-      unitSystem === 'metric'
-        ? 'bg-[#035AA8]/14 text-[#6E8BC7] border border-[#035AA8]/25'
-        : 'text-white/35 border border-white/5'
-    }`}
-  >
-    Metric
-  </button>
+<>
+{/* ACCOUNT PASSWORD */}
 
-  <button
-    type="button"
-    onClick={() =>
-      setUnitSystem('imperial')
-    }
-    className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-[0.18em] transition-all ${
-      unitSystem === 'imperial'
-        ? 'bg-[#035AA8]/14 text-[#6E8BC7] border border-[#035AA8]/25'
-        : 'text-white/35 border border-white/5'
-    }`}
-  >
-    Imperial
-  </button>
 
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+
+    <div>
+
+      <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
+
+        {
+          entryMode === 'signup'
+            ? t('createPassword')
+            : t('accountPassword')
+        }
+
+      </label>
+
+      <input
+        type="password"
+        
+        value={password}
+        onChange={(e) =>
+          setPassword(e.target.value)
+        }
+        placeholder={
+          entryMode === 'signup'
+            ? t('createPasswordPlaceholder')
+            : t('enterPasswordPlaceholder')
+        }
+        className="w-full rounded-[0.9rem] border border-[#C7AC60]/20 bg-white/[0.025] px-4 py-3 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#C7AC60]/45 focus:outline-none disabled:opacity-35
+disabled:cursor-not-allowed"
+      />
+
+    </div>
+{entryMode === 'signup' && (
+    <div>
+
+      <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
+  {t('confirmPassword')}
+</label>
+
+      <input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) =>
+          setConfirmPassword(
+            e.target.value,
+          )
+        }
+    
+        placeholder={t('confirmPasswordPlaceholder')}
+
+        className="
+          w-full
+          rounded-[0.9rem]
+          border
+          border-[#C7AC60]/20
+          bg-white/[0.025]
+          px-4
+          py-3
+          text-[13px]
+          text-white
+          placeholder:text-white/18
+          backdrop-blur-xl
+          transition-all
+          duration-300
+          focus:border-[#C7AC60]/45
+          focus:outline-none
+          disabled:opacity-35
+disabled:cursor-not-allowed
+        "
+      />
+
+    </div>
+)}
 </div>
 
-<div className="grid grid-cols-2 gap-3">
+{entryMode === 'signin' && (
 
-  {/* AGE */}
-  <div>
+  <div className="flex justify-end">
 
-    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-      Age
-    </label>
+    <button
+      type="button"
+      onClick={async () => {
 
-    <input
-      type="number"
-      min="18"
-      max="100"
-      value={age}
-      onChange={(e) =>
-        setAge(e.target.value)
-      }
-      placeholder="Age"
-      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
-    />
+        if (!email) {
 
-  </div>
+          setError(
+            t('errorEmailFirst'),
+          )
 
-  {/* SEX */}
-  <div>
+          return
+        }
 
-    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-      Sex
-    </label>
+     const { error } = await supabase.auth.resetPasswordForEmail(
+  email,
+  {
+    redirectTo: `${window.location.origin}/${locale}/reset-password`,
+  },
+)
+        if (error) {
 
-    <select
-      value={sex}
-      onChange={(e) =>
-        setSex(e.target.value)
-      }
-    className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
+          setError(
+            error.message,
+          )
+
+          return
+        }
+
+        setError(
+          t('passwordResetSent'),
+        )
+
+      }}
+      className="text-[11px] text-[#C7AC60]/70 hover:text-[#E7D19A]"
     >
-     <option value="" className="bg-[#0A1A28] text-[#EAE4D5]">
-  Select
-</option>
-
-<option value="male" className="bg-[#0A1A28] text-[#EAE4D5]">
-  Male
-</option>
-
-<option value="female" className="bg-[#0A1A28] text-[#EAE4D5]">
-  Female
-</option>
-    </select>
+      {t('forgotPassword')}
+    </button>
 
   </div>
 
-  {/* HEIGHT */}
-  <div>
+)}
 
-    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-      {unitSystem === 'metric'
-  ? 'Height (cm)'
-  : 'Height (ft/in)'}
-    </label>
+</>
 
-    <input
-      type="number"
-      value={height}
-      onChange={(e) =>
-        setHeight(e.target.value)
-      }
-      placeholder={
-  unitSystem === 'metric'
-    ? '178'
-    : `5'10`
-}
-      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
-    />
-
-  </div>
-
-  {/* WEIGHT */}
-  <div>
-
-    <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-      {unitSystem === 'metric'
-  ? 'Weight (kg)'
-  : 'Weight (lbs)'}
-    </label>
-
-    <input
-      type="number"
-      value={weight}
-      onChange={(e) =>
-        setWeight(e.target.value)
-      }
-      placeholder={
-  unitSystem === 'metric'
-    ? '72'
-    : '165'
-}
-      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
-    />
-
-  </div>
-
-</div>
+)}
 
           {/* LONGEVITY GOAL */}
           <div>
 
             <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-              Longevity Goal
+              {t('longevityGoal')}
             </label>
 
             <select
 className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
             >
          <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Optimize energy
+  {t('goalEnergy')}
 </option>
 
 <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Improve sleep
+  {t('goalSleep')}
 </option>
 
 <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Reduce stress
+  {t('goalStress')}
 </option>
 
 <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Increase performance
+  {t('goalPerformance')}
 </option>
 
 <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Healthy aging
+  {t('goalAging')}
 </option>
 
 <option className="bg-[#0A1A28] text-[#EAE4D5]">
-  Longevity optimization
+  {t('goalLongevity')}
 </option>
 
             </select>
@@ -327,12 +433,12 @@ className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] p
           <div>
 
             <label className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-white/72">
-              Current Health Priority
+              {t('healthPriority')}
             </label>
 
             <textarea
               rows={3}
-              placeholder="Describe your current goals, symptoms or health priorities"
+              placeholder={t('healthPriorityPlaceholder')}
            className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] px-4 py-2.5 text-[13px] text-white placeholder:text-white/18 backdrop-blur-xl transition-all duration-300 focus:border-[#035AA8]/45 focus:outline-none focus:shadow-[0_0_25px_rgba(3,90,168,0.18)]"
             />
 
@@ -350,63 +456,187 @@ className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] p
 
           {/* BUTTON */}
           <button
-            onClick={() => {
+            onClick={async () => {
 
-              if (
-  !name ||
-  !email ||
-  !age ||
-  !sex ||
-  !height ||
-  !weight
+             if (!email) {
+
+  setError(
+    t('errorEmail'),
+  )
+
+  return
+}
+
+if (
+  entryMode !== 'signin' &&
+  (
+    !firstName ||
+    !lastName
+  )
 ) {
 
-                setError(
-                  'Please complete all required biological intake fields before starting the assessment.',
-                )
+  setError(
+    t('errorName'),
+  )
 
-                return
-              }
+  return
+}
+ 
 
               setError('')
 
-     const parsedHeight =
-  unitSystem === 'metric'
-    ? Number(height)
-    : (() => {
-        const match =
-          height.match(
-            /(\d+)'(\d+)/,
-          )
+if (
+  entryMode === 'signup'
+) {
 
-        if (!match) return 0
+  if (
+    !password ||
+    !confirmPassword
+  ) {
 
-        const feet =
-          Number(match[1])
+    setError(
+      t('errorPassword'),
+    )
 
-        const inches =
-          Number(match[2])
+    return
+  }
 
-        return Math.round(
-          feet * 30.48 +
-            inches * 2.54,
-        )
-      })()
+  if (
+    password !== confirmPassword
+  ) {
 
-const parsedWeight =
-  unitSystem === 'metric'
-    ? Number(weight)
-    : Math.round(
-        Number(weight) * 0.453592,
-      )
+    setError(
+      t('errorPasswordMatch'),
+    )
+
+    return
+  }
+
+  if (password.length < 8) {
+
+    setError(
+      t('errorPasswordLength'),
+    )
+
+    return
+  }
+
+}
+
+if (
+  entryMode === 'guest'
+) {
+
+ const { error: profileError } =
+  await supabase
+    .from('profiles')
+    .insert({
+      first_name: firstName,
+      last_name: lastName,
+      full_name: `${firstName} ${lastName}`,
+      email,
+      access_mode: 'guest',
+      account_status: 'guest',
+      subscription_status: 'none',
+      subscription_plan: 'free',
+    })
+
+if (profileError) {
+
+  setError(
+    profileError.message,
+  )
+
+  return
+}
+
+}
+
+if (
+  entryMode !== 'guest'
+) {
+
+  if (
+    entryMode === 'signup'
+  ) {
+
+    const {
+      data,
+      error: signupError,
+    } =
+      await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+   if (signupError?.message) {
+
+  setError(
+    signupError.message,
+  )
+
+  return
+}
+
+  if (data?.user) {
+
+  await supabase
+    .from('profiles')
+    .insert({
+
+      id: data.user.id,
+
+      first_name: firstName,
+
+      last_name: lastName,
+
+      full_name: `${firstName} ${lastName}`,
+
+      email,
+
+          access_mode:
+  'registered',
+
+        })
+
+// Si email non confirmé, afficher message et stopper
+  if (!data.user.confirmed_at) {
+    setError(t('checkYourEmail'))
+    return
+ }
+    }
+
+  } else {
+
+    const {
+      error: signinError,
+    } =
+      await supabase.auth.signInWithPassword({
+      
+        email,
+        password,
+      })
+
+   if (signinError?.message) {
+
+  setError(
+    signinError.message,
+  )
+
+  return
+}
+
+  }
+
+}
 
 onStart(
-  name,
+  entryMode === 'guest'
+    ? 'guest'
+    : 'registered',
+  `${firstName} ${lastName}`,
   email,
-  Number(age),
-  sex,
-  parsedHeight,
-  parsedWeight,
+  password,
 )
 
             }}
@@ -418,12 +648,19 @@ onStart(
 {/* INNER GLOW */}
 <div className="absolute inset-0 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_24px_rgba(199,172,96,0.08)] pointer-events-none" />
             <span className="relative z-10">
-  Start Biological Assessment
+  {
+    entryMode === 'guest'
+      ? t('startAssessment')
+      : entryMode === 'signup'
+      ? t('createAndContinue')
+      : t('signInAndContinue')
+  }
 </span>
           </button>
-
+</div>
         </div>
       </div>
+          </div>
     </div>
   )
 }

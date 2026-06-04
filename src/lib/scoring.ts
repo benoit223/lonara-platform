@@ -9,7 +9,7 @@ export function calculateScores(
 
 questions.forEach((question) => {
   const response =
-    responses[question.question]
+    responses[question.id]
 
   // Ignore les questions non répondues
   if (response === undefined) {

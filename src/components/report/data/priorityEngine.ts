@@ -1,61 +1,100 @@
+import {
+  STRESS_RISK_THRESHOLD,
+  SLEEP_RISK_THRESHOLD,
+  RECOVERY_RISK_THRESHOLD,
+  INFLAMMATION_RISK_THRESHOLD,
+  COGNITION_RISK_THRESHOLD,
+  LONGEVITY_RISK_THRESHOLD,
+} from '@/lib/scoreThresholds'
+
 export function generatePriorityFocus(
   scores: Record<string, number>,
 ) {
 
   const priorities = []
 
-  if (scores.stress <= 65) {
+  if (scores.stress <= STRESS_RISK_THRESHOLD) {
     priorities.push({
       title: 'Stress Modulation',
-      impact: 'HIGH',
+      impact: 'Immediate Attention',
       severity: 'critical'
     })
   }
 
-  if (scores.sleep <= 70) {
+  if (scores.sleep <= SLEEP_RISK_THRESHOLD) {
     priorities.push({
       title: 'Sleep Optimization',
-      impact: 'HIGH',
+      impact: 'Immediate Attention',
       severity: 'critical'
     })
   }
 
-  if (scores.recovery <= 70) {
+  if (scores.recovery <= RECOVERY_RISK_THRESHOLD) {
     priorities.push({
       title: 'Recovery Support',
-      impact: 'MEDIUM',
+      impact: 'Optimization Needed',
       severity: 'moderate',
     })
   }
 
-  if (scores.inflammation <= 65) {
+  if (scores.inflammation <= INFLAMMATION_RISK_THRESHOLD) {
     priorities.push({
       title: 'Inflammatory Regulation',
-      impact: 'MEDIUM',
+      impact: 'Optimization Needed',
       severity: 'moderate',
     })
   }
 
-  if (scores.cognition <= 65) {
+  if (scores.cognition <= COGNITION_RISK_THRESHOLD) {
     priorities.push({
       title: 'Cognitive Optimization',
-      impact: 'MEDIUM',
+      impact: 'Optimization Needed',
       severity: 'moderate',
     })
   }
 
-  if (scores.longevity <= 70) {
+  if (scores.longevity <= LONGEVITY_RISK_THRESHOLD) {
     priorities.push({
       title: 'Longevity Resilience',
-      impact: 'HIGH',
+      impact: 'Immediate Attention',
       severity: 'critical'
     })
   }
+if (scores.mobility <= RECOVERY_RISK_THRESHOLD) {
+  priorities.push({
+    title: 'Mobility Restoration',
+    impact: 'Optimization Needed',
+    severity: 'moderate',
+  })
+}
+if (scores.social <= STRESS_RISK_THRESHOLD) {
+  priorities.push({
+    title: 'Psychosocial Resilience',
+    impact: 'Optimization Needed',
+    severity: 'moderate',
+  })
+}
+if (scores.purpose <= SLEEP_RISK_THRESHOLD) {
+  priorities.push({
+    title: 'Purpose Alignment',
+    impact: 'Optimization Needed',
+    severity: 'moderate',
+  })
+}
+
+if (scores.family <= INFLAMMATION_RISK_THRESHOLD) {
+  priorities.push({
+    title: 'Familial Risk Mitigation',
+    impact: 'Immediate Attention',
+    severity: 'critical',
+  })
+}
+
 
   if (priorities.length === 0) {
     priorities.push({
       title: 'Advanced Optimization',
-      impact: 'LOW',
+      impact: 'Stable',
        severity: 'low',
     })
   }

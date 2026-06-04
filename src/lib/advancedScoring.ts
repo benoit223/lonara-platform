@@ -21,6 +21,13 @@ type Inputs = {
   completionTime: number
 }
 
+function average(values: number[]) {
+  return (
+    values.reduce((a, b) => a + b, 0) /
+    values.length
+  )
+}
+
 export function generateAdvancedScores({
   scores,
   age,
@@ -32,14 +39,75 @@ export function generateAdvancedScores({
   const bmi =
     weight / ((height / 100) ** 2)
 
-  const bmiPenalty =
-    bmi > 30
-      ? 12
-      : bmi > 27
-      ? 7
-      : bmi < 18.5
-      ? 5
-      : 0
+ const bmiPenalty =
+  bmi > 30
+    ? 8
+    : bmi > 27
+    ? 5
+    : bmi > 25
+    ? 2
+    : bmi < 18.5
+    ? 4
+    : 0
+
+const physiology =
+  average([
+    scores.inflammation,
+    scores.metabolism,
+    scores.cardiovascular,
+    scores.immune,
+    scores.recovery,
+    scores.aging,
+    scores.hormonal,
+    scores.sexual,
+    scores.skin,
+  ])
+
+const lifestyle =
+  average([
+    scores.exercise,
+    scores.sleep,
+    scores.circadian,
+    scores.nutrition,
+    scores.detox,
+    scores.lifestyle,
+    scores.mobility,
+  ])
+
+const mental =
+  average([
+    scores.stress,
+    scores.emotional,
+    scores.resilience,
+    scores.cognition,
+    scores.social,
+    scores.purpose,
+  ])
+
+const environmentScore =
+  average([
+    scores.environment,
+    scores.family,
+  ])
+
+let bmiScore = 72
+
+if (bmi >= 18.5 && bmi <= 24.9) {
+  bmiScore = 96
+}
+
+else if (bmi >= 25 && bmi <= 29.9) {
+  bmiScore = 78
+}
+
+else if (bmi >= 30) {
+  bmiScore = 58
+}
+
+const foundation =
+  average([
+    bmiScore,
+  ])
 
   // =========================================
   // BIOLOGICAL COHERENCE
@@ -54,7 +122,7 @@ export function generateAdvancedScores({
           scores.sleep * 0.16 +
           scores.stress * 0.18 +
           scores.cognition * 0.12 +
-          scores.longevity * 0.14 +
+          scores.mobility * 0.14 +
           scores.resilience * 0.12 +
           scores.emotional * 0.10 -
           bmiPenalty,
@@ -73,8 +141,10 @@ export function generateAdvancedScores({
       Math.round(
         scores.sleep * 0.24 +
           scores.stress * 0.28 +
-          scores.emotional * 0.22 +
+          scores.emotional * 0.14 +
           scores.cognition * 0.16 +
+          scores.social * 0.06 + 
+          scores.purpose * 0.06 +
           scores.recovery * 0.10,
       ),
     ),
@@ -130,7 +200,7 @@ export function generateAdvancedScores({
           scores.exercise * 0.18 +
           scores.nutrition * 0.18 +
           scores.sleep * 0.14 +
-          scores.longevity * 0.14 +
+          scores.mobility * 0.14 +
           scores.resilience * 0.14,
       ),
     ),
@@ -170,7 +240,8 @@ export function generateAdvancedScores({
           scores.sleep * 0.26 +
           scores.exercise * 0.18 +
           scores.nutrition * 0.12 +
-          scores.energy * 0.10,
+          scores.energy * 0.05 +
+scores.mobility * 0.05,
       ),
     ),
   )
@@ -179,20 +250,30 @@ export function generateAdvancedScores({
   // LONGEVITY TRAJECTORY
   // =========================================
 
-  const longevityTrajectory = Math.max(
-    18,
+const rawLongevity =
+(
+  physiology * 0.27 +
+
+  lifestyle * 0.32 +
+
+  mental * 0.22 +
+
+  environmentScore * 0.09 +
+
+  scores.family * 0.05 +
+
+  foundation * 0.05
+)
+
+const longevityTrajectory =
+  Math.max(
+    35,
     Math.min(
       99,
       Math.round(
-        scores.longevity * 0.24 +
-          scores.metabolism * 0.16 +
-          scores.exercise * 0.14 +
-          scores.recovery * 0.14 +
-          scores.sleep * 0.12 +
-          scores.stress * 0.10 +
-          scores.inflammation * 0.10 -
-          age * 0.12 -
-          bmiPenalty,
+        rawLongevity -
+        bmiPenalty -
+        age * 0.05
       ),
     ),
   )

@@ -91,7 +91,7 @@ function BottomFeature({
 
 export default function DNAHero() {
   return (
-    <section className="relative min-h-screen overflow-visible bg-[#020817]">
+    <section className="fixed inset-0 overflow-visible bg-[#020817]">
 
       {/* ================================================= */}
       {/* GLOBAL BACKGROUND */}
@@ -99,7 +99,7 @@ export default function DNAHero() {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,180,255,0.12),transparent_48%)]" />
 
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('/noise.png')]" />
+      
 
       <div className="absolute right-[-250px] top-[-180px] h-[1100px] w-[1100px] rounded-full bg-cyan-400/10 blur-[220px]" />
 
