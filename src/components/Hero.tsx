@@ -164,8 +164,7 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
       style={{ backgroundImage: "url('/hero_premium.png')" }}
     >
 
-      {/* Feature cards */}
-      <div className="absolute bottom-[18%] sm:bottom-[8%] md:bottom-[6%] left-1/2 -translate-x-1/2 w-full max-w-[1850px] z-30">
+      <div className="hidden md:block absolute bottom-[18%] sm:bottom-[8%] md:bottom-[6%] left-1/2 -translate-x-1/2 w-full max-w-[1850px] z-30">
         <div className="flex flex-row justify-center md:justify-end items-center gap-4 sm:gap-6 md:gap-3 lg:gap-4 px-4 md:mr-8 lg:mr-12">       <FeatureCard
             icon={<Atom className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]" strokeWidth={1.35} />}
             title={t('hero.scienceBacked')}
