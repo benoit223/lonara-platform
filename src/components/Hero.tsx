@@ -186,7 +186,7 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-soft-light bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      
       <div className="absolute left-[54%] top-[20%] h-[420px] w-[420px] rounded-full bg-[#1A2A44]/30 blur-[160px] animate-slowPulse" />
       <div className="absolute right-[12%] bottom-[16%] h-[260px] w-[260px] rounded-full bg-[#C7AC60]/10 blur-[140px] animate-floatSlow" />
 

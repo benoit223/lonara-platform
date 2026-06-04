@@ -442,7 +442,7 @@ const w5 = topWeaknesses[5] ?? 'longevity'
   time: '30 DAYS',
   title: t('roadmap30title'),
   color: '#E7C980',
-  image: '/AA.png',
+  image: '/aa.png',
  description: t('roadmap30desc', {
   pillar: label(dominantPillar),
   score: String(pillarScore),
@@ -458,7 +458,7 @@ const w5 = topWeaknesses[5] ?? 'longevity'
   time: '90 DAYS',
   title: t('roadmap90title'),
   color: '#0D96FF',
-  image: '/AB.png',
+  image: '/ab.png',
   description: t('roadmap90desc', {
   w0: label(w0), w1: label(w1),
   w2: label(w2), s2: score(w2),
@@ -473,7 +473,7 @@ const w5 = topWeaknesses[5] ?? 'longevity'
   time: '6 MONTHS',
   title: t('roadmap6title'),
   color: '#0D96FF',
-  image: '/AC.png',
+  image: '/ac.png',
 description: t('roadmap6desc', {
   w4: label(w4), s4: score(w4),
 }),
@@ -488,7 +488,7 @@ description: t('roadmap6desc', {
   time: '12 MONTHS',
   title: t('roadmap12title'),
   color: '#E7C980',
-  image: '/AD.png',
+  image: '/ad.png',
  description: t('roadmap12desc', {
   pillar: label(dominantPillar),
   score: String(pillarScore),
