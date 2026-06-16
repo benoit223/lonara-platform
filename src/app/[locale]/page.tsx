@@ -75,7 +75,18 @@ export default function Home() {
 const [pendingStep, setPendingStep] = useState<boolean>(false)
 const [previousStep, setPreviousStep] = useState<string>('hero')
 const [mySpaceKey, setMySpaceKey] = useState(0)
-const [cachedAssessment, setCachedAssessment] = useState<any>(null)
+const [cachedAssessment, setCachedAssessment] = useState<any>(() => {
+  try {
+    const stored = sessionStorage.getItem('lonara-cached-assessment')
+    return stored ? JSON.parse(stored) : null
+  } catch { return null }
+})
+const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
+  try {
+    const stored = sessionStorage.getItem('lonara-cached-history')
+    return stored ? JSON.parse(stored) : []
+  } catch { return [] }
+})
 
 const handleMySpaceBack = () => {
   setStep('hero')
@@ -170,7 +181,19 @@ const handleGoToMySpace = () => {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
-        if (assessment) setCachedAssessment(assessment)
+        if (assessment) {
+          setCachedAssessment(assessment)
+          sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
+        }
+        const { data: allAssessments } = await supabase
+          .from('assessments')
+          .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+          .eq('email', userEmail)
+          .order('created_at', { ascending: true })
+        if (allAssessments) {
+          setCachedHistory(allAssessments)
+          sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
+        }
       }
     }
     checkSession()
@@ -420,6 +443,7 @@ setPendingStep(true)
       setStep('prequiz')
     }}
     initialAssessment={cachedAssessment}
+    initialHistory={cachedHistory}
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
   />
 )}
