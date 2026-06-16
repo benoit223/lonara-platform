@@ -122,8 +122,9 @@ function ChatSection({ lastAssessment, bgCharacter, messages, setMessages }: {
     checkLimit()
   }, [])
 
-  const sendMessage = async () => {
+ const sendMessage = async () => {
     if (!input.trim() || loading || limitReached) return
+    if (loading) return
     const userMessage = { role: 'user', content: input.trim() }
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
@@ -131,11 +132,15 @@ function ChatSection({ lastAssessment, bgCharacter, messages, setMessages }: {
     setLoading(true)
 
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
       const response = await fetch('/api/chat-character', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ character, messages: newMessages, userContext }),
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
       const data = await response.json()
       const newCount = dailyCount + 2
       setDailyCount(newCount)
@@ -147,6 +152,8 @@ function ChatSection({ lastAssessment, bgCharacter, messages, setMessages }: {
           .update({ chat_daily_count: newCount, chat_last_reset: new Date().toISOString().split('T')[0] })
           .eq('id', user.id)
       }
+    } catch (e) {
+      setMessages([...newMessages, { role: 'assistant', content: '...' }])
     } finally {
       setLoading(false)
     }

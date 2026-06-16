@@ -39,7 +39,7 @@ export default function Home() {
         if (step === 'myspace') setStep('hero')
       }
 
-      if (event === 'SIGNED_IN' && session) {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('member_tier, full_name, email')

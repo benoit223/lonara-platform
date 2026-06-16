@@ -1,10 +1,11 @@
 import { renderToBuffer } from '@react-pdf/renderer'
 import PDFReport from '@/components/PDFReport'
 import path from 'path'
+import fs from 'fs'
 import React from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-const LOGO_BL = path.join(process.cwd(), 'public', 'lonara-logo-bl.png')
+const LOGO_BL_PATH = path.join(process.cwd(), 'public', 'lonara-logo-bl.png')
 
 export async function POST(req: Request) {
   const supabaseAdmin = createClient(
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       showPage1: true,
       showPage2: isFullAccess,
       showPage3: true,
-      logoPath: LOGO_BL,
+      logoPath: `data:image/png;base64,${fs.readFileSync(LOGO_BL_PATH).toString('base64')}`,
     })
 
     const pdfBuffer = await renderToBuffer(element)
