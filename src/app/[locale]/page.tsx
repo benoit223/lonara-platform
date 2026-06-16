@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Hero from '@/components/Hero'
@@ -55,7 +55,7 @@ const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
 const [cachedBgCharacter, setCachedBgCharacter] = useState<'lona' | 'enginea' | 'gummy'>('lona')
 
 const [showSessionGuard, setShowSessionGuard] = useState(false)
-const sessionConfirmed = useRef(false)
+
 const handleMySpaceBack = () => {
   setStep('hero')
 }
@@ -199,7 +199,7 @@ useEffect(() => {
     }
   }
 
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+ const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_OUT') {
       setMemberTier('guest')
       setFullName('')
@@ -207,35 +207,13 @@ useEffect(() => {
       setStep('hero')
       return
     }
-
-if (!session) {
-  if (sessionConfirmed.current) {
-    sessionConfirmed.current = false
-    return
-  }
-  // Vérifier si session réellement perdue avant de reset
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) return  // session encore valide — ignorer le null transitoire
-  setMemberTier('guest')
-  setFullName('')
-  setEmail('')
-  setStep('hero')
-  return
-}
-
- if (
-      (event === 'SIGNED_IN' ||
-      event === 'TOKEN_REFRESHED' ||
-      event === 'INITIAL_SESSION') && session
-    ) {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
       await loadUserData(session.user.id, session.user.email ?? '')
     }
   })
 
   return () => subscription.unsubscribe()
 }, [])
-
-
 
 
   // ── OBJET BIOMARQUEURS — transmis au Quiz puis à Results ─────────────────
@@ -524,7 +502,7 @@ setPendingStep(true)
             <div className="flex flex-col gap-3">
               <button
                onClick={async () => {
-  sessionConfirmed.current = true
+  
   setShowSessionGuard(false)
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
