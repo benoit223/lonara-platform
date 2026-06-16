@@ -524,15 +524,15 @@ setPendingStep(true)
                 {locale === 'fr' ? 'Continuer la session' : locale === 'es' ? 'Continuar sesión' : 'Continue session'}
               </button>
               <button
-              onClick={async () => {
+  onClick={async () => {
   setShowSessionGuard(false)
   setMemberTier('guest')
   setFullName('')
   setEmail('')
   localStorage.removeItem('lonara-auth-token')
-sessionStorage.clear()
-  setStep('hero')
+  sessionStorage.clear()
   await supabase.auth.signOut()
+  setStep('hero')
 }}
                 className="w-full rounded-full border border-white/8 bg-white/[0.03] py-3.5 text-[11px] uppercase tracking-[0.25em] text-white/30 transition hover:text-white/50 hover:border-white/15"
               >
