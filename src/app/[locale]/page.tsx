@@ -153,6 +153,8 @@ const handleGoToMySpace = () => {
 // ── LIRE LE TIER AU MONTAGE si session active ─────────────────────────────
   useEffect(() => {
     const checkSession = async () => {
+      // Forcer la lecture depuis sessionStorage
+      await supabase.auth.initialize?.()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         setMemberTier('guest')
