@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Hero from '@/components/Hero'
@@ -55,7 +55,7 @@ const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
 const [cachedBgCharacter, setCachedBgCharacter] = useState<'lona' | 'enginea' | 'gummy'>('lona')
 
 const [showSessionGuard, setShowSessionGuard] = useState(false)
-
+const sessionConfirmed = useRef(false)
 const handleMySpaceBack = () => {
   setStep('hero')
 }
@@ -209,6 +209,10 @@ useEffect(() => {
     }
 
    if (!session && event !== 'INITIAL_SESSION' && event !== 'TOKEN_REFRESHED') {
+  if (sessionConfirmed.current) {
+    sessionConfirmed.current = false
+    return
+  }
   setMemberTier('guest')
   setFullName('')
   setEmail('')
@@ -517,6 +521,7 @@ setPendingStep(true)
             <div className="flex flex-col gap-3">
               <button
                onClick={async () => {
+  sessionConfirmed.current = true
   setShowSessionGuard(false)
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
