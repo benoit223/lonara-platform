@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server'
+import en from '../../../messages/en.json'
+import fr from '../../../messages/fr.json'
+import es from '../../../messages/es.json'
 
+const MESSAGES: Record<string, any> = { en, fr, es }
+
+function getPatternDesc(patternName: string, locale: string): string {
+  const messages = MESSAGES[locale] ?? MESSAGES['en']
+  const descKey = `${patternName}_desc`
+  return messages?.executive?.[descKey] ?? MESSAGES['en']?.executive?.[descKey] ?? ''
+}
 import {
   calculateLongevityScores,
   calculateBiologicalAge,
@@ -10,6 +20,7 @@ import {
 import { generateLongevityReport } from '@/components/report/data/scoringEngine'
 import { generateAdvancedScores } from '@/lib/advancedScoring'
 import { generateAINarrative } from '@/lib/report/generateAINarrative'
+import { interpretBiomarkers, applyBiomarkerAdjustments } from '@/lib/biomarkerEngine'
 
 const ARCHETYPE_NAMES_EN: Record<string, string> = {
   'archetype_longevity_optimized': 'Longevity Optimized',
@@ -35,7 +46,6 @@ const ARCHETYPE_NAMES_FR: Record<string, string> = {
   'archetype_strong_recovery_low_output': 'Forte Récupération, Faible Rendement',
   'archetype_balanced_optimizer': 'Optimiseur Équilibré',
 }
-
 const ARCHETYPE_NAMES_ES: Record<string, string> = {
   'archetype_longevity_optimized': 'Longevidad Optimizada',
   'archetype_high_performer_nervous': 'Alto Rendimiento Bajo Presión Nerviosa',
@@ -48,7 +58,6 @@ const ARCHETYPE_NAMES_ES: Record<string, string> = {
   'archetype_strong_recovery_low_output': 'Fuerte Recuperación, Bajo Rendimiento',
   'archetype_balanced_optimizer': 'Optimizador Equilibrado',
 }
-
 const ARCHETYPE_DESCS_EN: Record<string, string> = {
   'archetype_longevity_optimized_desc': 'All four biological pillars operating at high efficiency. You represent the top tier of biological optimization.',
   'archetype_high_performer_nervous_desc': 'Strong physical output but autonomic system overloaded. Performance is sustainable only with immediate nervous system support.',
@@ -61,7 +70,6 @@ const ARCHETYPE_DESCS_EN: Record<string, string> = {
   'archetype_strong_recovery_low_output_desc': 'Excellent regenerative capacity but energy generation is underperforming. Recovery potential is there — activation is the missing key.',
   'archetype_balanced_optimizer_desc': 'No critical deficits across any pillar. A well-rounded biological profile with clear pathways for targeted optimization.',
 }
-
 const ARCHETYPE_DESCS_FR: Record<string, string> = {
   'archetype_longevity_optimized_desc': 'Les quatre piliers biologiques fonctionnent à haute efficacité. Vous représentez le niveau supérieur de l\'optimisation biologique.',
   'archetype_high_performer_nervous_desc': 'Fort rendement physique mais système autonome surchargé. La performance n\'est durable qu\'avec un soutien immédiat du système nerveux.',
@@ -74,7 +82,6 @@ const ARCHETYPE_DESCS_FR: Record<string, string> = {
   'archetype_strong_recovery_low_output_desc': 'Excellente capacité régénérative mais la génération d\'énergie est sous-performante. Le potentiel de récupération est là — l\'activation est la clé manquante.',
   'archetype_balanced_optimizer_desc': 'Aucun déficit critique dans aucun pilier. Un profil biologique équilibré avec des voies claires pour une optimisation ciblée.',
 }
-
 const ARCHETYPE_DESCS_ES: Record<string, string> = {
   'archetype_longevity_optimized_desc': 'Los cuatro pilares biológicos funcionan con alta eficiencia. Representa el nivel superior de optimización biológica.',
   'archetype_high_performer_nervous_desc': 'Fuerte rendimiento físico pero sistema autónomo sobrecargado. El rendimiento solo es sostenible con soporte inmediato del sistema nervioso.',
@@ -86,6 +93,77 @@ const ARCHETYPE_DESCS_ES: Record<string, string> = {
   'archetype_resilient_but_inflamed_desc': 'Buena energía y equilibrio mental, pero la carga inflamatoria es la amenaza oculta para la vitalidad a largo plazo y la edad biológica.',
   'archetype_strong_recovery_low_output_desc': 'Excelente capacidad regenerativa pero la generación de energía está por debajo. El potencial de recuperación está ahí — la activación es la clave que falta.',
   'archetype_balanced_optimizer_desc': 'Sin déficits críticos en ningún pilar. Un perfil biológico equilibrado con caminos claros para una optimización específica.',
+}
+
+async function generateBiomarkerAnalysis(
+  bioResults: any[],
+  age: number,
+  sex: string,
+  locale: string,
+): Promise<string> {
+  if (!bioResults || bioResults.length === 0) return ''
+
+  const markerSummary = bioResults.map(m => {
+    const optRange = m.optimalMin != null && m.optimalMax != null
+      ? `optimal: ${m.optimalMin}–${m.optimalMax} ${m.unit}`
+      : `unit: ${m.unit}`
+    return `- ${m.label}: ${m.value} ${m.unit} [${optRange}] → ${m.status}${m.flagMessage ? ` ⚠ ${m.flagMessage}` : ''}`
+  }).join('\n')
+
+  const langInstruction = locale === 'fr'
+    ? 'Respond entirely in French.'
+    : locale === 'es'
+    ? 'Respond entirely in Spanish.'
+    : 'Respond entirely in English.'
+
+  const prompt = `You are a world-class longevity physician analyzing laboratory biomarker results for a ${age}-year-old ${sex} patient.
+
+BIOMARKER RESULTS:
+${markerSummary}
+
+${langInstruction}
+
+Write a concise professional clinical commentary (150-200 words) analyzing ONLY these biomarker results. Focus on:
+1. Which values are concerning and why (reference clinical norms)
+2. Key metabolic/hormonal/inflammatory patterns visible in the data
+3. The most significant finding and its biological implication
+
+Rules:
+- Be purely scientific and clinical — no lifestyle advice, no protocol recommendations
+- Reference specific values and their deviation from optimal ranges
+- Write as a physician reviewing lab results, not as a wellness coach
+- No introduction like "Based on your results" — start directly with the analysis
+- No conclusion paragraph about what to do
+
+Respond with plain text only, no JSON, no markdown.`
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY ?? ''}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 400,
+        temperature: 0.4,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a board-certified longevity physician. Provide precise, evidence-based clinical analysis of laboratory results. ${langInstruction}`,
+          },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    })
+
+    if (!response.ok) return ''
+    const data = await response.json()
+    return data.choices?.[0]?.message?.content?.trim() ?? ''
+  } catch {
+    return ''
+  }
 }
 
 export async function POST(req: Request) {
@@ -100,7 +178,7 @@ export async function POST(req: Request) {
     ? { ...body.scores, ...engineA.scores }
     : body.scores
 
-  // ── CALCUL MINIMAL pour recommendProducts (nécessite LongevityScores type) 
+  // ── CALCUL MINIMAL pour recommendProducts ────────────────────────────────
   const calculatedScores = calculateLongevityScores({
     sleep:         sourceScores.sleep         ?? 50,
     stress:        sourceScores.stress        ?? 50,
@@ -126,62 +204,93 @@ export async function POST(req: Request) {
     completionTime: body.completionTime || 600,
   })
 
-  // ── SCORES GLOBAUX — Engine A uniquement ─────────────────────────────────
-  const longevityScore = engineA?.longevityScore
+  // ── BIOMARQUEURS — interprétation avant Engine A ──────────────────────────
+  // Les valeurs brutes des panels PreQuiz arrivent dans body.biomarkers
+  const memberTier = body.memberType || 'guest'
+  const bioRaw: Record<string, string | number | undefined> = body.biomarkers ?? {}
+
+  const bioOutput = interpretBiomarkers(bioRaw, memberTier, body.age ?? 35)
+
+  // Appliquer les ajustements biomarqueurs aux scores source
+  const bioAdjustedScores = { ...sourceScores }
+  if (bioOutput.hasBiomarkers) {
+    Object.entries(bioOutput.scoreAdjustments).forEach(([domain, delta]) => {
+      bioAdjustedScores[domain] = Math.max(0, Math.min(100,
+        (bioAdjustedScores[domain] ?? 50) + delta
+      ))
+    })
+  }
+
+  // ── SCORES GLOBAUX — Engine A + biomarqueurs ─────────────────────────────
+  const baseLongevityScore = engineA?.longevityScore
     ?? calculatedScores.longevity
     ?? 50
 
-  const biologicalAge = engineA?.biologicalAge
+  const longevityScore = bioOutput.hasBiomarkers
+    ? Math.max(0, Math.min(100, baseLongevityScore + bioOutput.longevityScoreAdjustment))
+    : baseLongevityScore
+
+  const baseBiologicalAge = engineA?.biologicalAge
     ?? calculateBiologicalAge(body.age, calculatedScores, body.weight, body.height)
 
+  const biologicalAge = bioOutput.hasBiomarkers && baseBiologicalAge != null
+    ? Math.max(18, baseBiologicalAge + bioOutput.biologicalAgeAdjustment)
+    : baseBiologicalAge
+
   const percentile = engineA?.percentile
-    ?? calculatePercentile(calculatedScores.longevity)
+    ?? calculatePercentile(Math.round(longevityScore))
 
   // ── PILIERS — Engine A uniquement ────────────────────────────────────────
   const pillarScores = engineA?.pillarScores ?? {
-    activate: Math.round(((sourceScores.energy ?? 50) + (sourceScores.cognition ?? 50) + (sourceScores.exercise ?? 50)) / 3),
-    balance:  Math.round(((sourceScores.stress ?? 50) + (sourceScores.sleep ?? 50) + (sourceScores.emotional ?? 50)) / 3),
-    protect:  Math.round(((sourceScores.inflammation ?? 50) + (sourceScores.immune ?? 50) + (sourceScores.cardiovascular ?? 50)) / 3),
-    restore:  Math.round(((sourceScores.recovery ?? 50) + (sourceScores.longevity ?? 50) + (sourceScores.resilience ?? 50)) / 3),
+    activate: Math.round(((bioAdjustedScores.energy ?? 50) + (bioAdjustedScores.cognition ?? 50) + (bioAdjustedScores.exercise ?? 50)) / 3),
+    balance:  Math.round(((bioAdjustedScores.stress ?? 50) + (bioAdjustedScores.sleep ?? 50) + (bioAdjustedScores.emotional ?? 50)) / 3),
+    protect:  Math.round(((bioAdjustedScores.inflammation ?? 50) + (bioAdjustedScores.immune ?? 50) + (bioAdjustedScores.cardiovascular ?? 50)) / 3),
+    restore:  Math.round(((bioAdjustedScores.recovery ?? 50) + (bioAdjustedScores.longevity ?? 50) + (bioAdjustedScores.resilience ?? 50)) / 3),
   }
 
-  // ── PRIORITIES — 100% Engine A ───────────────────────────────────────────
-  // Construites depuis les flags + weaknesses Engine A
-  // L'ancien generatePriorities est supprimé de la chaîne principale
+  // ── PRIORITIES — Engine A + flags biomarqueurs ───────────────────────────
   const priorities = engineA
     ? [
-        // Flags critiques en tête
+        // Flags critiques biomarqueurs en premier
+        ...bioOutput.additionalFlags
+          .filter(f => f.severity === 'critical')
+          .slice(0, 2)
+          .map(f => ({
+            title: f.message,
+            impact: 'impact_immediate',
+            severity: 'critical',
+          })),
+        // Flags critiques Engine A
         ...(engineA.flags ?? [])
           .filter((f: any) => f.severity === 'critical')
-          .slice(0, 3)
+          .slice(0, 2)
           .map((f: any) => ({
             title: f.message,
             impact: 'impact_immediate',
             severity: 'critical',
           })),
-        // Weaknesses Engine A comme priorities supplémentaires
+        // Weaknesses Engine A
         ...(engineA.weaknesses ?? [])
           .slice(0, 3)
           .map((w: string) => ({
             title: `priority_${w}`,
-            impact: (sourceScores[w] ?? 50) < 45
+            impact: (bioAdjustedScores[w] ?? 50) < 45
               ? 'impact_immediate'
-              : (sourceScores[w] ?? 50) < 70
+              : (bioAdjustedScores[w] ?? 50) < 70
               ? 'impact_optimization'
               : 'impact_stable',
-            severity: (sourceScores[w] ?? 50) < 45
+            severity: (bioAdjustedScores[w] ?? 50) < 45
               ? 'critical'
-              : (sourceScores[w] ?? 50) < 70
+              : (bioAdjustedScores[w] ?? 50) < 70
               ? 'moderate'
               : 'low',
           })),
       ]
-        // Dédupliquer et limiter à 5
         .filter((p, i, arr) => arr.findIndex(x => x.title === p.title) === i)
         .slice(0, 5)
     : []
 
-  // ── RISKS — 100% Engine A ────────────────────────────────────────────────
+  // ── RISKS ─────────────────────────────────────────────────────────────────
   const risks = engineA
     ? (engineA.flags ?? [])
         .map((f: any) => ({
@@ -197,28 +306,45 @@ export async function POST(req: Request) {
   if (engineA?.weaknesses) {
     const w = engineA.weaknesses
     if (w.includes('sleep') || w.includes('stress') || w.includes('circadian')) {
-      weaknessBoosts.sleep = Math.min((sourceScores.sleep ?? 50) - 20, 10)
-      weaknessBoosts.stress = Math.min((sourceScores.stress ?? 50) - 20, 10)
+      weaknessBoosts.sleep = Math.min((bioAdjustedScores.sleep ?? 50) - 20, 10)
+      weaknessBoosts.stress = Math.min((bioAdjustedScores.stress ?? 50) - 20, 10)
     }
     if (w.includes('energy') || w.includes('cognition') || w.includes('performance')) {
-      weaknessBoosts.energy = Math.min((sourceScores.energy ?? 50) - 20, 10)
-      weaknessBoosts.cognition = Math.min((sourceScores.cognition ?? 50) - 20, 10)
+      weaknessBoosts.energy = Math.min((bioAdjustedScores.energy ?? 50) - 20, 10)
+      weaknessBoosts.cognition = Math.min((bioAdjustedScores.cognition ?? 50) - 20, 10)
     }
     if (w.includes('gut') || w.includes('inflammation') || w.includes('immune')) {
-      weaknessBoosts.inflammation = Math.min((sourceScores.inflammation ?? 50) - 20, 10)
+      weaknessBoosts.inflammation = Math.min((bioAdjustedScores.inflammation ?? 50) - 20, 10)
     }
     if (w.includes('recovery') || w.includes('resilience')) {
-      weaknessBoosts.recovery = Math.min((sourceScores.recovery ?? 50) - 20, 10)
+      weaknessBoosts.recovery = Math.min((bioAdjustedScores.recovery ?? 50) - 20, 10)
     }
   }
 
+  // Enrichir les weaknesses avec les domaines biomarqueurs critiques
+  const bioWeaknesses = bioOutput.additionalFlags
+    .filter(f => f.severity === 'critical')
+    .flatMap(f => {
+      const domainMap: Record<string, string> = {
+        'inflammation': 'inflammation',
+        'cardiovascular': 'cardiovascular',
+        'cognition': 'cognition',
+        'longevity': 'longevity',
+        'energy': 'energy',
+      }
+      return Object.keys(bioOutput.scoreAdjustments)
+        .filter(d => (bioOutput.scoreAdjustments[d] ?? 0) < -5)
+    })
+  const engineWeaknesses = [
+    ...new Set([...(engineA?.weaknesses ?? []), ...bioWeaknesses])
+  ]
+
   const productScores = {
-    ...sourceScores,
+    ...bioAdjustedScores,
     ...weaknessBoosts,
     ...(engineA && { [`${engineA.dominantPillar}_priority`]: 100 }),
   }
 
-  const engineWeaknesses = engineA?.weaknesses ?? []
   const { protocolProducts, lifestyleProducts } = engineWeaknesses.length > 0
     ? await recommendProducts(productScores, engineWeaknesses)
     : { protocolProducts: [], lifestyleProducts: [] }
@@ -306,43 +432,53 @@ export async function POST(req: Request) {
       return { ...item, color, exceedsUpper }
     })
 
-  const memberType = body.memberType || 'guest'
-
-  // ── NARRATIVES IA ─────────────────────────────────────────────────────────
+  // ── NARRATIVES IA — enrichies avec contexte biomarqueurs ──────────────────
   const aiNarratives = engineA
     ? await generateAINarrative({
         age:            body.age,
         sex:            body.sex,
         biologicalAge,
-        longevityScore,
+        longevityScore: Math.round(longevityScore),
         percentile,
         pillarScores,
         dominantPillar: engineA.dominantPillar,
         strengths:      engineA.strengths   ?? [],
         weaknesses:     engineA.weaknesses  ?? [],
         patterns:       engineA.patterns    ?? [],
-        flags:          engineA.flags       ?? [],
+        flags: [
+          ...(engineA.flags ?? []),
+          ...bioOutput.additionalFlags,
+        ],
         archetype: engineA.profileVector?.archetype
           ? {
               name: (body.locale === 'fr' ? ARCHETYPE_NAMES_FR : body.locale === 'es' ? ARCHETYPE_NAMES_ES : ARCHETYPE_NAMES_EN)[engineA.profileVector.archetype.name] ?? engineA.profileVector.archetype.name,
-description: (body.locale === 'fr' ? ARCHETYPE_DESCS_FR : body.locale === 'es' ? ARCHETYPE_DESCS_ES : ARCHETYPE_DESCS_EN)[engineA.profileVector.archetype.description] ?? engineA.profileVector.archetype.description,
+              description: (body.locale === 'fr' ? ARCHETYPE_DESCS_FR : body.locale === 'es' ? ARCHETYPE_DESCS_ES : ARCHETYPE_DESCS_EN)[engineA.profileVector.archetype.description] ?? engineA.profileVector.archetype.description,
             }
           : null,
         signatureCode:  engineA.profileVector?.signatureCode ?? null,
-        profileSummary: engineA.profileSummary ?? '',
+        profileSummary: bioOutput.hasBiomarkers
+          ? `${engineA.profileSummary ?? ''} Biomarker findings: ${bioOutput.narrativeContext}`.trim()
+          : engineA.profileSummary ?? '',
         country:        body.country        ?? '',
         socioeconomic:  body.socioeconomic  ?? '',
         locale:         body.locale         ?? 'en',
       })
     : null
 
-  // ── RAPPORT WRAPPER (structure de base pour les pages) ───────────────────
-  // generateLongevityReport sert uniquement de structure — 
-  // toutes ses valeurs seront écrasées par Engine A dans enrichedReport
+const aiBiomarkerAnalysis = bioOutput.hasBiomarkers
+    ? await generateBiomarkerAnalysis(
+        bioOutput.results,
+        body.age ?? 35,
+        body.sex ?? 'unknown',
+        body.locale ?? 'en',
+      )
+    : ''
+
+  // ── RAPPORT WRAPPER ───────────────────────────────────────────────────────
   const report = generateLongevityReport({
     advancedScores,
     user: {
-      memberType,
+      memberType: memberTier,
       name:       body.fullName,
       email:      body.email,
       age:        body.age,
@@ -363,35 +499,50 @@ description: (body.locale === 'fr' ? ARCHETYPE_DESCS_FR : body.locale === 'es' ?
     psychometric:      body.psychometric,
   })
 
-  // ── RAPPORT FINAL — Engine A écrase tout ─────────────────────────────────
+  // ── RAPPORT FINAL — Engine A + biomarqueurs ───────────────────────────────
   const enrichedReport = {
     ...report,
 
-    // Scores — Engine A source de vérité
-    scores: sourceScores,
+    // Scores ajustés par biomarqueurs
+    scores: bioAdjustedScores,
 
-    // Métriques globales — Engine A
-    longevityScore,
+    // Métriques globales ajustées
+    longevityScore: Math.round(longevityScore),
     biologicalAge,
     percentile,
 
-    // Piliers — Engine A
+    // Piliers
     pillarScores,
 
-    // Priorities & Risks — Engine A
+    // Priorities & Risks
     priorities,
     risks,
 
     // Produits
     alternativeOverlaps,
 
-    // Données Engine A complètes
+    // Données Engine A
     ...(engineA && {
       strengths:        engineA.strengths,
-      weaknesses:       engineA.weaknesses,
-      flags:            engineA.flags,
+      weaknesses:       engineWeaknesses,
+      flags: [
+        ...(engineA.flags ?? []),
+        ...bioOutput.additionalFlags,
+      ],
       profileSummary:   engineA.profileSummary,
-      patterns:         engineA.patterns,
+    patterns: (engineA.patterns ?? []).map((pt: any) => {
+        const labelKey = 'pattern_' + (pt.label ?? '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_|_$/g, '')
+        const descKey = `${labelKey}_desc`
+        const messages = body.locale === 'fr' ? fr : body.locale === 'es' ? es : en
+        const translated = (messages as any)?.executive?.[descKey]
+        return {
+          ...pt,
+          description: translated || pt.description,
+        }
+      }),
       dominantPillar:   engineA.dominantPillar,
       patternNarrative: engineA.patternNarrative,
       profileVector:    engineA.profileVector,
@@ -405,6 +556,13 @@ description: (body.locale === 'fr' ? ARCHETYPE_DESCS_FR : body.locale === 'es' ?
         aiProtocolIntro: aiNarratives.aiProtocolIntro,
       }),
     }),
+
+    // ── BIOMARQUEURS — données brutes interprétées pour la page 2 ──────────
+    biomarkers:          bioOutput.results,
+    biomarkerContext:    bioOutput.narrativeContext,
+    biomarkerPanelsUsed: bioOutput.panelsUsed,
+    hasBiomarkers:       bioOutput.hasBiomarkers,
+    aiBiomarkerAnalysis,
   }
 
   return NextResponse.json(enrichedReport)

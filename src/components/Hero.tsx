@@ -16,11 +16,16 @@ import LanguageToggle from '@/components/LanguageToggle'
 import { useTranslations } from 'next-intl'
 import LegalNotice from './LegalNotice'
 import PrivacyPolicy from './PrivacyPolicy'
+import TermsRefundPricing from './TermsRefundPricing'
+import MySpaceModal from './MySpaceModal'
+import { supabase } from '../lib/supabase'
 
 interface HeroProps {
   onStart: () => void
   onReports: () => void
   onAbout: () => void
+  onMySpace: () => void
+  memberTier: 'guest' | 'member' | 'premium' | 'executive'  // ← ajouter
 }
 
 interface FeatureCardProps {
@@ -61,12 +66,20 @@ function BackgroundParticles() {
   )
 }
 
+// ─────────────────────────────────────────────
+// NAVBAR
+// ─────────────────────────────────────────────
 function Navbar({
   onStart,
   onAbout,
   onScience,
   onReports,
-}: HeroProps & { onScience: () => void }) {
+  onMySpaceClick,
+    memberTier,
+}: HeroProps & {
+  onScience: () => void
+  onMySpaceClick: () => void
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const t = useTranslations()
 
@@ -85,44 +98,118 @@ function Navbar({
         {/* Desktop nav */}
         <div className="hidden md:flex ml-auto mr-4 md:mr-8 lg:mr-12 items-center gap-4 md:gap-6 lg:gap-10 text-[13px] uppercase tracking-[0.18em] text-white/52">
           <LanguageToggle />
-          <button onClick={onAbout} className="transition-all hover:text-[#C7AC60] cursor-pointer">
+
+          <button
+            onClick={onAbout}
+            className="transition-all hover:text-[#C7AC60] cursor-pointer"
+          >
             {t('nav.about')}
           </button>
-          <button onClick={onReports} className="transition-all hover:text-[#C7AC60] cursor-pointer">
+          <button
+            onClick={onReports}
+            className="transition-all hover:text-[#C7AC60] cursor-pointer"
+          >
             {t('nav.reports')}
           </button>
-          <button onClick={onScience} className="transition-all hover:text-[#C7AC60] cursor-pointer">
+          <button
+            onClick={onScience}
+            className="transition-all hover:text-[#C7AC60] cursor-pointer"
+          >
             {t('nav.science')}
           </button>
-          <a href="https://www.lonaralabs.com" target="_blank" rel="noopener noreferrer" className="transition-all hover:text-[#C7AC60] cursor-pointer">
+          <a
+            href="https://www.lonaralabs.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-all hover:text-[#C7AC60] cursor-pointer"
+          >
             {t('nav.labs')}
           </a>
+
+          {/* ── MY SPACE ── */}
+          <button
+            onClick={onMySpaceClick}
+            className="relative group flex items-center gap-2 rounded-full border border-[#C7AC60]/25 bg-[#C7AC60]/5 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80 backdrop-blur-xl transition-all hover:border-[#C7AC60]/45 hover:bg-[#C7AC60]/10 hover:text-[#E7D19A]"
+          >
+            {/* top line accent */}
+            <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent pointer-events-none" />
+            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
+  memberTier === 'premium' || memberTier === 'executive'
+    ? 'bg-[#0D96FF] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_12px_4px_rgba(13,150,255,0.8)]'
+    : 'bg-[#C7AC60]/50'
+}`} />
+            {t('nav.myspace')}
+          </button>
         </div>
 
         {/* Mobile hamburger */}
         <button
           className="md:hidden ml-auto mr-4 text-white/60 hover:text-white transition-all"
-          onClick={() => setMobileMenuOpen(prev => !prev)}
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-[80px] left-0 right-0 bg-black/20 backdrop-blur-xl border-b border-white/6 z-50 flex flex-col items-center gap-6 py-8 text-[13px] uppercase tracking-[0.18em] text-white/70">
-          <button onClick={() => { onAbout(); setMobileMenuOpen(false) }} className="hover:text-[#C7AC60] transition-all">
+          <button
+            onClick={() => {
+              onAbout()
+              setMobileMenuOpen(false)
+            }}
+            className="hover:text-[#C7AC60] transition-all"
+          >
             {t('nav.about')}
           </button>
-          <button onClick={() => { onReports(); setMobileMenuOpen(false) }} className="hover:text-[#C7AC60] transition-all">
+          <button
+            onClick={() => {
+              onReports()
+              setMobileMenuOpen(false)
+            }}
+            className="hover:text-[#C7AC60] transition-all"
+          >
             {t('nav.reports')}
           </button>
-          <button onClick={() => { onScience(); setMobileMenuOpen(false) }} className="hover:text-[#C7AC60] transition-all">
+          <button
+            onClick={() => {
+              onScience()
+              setMobileMenuOpen(false)
+            }}
+            className="hover:text-[#C7AC60] transition-all"
+          >
             {t('nav.science')}
           </button>
-          <a href="https://www.lonaralabs.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#C7AC60] transition-all">
+          <a
+            href="https://www.lonaralabs.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#C7AC60] transition-all"
+          >
             {t('nav.labs')}
           </a>
+
+          {/* ── MY SPACE mobile ── */}
+          <button
+            onClick={() => {
+              onMySpaceClick()
+              setMobileMenuOpen(false)
+            }}
+            className="flex items-center gap-2 rounded-full border border-[#C7AC60]/25 bg-[#C7AC60]/5 px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80 transition-all hover:border-[#C7AC60]/45 hover:text-[#E7D19A]"
+          >
+            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
+  memberTier === 'premium' || memberTier === 'executive'
+    ? 'bg-[#0D96FF] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_12px_4px_rgba(13,150,255,0.8)]'
+    : 'bg-[#C7AC60]/50'
+}`} />
+            {t('nav.myspace')}
+          </button>
+
           <LanguageToggle />
         </div>
       )}
@@ -130,22 +217,33 @@ function Navbar({
   )
 }
 
-export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
+// ─────────────────────────────────────────────
+// HERO
+// ─────────────────────────────────────────────
+export default function Hero({ onStart, onReports, onAbout, onMySpace, memberTier }: HeroProps) {
   const [cellularHealth, setCellularHealth] = useState(92)
   useEffect(() => {
-    const interval = setInterval(() => { setCellularHealth(91 + Math.random() * 2) }, 2400)
+    const interval = setInterval(
+      () => setCellularHealth(91 + Math.random() * 2),
+      2400,
+    )
     return () => clearInterval(interval)
   }, [])
 
   const [mitochondrialFunction, setMitochondrialFunction] = useState(87)
   useEffect(() => {
-    const interval = setInterval(() => { setMitochondrialFunction(86 + Math.random() * 2) }, 2800)
+    const interval = setInterval(
+      () => setMitochondrialFunction(86 + Math.random() * 2),
+      2800,
+    )
     return () => clearInterval(interval)
   }, [])
 
   const [showScience, setShowScience] = useState(false)
   const [showLegal, setShowLegal] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showMySpaceModal, setShowMySpaceModal] = useState(false)
   const [dnaIntegrity, setDnaIntegrity] = useState(98.2)
   const [neuralRecovery, setNeuralRecovery] = useState(91.7)
   const t = useTranslations()
@@ -158,6 +256,17 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
     return () => clearInterval(interval)
   }, [])
 
+  // ── Logique My Space : session active → direct, sinon → modal login
+  const handleMySpaceClick = () => {
+    if (memberTier === 'premium' || memberTier === 'executive') {
+      onMySpace()
+    } else if (memberTier === 'member') {
+      setShowMySpaceModal(true)
+    } else {
+      setShowMySpaceModal(true)
+    }
+  }
+
   return (
     <section
       className="fixed inset-0 overflow-hidden bg-cover bg-center"
@@ -165,27 +274,42 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
     >
 
       <div className="hidden md:block absolute bottom-[18%] sm:bottom-[8%] md:bottom-[6%] left-1/2 -translate-x-1/2 w-full max-w-[1850px] z-30">
-        <div className="flex flex-row justify-center md:justify-end items-center gap-4 sm:gap-6 md:gap-3 lg:gap-4 px-4 md:mr-8 lg:mr-12">       <FeatureCard
-            icon={<Atom className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]" strokeWidth={1.35} />}
+        <div className="flex flex-row justify-center md:justify-end items-center gap-4 sm:gap-6 md:gap-3 lg:gap-4 px-4 md:mr-8 lg:mr-12">
+          <FeatureCard
+            icon={
+              <Atom
+                className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]"
+                strokeWidth={1.35}
+              />
+            }
             title={t('hero.scienceBacked')}
             subtitle={t('hero.scienceBackedSub')}
           />
           <div className="h-[32px] sm:h-[40px] md:h-[48px] w-px bg-[#EAE4D5]/10" />
           <FeatureCard
-            icon={<Shield className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]" strokeWidth={1.35} />}
+            icon={
+              <Shield
+                className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]"
+                strokeWidth={1.35}
+              />
+            }
             title={t('hero.privateSecure')}
             subtitle={t('hero.privateSecureSub')}
           />
           <div className="h-[32px] sm:h-[40px] md:h-[48px] w-px bg-[#EAE4D5]/10" />
           <FeatureCard
-            icon={<Sparkles className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]" strokeWidth={1.35} />}
+            icon={
+              <Sparkles
+                className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] md:h-[28px] md:w-[28px] text-[#EAE4D5]"
+                strokeWidth={1.35}
+              />
+            }
             title={t('hero.coreInsights')}
             subtitle={t('hero.coreInsightsSub')}
           />
         </div>
       </div>
 
-      
       <div className="absolute left-[54%] top-[20%] h-[420px] w-[420px] rounded-full bg-[#1A2A44]/30 blur-[160px] animate-slowPulse" />
       <div className="absolute right-[12%] bottom-[16%] h-[260px] w-[260px] rounded-full bg-[#C7AC60]/10 blur-[140px] animate-floatSlow" />
 
@@ -194,6 +318,9 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
         onAbout={onAbout}
         onReports={onReports}
         onScience={() => setShowScience(true)}
+        onMySpace={onMySpace}
+        onMySpaceClick={handleMySpaceClick}
+        memberTier={memberTier}  
       />
 
       {/* Desktop CTA */}
@@ -214,19 +341,35 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
       </div>
 
       {/* Mobile card */}
-      <div className="md:hidden absolute z-20 left-0 right-0 flex justify-center px-4"
-        style={{ top: '96px', bottom: '140px' }}>
+      <div
+        className="md:hidden absolute z-20 left-0 right-0 flex justify-center px-4"
+        style={{ top: '96px', bottom: '140px' }}
+      >
         <div className="flex items-center justify-center w-full">
           <div className="relative w-full max-w-[320px] rounded-[20px] border border-white/6 bg-black/24 px-5 py-4 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)]">
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-            <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#C7AC60]/80" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p
+              className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#C7AC60]/80"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
               {t('hero.badge')}
             </p>
-            <h1 className="leading-[1.02] tracking-[0.01em]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              <div className="text-[32px] font-light text-[#EAE4D5]">{t('hero.line1')}</div>
-              <div className="text-[32px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">{t('hero.line2')}</div>
-              <div className="mt-0 text-[32px] font-light text-[#EAE4D5]">{t('hero.line3')}</div>
-              <div className="text-[32px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">{t('hero.line4')}</div>
+            <h1
+              className="leading-[1.02] tracking-[0.01em]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              <div className="text-[32px] font-light text-[#EAE4D5]">
+                {t('hero.line1')}
+              </div>
+              <div className="text-[32px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">
+                {t('hero.line2')}
+              </div>
+              <div className="mt-0 text-[32px] font-light text-[#EAE4D5]">
+                {t('hero.line3')}
+              </div>
+              <div className="text-[32px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">
+                {t('hero.line4')}
+              </div>
             </h1>
             <p className="mt-2 text-[11px] font-light leading-[1.7] tracking-[0.01em] text-white/48">
               {t('hero.description')}
@@ -260,14 +403,28 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
           <div className="absolute left-[240px] bottom-[120px] h-[320px] w-[320px] rounded-full bg-cyan-300/[0.015] blur-[90px]" />
           <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-70 rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)]">
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-            <p className="mb-6 text-[13px] uppercase tracking-[0.28em] text-[#C7AC60]/80" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p
+              className="mb-6 text-[13px] uppercase tracking-[0.28em] text-[#C7AC60]/80"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
               {t('hero.badge')}
             </p>
-            <h1 className="max-w-[760px] leading-[1.02] tracking-[0.01em]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              <div className="text-[52px] lg:text-[64px] font-light text-[#EAE4D5]">{t('hero.line1')}</div>
-              <div className="text-[52px] lg:text-[64px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">{t('hero.line2')}</div>
-              <div className="mt-1 text-[52px] lg:text-[64px] font-light text-[#EAE4D5]">{t('hero.line3')}</div>
-              <div className="text-[52px] lg:text-[64px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">{t('hero.line4')}</div>
+            <h1
+              className="max-w-[760px] leading-[1.02] tracking-[0.01em]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              <div className="text-[52px] lg:text-[64px] font-light text-[#EAE4D5]">
+                {t('hero.line1')}
+              </div>
+              <div className="text-[52px] lg:text-[64px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">
+                {t('hero.line2')}
+              </div>
+              <div className="mt-1 text-[52px] lg:text-[64px] font-light text-[#EAE4D5]">
+                {t('hero.line3')}
+              </div>
+              <div className="text-[52px] lg:text-[64px] italic font-light text-[#C7AC60] drop-shadow-[0_0_30px_rgba(199,172,96,0.18)]">
+                {t('hero.line4')}
+              </div>
             </h1>
             <p className="mt-6 max-w-[385px] text-[16px] lg:text-[17px] font-light leading-[1.85] tracking-[0.01em] text-white/48">
               {t('hero.description')}
@@ -277,24 +434,65 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
       </div>
 
       {/* Legal footer */}
-      <div className="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 w-full max-w-[1850px] z-50 text-[11px] md:text-[13px] uppercase tracking-[0.18em] text-white/38">
+      <div className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 w-full max-w-[1850px] z-50 text-[11px] md:text-[13px] uppercase tracking-[0.18em] text-white/38">
         <div className="flex flex-col items-center gap-2 md:hidden">
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowLegal(true)} className="transition-all hover:text-[#C7AC60]/70">{t('legal.legalNotice')}</button>
+            <button
+              onClick={() => setShowLegal(true)}
+              className="transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('legal.legalNotice')}
+            </button>
             <div className="h-[10px] w-px bg-white/10" />
-            <button onClick={() => setShowPrivacy(true)} className="transition-all hover:text-[#C7AC60]/70">{t('legal.privacyPolicy')}</button>
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('legal.privacyPolicy')}
+            </button>
+            <div className="h-[10px] w-px bg-white/10" />
+            <button
+              onClick={() => setShowTerms(true)}
+              className="uppercase transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('terms.label')}
+            </button>
           </div>
-          <p className="text-[9px] font-thin uppercase tracking-[0.24em] whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p
+            className="text-[9px] font-thin uppercase tracking-[0.24em] whitespace-nowrap"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
             {t('legal.copyright')}
           </p>
         </div>
         <div className="hidden md:block">
           <div className="ml-8 lg:ml-12 flex items-center gap-6">
-            <button onClick={() => setShowLegal(true)} className="transition-all hover:text-[#C7AC60]/70">{t('legal.legalNotice')}</button>
+            <button
+              onClick={() => setShowLegal(true)}
+              className="transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('legal.legalNotice')}
+            </button>
             <div className="h-[10px] w-px bg-white/10" />
-            <button onClick={() => setShowPrivacy(true)} className="transition-all hover:text-[#C7AC60]/70">{t('legal.privacyPolicy')}</button>
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('legal.privacyPolicy')}
+            </button>
+            <div className="h-[10px] w-px bg-white/10" />
+            <button
+              onClick={() => setShowTerms(true)}
+              className="uppercase transition-all hover:text-[#C7AC60]/70"
+            >
+              {t('terms.label')}
+            </button>
+
           </div>
-          <p className="absolute left-1/2 -translate-x-1/2 text-[11px] font-thin uppercase tracking-[0.28em] whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p
+            className="absolute left-1/2 -translate-x-1/2 bottom-[-30px] text-[11px] font-thin uppercase tracking-[0.28em] whitespace-nowrap"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
             {t('legal.copyright')}
           </p>
         </div>
@@ -302,7 +500,19 @@ export default function Hero({ onStart, onReports, onAbout }: HeroProps) {
 
       {showLegal && <LegalNotice onClose={() => setShowLegal(false)} />}
       {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+      {showTerms && <TermsRefundPricing onClose={() => setShowTerms(false)} />}
       {showScience && <Science onClose={() => setShowScience(false)} />}
+
+      {/* MY SPACE MODAL */}
+      {showMySpaceModal && (
+        <MySpaceModal
+          onClose={() => setShowMySpaceModal(false)}
+          onAccess={() => {
+            setShowMySpaceModal(false)
+            onMySpace()
+          }}
+        />
+      )}
 
     </section>
   )

@@ -96,9 +96,11 @@ type QuizProps = {
   height: number
   weight: number
   unitSystem: 'metric' | 'imperial'
-  country?: string
-  socioeconomic?: string
-  onBack: () => void
+country?: string
+socioeconomic?: string
+biomarkers?: Record<string, string>
+onBack: () => void
+onMySpace?: () => void 
 }
 
 export default function Quiz({
@@ -112,8 +114,10 @@ export default function Quiz({
   weight,
   unitSystem,
   country,
-  socioeconomic,
-  onBack,
+socioeconomic,
+biomarkers = {},
+onBack,
+onMySpace,
 }: QuizProps) {
 
   const t = useTranslations('quiz')
@@ -259,7 +263,7 @@ export default function Quiz({
   const nextSection = async () => {
     if (isSaving) return
 
-    const currentUnanswered = currentQuestions.filter(             //ici condition lesboutonstest remettre 1 au lieu de 99 
+    const currentUnanswered = currentQuestions.filter(             //ici condition lesboutonstest remettre 1 au lieu de 99 benoit
       (q: Question) => responses[q.id] === undefined
     ).length
 
@@ -282,21 +286,27 @@ export default function Quiz({
 
     setIsSaving(true)
 
-    const payload = {
-      full_name: fullName,
-      email,
-      age,
-      sex,
-      height,
-      weight,
-      access_mode: accessMode,
-      member_tier: memberTier,
-      feedback_score: null,
-      completion_time: Math.round((Date.now() - startedAt) / 1000),
-      responses,
-      scores,
-      protocols,
-    }
+   const session = await supabase.auth.getSession()
+   const payload = {
+    profile_id: session.data.session?.user?.id ?? null,  
+full_name: fullName,
+email,
+age,
+sex,
+height,
+weight,
+unit_system: unitSystem,
+country: country ?? '',
+socioeconomic: socioeconomic ?? '',
+access_mode: accessMode,
+member_tier: memberTier,
+feedback_score: null,
+completion_time: Math.round((Date.now() - startedAt) / 1000),
+responses,
+scores,
+protocols,
+biomarkers: biomarkers ?? {},
+}
 
     const { data, error } = await supabase
       .from('assessments')
@@ -349,13 +359,15 @@ export default function Quiz({
         unitSystem={unitSystem}
         country={country}
         socioeconomic={socioeconomic}
-        responses={responses}
+biomarkers={biomarkers}
+responses={responses}
         completionTime={Math.round((Date.now() - startedAt) / 1000)}
         onRestart={() => {
           setResponses({})
           setSectionIndex(0)
           setCompleted(false)
         }}
+        onMySpace={onMySpace}
       />
     )
   }

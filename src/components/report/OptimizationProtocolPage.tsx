@@ -61,6 +61,8 @@ function getInterventionsForWeaknesses(weaknesses: string[], dict: Record<string
   return result
 }
 
+
+
 function getPersonalizedInterventions(
   weaknesses: string[],
   dict: Record<string, string[]>,
@@ -504,7 +506,7 @@ description: t('roadmap6desc', {
 
 // ── COMPOSANT PRINCIPAL ───────────────────────────────────────────────────────
 
-export default function OptimizationProtocolPage({ report }: any) {
+export default function OptimizationProtocolPage({ report, onMySpace }: { report: any; onMySpace?: () => void }) {
 
   const t = useTranslations('optimization')
 const locale = useLocale()
@@ -624,7 +626,7 @@ const eveningProtocol = getEveningProtocol(dominantPillar, weaknesses, t, INTERV
                 ))}
               </div>
 
-              <img src="/cable2.png" alt="" className="absolute right-[-80px] top-[-140px] w-[600px] h-auto z-[1] object-contain opacity-90 scale-[0.80] saturate-[2.0] brightness-[1.0] contrast-[1.00] pointer-events-none select-none" />
+              <img src="/cable2.png" alt="" className="absolute right-[-80px] top-[-140px] w-[600px] h-auto z-[1] object-contain opacity-90 scale-[0.80] saturate-[2.5] brightness-[1.0] contrast-[1.00] pointer-events-none select-none" />
               <img src="/gaugeb.png" alt="" className="absolute inset-0 w-full h-full z-[3] object-contain opacity-90 scale-[1.0] contrast-90 brightness-[1.4] saturate-[0.7] pointer-events-none select-none" />
               <div className="absolute inset-0 rounded-full bg-[#57C7FF]/10 blur-[120px] scale-[1.05] opacity-90" />
               <div className="absolute left-1/2 top-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full pointer-events-none"
@@ -704,7 +706,7 @@ const eveningProtocol = getEveningProtocol(dominantPillar, weaknesses, t, INTERV
             {/* CINEMATIC TIMELINE */}
             <div className="relative mt-14 min-h-[560px]">
               <div className="absolute left-[-8%] right-[-8%] top-[-20px] h-[320px] z-[1] pointer-events-none overflow-hidden">
-                <img src="/cable1.png" alt="" className="w-full h-full object-fill opacity-90 saturate-[2.0]" />
+                <img src="/cable1.png" alt="" className="w-full h-full object-fill opacity-90 saturate-[1.4]" />
               </div>
 
               <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-2 items-start [&>*:nth-child(2)]:mt-0 [&>*:nth-child(4)]:mt-16 md:[&>*:nth-child(4)]:mt-0 [&>*:nth-child(3)]:mt-16 md:[&>*:nth-child(3)]:mt-0">
@@ -767,12 +769,13 @@ const eveningProtocol = getEveningProtocol(dominantPillar, weaknesses, t, INTERV
               </div>
             </div>
 
-            <p className="mt-8 text-[17px] leading-[2] text-[#EAE4D5]/58">
-              {t('roadmapOutro')}
-            </p>
-          </div>
-          <div className="h-10" />
-        </div>
+        <p className="mt-8 text-[17px] leading-[2] text-[#EAE4D5]/58">
+          {t('roadmapOutro')}
+        </p>
+      </div>
+      <div className="h-10" />
+
+       </div>
 
         <div className="h-10" />
 {/* PRODUCT STACK */}
@@ -887,6 +890,9 @@ const eveningProtocol = getEveningProtocol(dominantPillar, weaknesses, t, INTERV
             </p>
           </div>
         </div>
+
+<PDFButtons report={report} onMySpace={onMySpace} />
+
 
         {/* LEGAL */}
         <div className="relative overflow-hidden mt-10 rounded-[32px] border border-[#C7AC60]/10 bg-black/20 p-8">
@@ -1022,6 +1028,120 @@ function PriorityRow({ label, level }: any) {
     <div className="flex items-center justify-between border-b border-[#C7AC60]/8 pb-4">
       <p className="text-sm text-[#EAE4D5]/70">{label}</p>
       <p className="text-[11px] tracking-[0.25em] text-[#C7AC60]">{level}</p>
+    </div>
+  )
+}
+
+function PDFButtons({ report, onMySpace }: { report: any; onMySpace?: () => void }) {
+  const t = useTranslations('optimization')
+  const locale = useLocale()
+  const [loadingBW, setLoadingBW] = useState(false)
+  const [sent, setSent]                 = useState<'bw' | 'color' | null>(null)
+
+  async function sendPDF(variant: 'bw' | 'color') {
+    const set = setLoadingBW
+    set(true)
+    setSent(null)
+    try {
+      await fetch('/api/send-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email:          report.user?.email,
+          fullName:       report.user?.name,
+          scores:         report.scores,
+          insights:       [report.aiNarrative ?? report.aiKeyInsight ?? ''],
+          protocols:      report.priorities ?? [],
+          longevityScore: report.longevityScore,
+          biologicalAge:  report.biologicalAge,
+          report,
+          variant,
+          locale,
+        }),
+      })
+      setSent(variant)
+    } finally {
+      set(false)
+    }
+  }
+
+ return (
+    <div className="relative mt-10 mb-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(199,172,96,0.05),transparent_70%)] pointer-events-none" />
+
+      {/* BOUTONS PDF — member, premium, executive seulement */}
+      {report?.memberType !== 'guest' && (
+        <>
+          {/* CLASSIC — B&W */}
+          <button
+            onClick={() => sendPDF('bw')}
+            disabled={loadingBW}
+            className="relative group flex items-center gap-3 rounded-full border border-[#C7AC60]/25 bg-[rgba(7,17,29,0.6)] px-7 py-3.5 backdrop-blur-xl transition-all duration-300 hover:border-[#C7AC60]/50 hover:bg-[rgba(7,17,29,0.85)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/40 to-transparent" />
+            {loadingBW
+              ? <div className="w-3.5 h-3.5 rounded-full border border-[#C7AC60]/30 border-t-[#C7AC60] animate-spin" />
+              : <svg className="w-3.5 h-3.5 text-[#C7AC60]/60 group-hover:text-[#C7AC60]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            }
+            <span className="text-[10px] uppercase tracking-[0.3em] text-[#EAE4D5]/60 group-hover:text-[#EAE4D5] transition-colors">
+              {loadingBW ? t('sending') : sent === 'bw' ? t('reportSent') : t('sendReportClassic')}
+            </span>
+          </button>
+
+          
+        </>
+      )}
+
+      {/* MY SPACE — premium et executive seulement */}
+      {(report?.memberType === 'premium' || report?.memberType === 'executive') && (
+     <button
+onClick={() => {
+    if (report?.user?.memberType === 'premium' || report?.user?.memberType === 'executive') {
+      if (report.assessmentId) {
+        import('@/lib/supabase').then(({ supabase }) => {
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+              fetch('/api/save-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  assessmentId: report.assessmentId,
+                  userId: user.id,
+                  fullName: report.user?.name,
+                  scores: report.scores,
+                  insights: [report.aiNarrative ?? report.aiKeyInsight ?? ''],
+                  protocols: report.priorities ?? [],
+                  longevityScore: report.longevityScore,
+                  biologicalAge: report.biologicalAge,
+                  report,
+                }),
+              })
+            }
+          })
+        })
+      }
+    }
+    onMySpace?.()
+  }}
+  className="relative group flex items-center gap-3 rounded-full border border-[#035AA8]/40 bg-[#035AA8]/[0.08] px-7 py-3.5 backdrop-blur-xl transition-all duration-300 hover:border-[#035AA8]/65 hover:bg-[#035AA8]/[0.15]"
+>
+  <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#5C96D8]/60 to-transparent" />
+  <svg className="w-3.5 h-3.5 text-[#5C96D8] group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+  </svg>
+  <span className="text-[10px] uppercase tracking-[0.3em] text-[#5C96D8] group-hover:text-white transition-colors">
+    {t('mySpace')}
+  </span>
+</button>
+      )}
+
+      {sent && (
+        <p className="absolute -bottom-6 text-[9px] uppercase tracking-[0.22em] text-[#7EE2A8]/60">
+          {t('sentTo')} {report.user?.email}
+        </p>
+      )}
     </div>
   )
 }

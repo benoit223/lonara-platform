@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl'
 import ExecutiveOverviewPage from '@/components/report/ExecutiveOverviewPage'
 import BiologicalIntelligencePage from '@/components/report/BiologicalIntelligencePage'
 import OptimizationProtocolPage from '@/components/report/OptimizationProtocolPage'
-
+import { supabase } from '../lib/supabase'
 // ── NOUVEAU : import du moteur V2 ──────────────────────────────────────────
 import { calculateScoresV2 } from '@/lib/scoring/engineA'
 import { questions } from '../data/questions'
@@ -32,12 +32,14 @@ type ResultsProps = {
   psychometricProfile: any
   accessMode: 'guest' | 'registered'
   assessmentId: string | null
-  // ── NOUVEAU : responses brutes transmises depuis Quiz.tsx ──
-  responses: Record<string, number>
-  // ──────────────────────────────────────────────────────────
-  country?: string
-  socioeconomic?: string
+// ── NOUVEAU : responses brutes transmises depuis Quiz.tsx ──
+responses: Record<string, number>
+// ──────────────────────────────────────────────────────────
+biomarkers?: Record<string, string>
+country?: string
+socioeconomic?: string
   onRestart: () => void
+  onMySpace?: () => void 
 }
 
 export default function Results({
@@ -55,10 +57,12 @@ export default function Results({
 socioeconomic,
   completionTime,
   psychometricProfile,
-  accessMode,
-  assessmentId,
-  responses,       // ── NOUVEAU
-  onRestart,
+ accessMode,
+assessmentId,
+responses,       // ── NOUVEAU
+biomarkers = {},
+onRestart,
+onMySpace,
 }: ResultsProps) {
 const locale = useLocale()
   const t = useTranslations('results')
@@ -103,8 +107,10 @@ const engineAResult = calculateScoresV2(
           country:       country ?? '',
           socioeconomic: socioeconomic ?? '',
           locale,
-          // ── NOUVEAU : données enrichies transmises à l'API ─────────────
-          engineA: {
+// ── Biomarqueurs scientifiques ─────────────────────────────────
+biomarkers,
+// ── NOUVEAU : données enrichies transmises à l'API ─────────────
+engineA: {
             pillarScores:     engineAResult.pillarScores,
             longevityScore:   engineAResult.longevityScore,
             biologicalAge:    engineAResult.biologicalAge,
@@ -126,11 +132,32 @@ const engineAResult = calculateScoresV2(
 
       
       setReport(data)
+
+
+
+// Sauvegarder les scores calculés dans assessments
+if (assessmentId && data) {
+  await supabase
+  .from('assessments')
+  .update({
+    biological_age:  data.biologicalAge,
+    longevity_score: data.longevityScore,
+    recovery_index:  data.scores?.recovery ?? null,
+    stress_load:     data.scores?.stress ?? null,
+    pillar_activate: data.pillarScores?.activate ?? null,
+    pillar_balance:  data.pillarScores?.balance  ?? null,
+    pillar_protect:  data.pillarScores?.protect  ?? null,
+    pillar_restore:  data.pillarScores?.restore  ?? null,
+  })
+  .eq('id', assessmentId)
+    
+}
+
     }
 
     generateReport()
 
-  }, [scores, protocols, fullName, email, memberTier, accessMode, completionTime, psychometricProfile, responses, age])
+  }, [])
 
  if (!report) return (
   <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-[#040B14] text-white">
@@ -215,7 +242,7 @@ const engineAResult = calculateScoresV2(
 
         )}
 
-        <OptimizationProtocolPage report={report} />
+        <OptimizationProtocolPage report={{ ...report, assessmentId }} onMySpace={onMySpace} />
 
       </div>
 

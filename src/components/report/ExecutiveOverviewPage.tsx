@@ -392,7 +392,7 @@ export default function ExecutiveOverviewPage({
                   </p>
                 )}
                 {report.flags?.filter((f: any) => f.severity === 'critical').map((flag: any, index: number) => (
-                  <p key={index} className="text-sm leading-relaxed text-[#FF9F43]/80">⚠ {flag.message.startsWith('flag_') ? t(flag.message) : flag.message}</p>
+                  <p key={index} className="text-sm leading-relaxed text-[#FF9F43]/80">⚠ {(flag.message.startsWith('flag_') || flag.message.startsWith('biomarker_flag_')) ? t(flag.message) : flag.message}</p>
                 ))}
                 {!report.patternNarrative && report.insights?.map((insight: string, index: number) => (
                   <p key={index} className="text-sm leading-relaxed text-[#EAE4D5]/70">{insight}</p>
@@ -470,7 +470,7 @@ export default function ExecutiveOverviewPage({
       borderColor: flag.severity === 'critical' ? 'rgba(255,77,109,0.25)' : 'rgba(255,159,67,0.25)'
     }}>
     <p className="text-[#EAE4D5]/80 text-sm">
-      {flag.message.startsWith('flag_') ? t(flag.message) : flag.message}
+      {(flag.message.startsWith('flag_') || flag.message.startsWith('biomarker_flag_')) ? t(flag.message) : flag.message}
     </p>
     <p className={`text-xs uppercase tracking-[0.15em] ml-4 shrink-0 ${
       flag.severity === 'critical' ? 'text-[#FF4D6D]' : 'text-[#FF9F43]'
@@ -604,12 +604,12 @@ function PriorityItem({ title, impact, severity, t }: any) {
     low:      'border-[#E7D19A]/20 bg-[#C7AC60]/[0.06] text-[#E7D19A] shadow-[0_0_20px_rgba(199,172,96,0.10)]',
   }
   return (
-    <div className={`flex items-center justify-between rounded-[18px] border px-4 py-4 ${severityStyles[severity] ?? severityStyles.low}`}>
-      <p className="text-sm text-[#EAE4D5]/85">
-                {(title.startsWith('priority_') || title.startsWith('flag_')) ? t(title) : title}
-              </p>
-      <span className="text-[11px] tracking-[0.2em] uppercase">{t(impact)}</span>
-    </div>
+   <div className={`flex items-center justify-between rounded-[18px] border px-4 py-4 ${severityStyles[severity] ?? severityStyles.low}`}>
+  <p className="text-sm text-[#EAE4D5]/85 flex-1 pr-4">
+    {(title.startsWith('priority_') || title.startsWith('flag_')) ? t(title) : title}
+  </p>
+  <span className="text-[11px] tracking-[0.2em] uppercase text-right shrink-0 w-[120px]">{t(impact)}</span>
+</div>
   )
 }
 

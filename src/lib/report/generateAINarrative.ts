@@ -120,9 +120,11 @@ function buildPrompt(input: NarrativeInput): string {
     .join(', ')
 
   const criticalFlags = input.flags
-    .filter(f => f.severity === 'critical')
-    .map(f => f.message)
-    .join('; ')
+  .filter(f => f.severity === 'critical')
+  .map(f => f.message?.startsWith('flag_') || f.message?.startsWith('biomarker_flag_')
+    ? f.message.replace('biomarker_flag_', '').replace('flag_', '').replace(/_/g, ' ')
+    : f.message)
+  .join('; ')
 
   const isOptimal = input.weaknesses.length === 0 &&
     Object.values(input.pillarScores).every(s => s >= 80)
@@ -134,7 +136,9 @@ BIOLOGICAL PROFILE:
 - Age: ${input.age} years old, ${input.sex}
 - Longevity Score: ${input.longevityScore}/100 (Top ${100 - input.percentile}% of population)
 - Biological Age: ${input.biologicalAge} years (${bioAgeText})
-- Archetype: ${input.archetype?.name ?? 'Unknown'}
+- Archetype: ${input.archetype?.name?.startsWith('archetype_') 
+  ? input.archetype.name.replace('archetype_', '').replace(/_/g, ' ') 
+  : input.archetype?.name ?? 'Unknown'}
 - Signature Code: ${input.signatureCode ?? 'N/A'}
 
 PILLAR SCORES:
@@ -204,22 +208,43 @@ function getFallbackNarrative(input: NarrativeInput): AINarrativeResult {
   const criticalPatterns = input.patterns.filter(p => p.severity === 'critical')
   const dominantPattern = criticalPatterns[0]
 
-  const aiNarrative = `Your biological profile scores ${input.longevityScore}/100, placing you in the top ${100 - input.percentile}% of the population. Biological age assessment indicates ${bioAgeText}. ${input.archetype ? `Your profile matches the ${input.archetype.name} archetype — ${input.archetype.description}` : ''} The ${input.dominantPillar} pillar represents your primary optimization opportunity, currently scoring ${input.pillarScores[input.dominantPillar as keyof typeof input.pillarScores]}/100. ${dominantPattern ? `A critical biological pattern has been identified: ${dominantPattern.label} — ${dominantPattern.description}` : ''} ${input.strengths.length > 0 ? `Your strongest biological assets are ${input.strengths.slice(0, 2).join(' and ')}.` : ''}`
+  const lang = input.locale === 'fr' ? 'fr' : input.locale === 'es' ? 'es' : 'en'
+
+const archetypeName = input.archetype?.name?.startsWith('archetype_')
+  ? input.archetype.name.replace('archetype_', '').replace(/_/g, ' ')
+  : input.archetype?.name ?? ''
+
+const aiNarrative = lang === 'fr'
+  ? `Votre profil biologique score ${input.longevityScore}/100, vous plaçant dans le top ${100 - input.percentile}% de la population. L'évaluation de l'âge biologique indique ${bioAgeText}. ${archetypeName ? `Votre profil correspond à l'archétype ${archetypeName}.` : ''} Le pilier ${input.dominantPillar} représente votre principale opportunité d'optimisation, scorant actuellement ${input.pillarScores[input.dominantPillar as keyof typeof input.pillarScores]}/100. ${dominantPattern ? `Un pattern biologique critique a été identifié : ${dominantPattern.label} — ${dominantPattern.description}` : ''} ${input.strengths.length > 0 ? `Vos atouts biologiques les plus forts sont ${input.strengths.slice(0, 2).join(' et ')}.` : ''}`
+  : lang === 'es'
+  ? `Su perfil biológico puntúa ${input.longevityScore}/100, situándole en el top ${100 - input.percentile}% de la población. La evaluación de la edad biológica indica ${bioAgeText}. ${archetypeName ? `Su perfil corresponde al arquetipo ${archetypeName}.` : ''} El pilar ${input.dominantPillar} representa su principal oportunidad de optimización, puntuando actualmente ${input.pillarScores[input.dominantPillar as keyof typeof input.pillarScores]}/100. ${dominantPattern ? `Se ha identificado un patrón biológico crítico: ${dominantPattern.label} — ${dominantPattern.description}` : ''} ${input.strengths.length > 0 ? `Sus activos biológicos más fuertes son ${input.strengths.slice(0, 2).join(' y ')}.` : ''}`
+  : `Your biological profile scores ${input.longevityScore}/100, placing you in the top ${100 - input.percentile}% of the population. Biological age assessment indicates ${bioAgeText}. ${archetypeName ? `Your profile matches the ${archetypeName} archetype.` : ''} The ${input.dominantPillar} pillar represents your primary optimization opportunity, currently scoring ${input.pillarScores[input.dominantPillar as keyof typeof input.pillarScores]}/100. ${dominantPattern ? `A critical biological pattern has been identified: ${dominantPattern.label} — ${dominantPattern.description}` : ''} ${input.strengths.length > 0 ? `Your strongest biological assets are ${input.strengths.slice(0, 2).join(' and ')}.` : ''}`
 
   const isOptimalFallback = input.weaknesses.length === 0 &&
     Object.values(input.pillarScores).every(s => s >= 80)
 
-  const aiKeyInsight = isOptimalFallback
-    ? `Your fully optimized biological profile places you in the top ${100 - input.percentile}% — maintain this foundation through advanced longevity protocols and consistent biological monitoring.`
+const aiKeyInsight = isOptimalFallback
+  ? lang === 'fr' ? `Votre profil biologique entièrement optimisé vous place dans le top ${100 - input.percentile}% — maintenez cette base grâce à des protocoles de longévité avancés et une surveillance biologique continue.`
+    : lang === 'es' ? `Su perfil biológico completamente optimizado lo sitúa en el top ${100 - input.percentile}% — mantenga esta base con protocolos avanzados de longevidad y monitoreo biológico continuo.`
+    : `Your fully optimized biological profile places you in the top ${100 - input.percentile}% — maintain this foundation through advanced longevity protocols and consistent biological monitoring.`
+  : lang === 'fr' ? `Votre système ${input.dominantPillar} est le facteur limitant — l'adresser en premier débloquera des améliorations composées sur les quatre piliers biologiques.`
+    : lang === 'es' ? `Su sistema ${input.dominantPillar} es el factor limitante — abordarlo primero desbloqueará mejoras compuestas en los cuatro pilares biológicos.`
     : `Your ${input.dominantPillar} system is the limiting factor — addressing it first will unlock compounding improvements across all four biological pillars.`
 
   const aiSynthesis = isOptimalFallback
-    ? `All four biological pillars are operating at high efficiency. The next frontier is advanced longevity optimization — senolytic protocols, NAD+ support, and epigenetic fine-tuning. ${input.strengths.length > 0 ? `Your exceptional strength in ${input.strengths.slice(0, 2).join(' and ')} provides the foundation for elite-level biological enhancement.` : ''}`
+  ? lang === 'fr' ? `Les quatre piliers biologiques fonctionnent à haute efficacité. La prochaine frontière est l'optimisation avancée de la longévité — protocoles sénolyse, soutien NAD+ et ajustement épigénétique. ${input.strengths.length > 0 ? `Votre force exceptionnelle en ${input.strengths.slice(0, 2).join(' et ')} fournit la base pour une amélioration biologique de niveau élite.` : ''}`
+    : lang === 'es' ? `Los cuatro pilares biológicos funcionan con alta eficiencia. La siguiente frontera es la optimización avanzada de longevidad — protocolos senolíticos, soporte NAD+ y ajuste epigenético. ${input.strengths.length > 0 ? `Su fortaleza excepcional en ${input.strengths.slice(0, 2).join(' y ')} proporciona la base para una mejora biológica de élite.` : ''}`
+    : `All four biological pillars are operating at high efficiency. The next frontier is advanced longevity optimization — senolytic protocols, NAD+ support, and epigenetic fine-tuning. ${input.strengths.length > 0 ? `Your exceptional strength in ${input.strengths.slice(0, 2).join(' and ')} provides the foundation for elite-level biological enhancement.` : ''}`
+  : lang === 'fr' ? `Un protocole ciblé de 30 jours axé sur la stabilisation du ${input.dominantPillar} créera les fondations biologiques pour une optimisation plus profonde. À 90 jours, des améliorations systématiques sur ${input.weaknesses.slice(0, 2).join(' et ')} sont réalisables. ${input.strengths.length > 0 ? `Utilisez votre force existante en ${input.strengths[0]} comme ancre de cette transformation.` : 'Des rituels quotidiens cohérents se composeront en améliorations biologiques mesurables.'}`
+    : lang === 'es' ? `Un protocolo dirigido de 30 días enfocado en la estabilización del ${input.dominantPillar} creará la base biológica para una optimización más profunda. A los 90 días, mejoras sistemáticas en ${input.weaknesses.slice(0, 2).join(' y ')} son alcanzables. ${input.strengths.length > 0 ? `Aproveche su fortaleza existente en ${input.strengths[0]} como ancla de esta transformación.` : 'Los rituales diarios consistentes se compondrán en mejoras biológicas medibles.'}`
     : `A targeted 30-day protocol focused on ${input.dominantPillar} stabilization will create the biological foundation for deeper optimization. By 90 days, systematic improvements across ${input.weaknesses.slice(0, 2).join(' and ')} are achievable. ${input.strengths.length > 0 ? `Leverage your existing strength in ${input.strengths[0]} as the anchor for this transformation.` : 'Consistent daily rituals will compound into measurable biological improvements.'}`
 
   const aiProtocolIntro = isOptimalFallback
-    ? `${input.archetype?.name ?? 'Longevity Optimized'} reflects a rare status — all four biological pillars at high efficiency with a longevity score of ${input.longevityScore}/100. This protocol is designed not for correction, but for the elevation of an already exceptional biological foundation. Every element is calibrated to your unique profile, integrating the highest-leverage longevity interventions available.`
-    : `Your ${input.archetype?.name ?? 'biological profile'} demands a precision-engineered response. With a longevity score of ${input.longevityScore}/100, your ${input.dominantPillar} system is the primary limiting factor — scoring critically low and creating cascading effects across your biology. This protocol is not a generic wellness plan. Every intervention below is calibrated to your specific biological architecture, targeting ${input.weaknesses.slice(0, 2).join(' and ')} as the highest-leverage entry points for measurable biological transformation.`
-
+  ? lang === 'fr' ? `${archetypeName || 'Longévité Optimisée'} reflète un statut rare — les quatre piliers biologiques à haute efficacité avec un score de longévité de ${input.longevityScore}/100. Ce protocole est conçu non pour la correction, mais pour l'élévation d'une base biologique déjà exceptionnelle.`
+    : lang === 'es' ? `${archetypeName || 'Longevidad Optimizada'} refleja un estado excepcional — los cuatro pilares biológicos en alta eficiencia con una puntuación de longevidad de ${input.longevityScore}/100. Este protocolo está diseñado no para corrección, sino para elevar una base biológica ya excepcional.`
+    : `${archetypeName || 'Longevity Optimized'} reflects a rare status — all four biological pillars at high efficiency with a longevity score of ${input.longevityScore}/100. This protocol is designed not for correction, but for the elevation of an already exceptional biological foundation.`
+  : lang === 'fr' ? `${archetypeName || 'Votre profil biologique'} exige une réponse de précision. Avec un score de longévité de ${input.longevityScore}/100, votre système ${input.dominantPillar} est le facteur limitant principal — créant des effets en cascade sur toute votre biologie. Ce protocole n'est pas un plan bien-être générique. Chaque intervention est calibrée pour cibler ${input.weaknesses.slice(0, 2).join(' et ')} comme points d'entrée à plus fort levier.`
+    : lang === 'es' ? `${archetypeName || 'Su perfil biológico'} exige una respuesta de precisión. Con una puntuación de longevidad de ${input.longevityScore}/100, su sistema ${input.dominantPillar} es el factor limitante principal — creando efectos en cascada en toda su biología. Este protocolo no es un plan de bienestar genérico. Cada intervención está calibrada para apuntar a ${input.weaknesses.slice(0, 2).join(' y ')} como puntos de entrada de mayor apalancamiento.`
+    : `${archetypeName || 'Your biological profile'} demands a precision-engineered response. With a longevity score of ${input.longevityScore}/100, your ${input.dominantPillar} system is the primary limiting factor — creating cascading effects across your biology. This protocol is not a generic wellness plan. Every intervention is calibrated to target ${input.weaknesses.slice(0, 2).join(' and ')} as the highest-leverage entry points.`
   return { aiNarrative, aiKeyInsight, aiSynthesis, aiProtocolIntro }
 }

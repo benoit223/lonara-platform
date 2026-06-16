@@ -1,45 +1,135 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+
+
+// ── MARQUEURS ACCESSIBLES PAR NIVEAU ─────────────────────────────────────────
+const PREMIUM_MARKERS = new Set([
+  'fastingGlucose', 'hba1c', 'ldl', 'hdl', 'triglycerides', 'apoB',
+  'tsh', 'vitaminD', 'testosterone', 'homocysteine',
+  'hsCRP', 'ferritin',
+])
+const EXECUTIVE_MARKERS = new Set([
+  'fastingGlucose', 'hba1c', 'ldl', 'hdl', 'triglycerides', 'apoB',
+  'tsh', 'vitaminD', 'testosterone', 'homocysteine', 'igf1', 'insulin', 'dheas',
+  'hsCRP', 'ferritin', 'il6', 'tnfAlpha',
+  'horvath', 'phenoAge', 'grimAge', 'dunedinPACE',
+  'telomereQPCR', 'telomereFISH', 'telomeraseActivity',
+  'proteomics', 'metabolomics', 'microbiome', 'gwasSNP',
+  'gfap', 'nfl', 'amyloidBeta', 'pTau217',
+  'ntProBNP', 'lpa', 'cacScore', 'gdf15',
+])
+
+
+
 
 interface PreQuizProps {
   fullName: string
   email: string
-  memberTier:
-  | 'guest'
-  | 'member'
-  | 'premium'
-  | 'executive'
+  memberTier: 'guest' | 'member' | 'premium' | 'executive'
   accessMode: 'guest' | 'registered'
   age: number
   sex: 'male' | 'female' | 'other'
   height: number
   weight: number
   unitSystem: 'metric' | 'imperial'
-onUnitSystemChange: (
-  value: 'metric' | 'imperial',
-) => void
-  bloodGlucose: string
+  onUnitSystemChange: (value: 'metric' | 'imperial') => void
+  // Panel 1 — Métabolique
+  fastingGlucose: string
+  hba1c: string
   ldl: string
   hdl: string
-  crp: string
-  vitaminD: string
+  triglycerides: string
+  apoB: string
+  // Panel 2 — Hormonal
   tsh: string
-  geneticRisk: string
+  vitaminD: string
+  testosterone: string
+  homocysteine: string
+  igf1: string
+  insulin: string
+  dheas: string
+  // Panel 3 — Inflammation
+  hsCRP: string
+  ferritin: string
+  il6: string
+  tnfAlpha: string
+  // Panel 4 — Épigénétique
+  horvath: string
+  phenoAge: string
+  grimAge: string
+  dunedinPACE: string
+  // Panel 5 — Télomères
+  telomereQPCR: string
+  telomereFISH: string
+  telomeraseActivity: string
+  // Panel 6 — Multi-omics
+  proteomics: string
+  metabolomics: string
+  microbiome: string
+  gwasSNP: string
+  // Panel 7 — Neuro
+  gfap: string
+  nfl: string
+  amyloidBeta: string
+  pTau217: string
+  // Panel 8 — Cardio avancé
+  ntProBNP: string
+  lpa: string
+  cacScore: string
+  gdf15: string
+  // Setters Panel 1
+  onFastingGlucoseChange: (v: string) => void
+  onHba1cChange: (v: string) => void
+  onLdlChange: (v: string) => void
+  onHdlChange: (v: string) => void
+  onTriglyceridesChange: (v: string) => void
+  onApoBChange: (v: string) => void
+  // Setters Panel 2
+  onTshChange: (v: string) => void
+  onVitaminDChange: (v: string) => void
+  onTestosteroneChange: (v: string) => void
+  onHomocysteineChange: (v: string) => void
+  onIgf1Change: (v: string) => void
+  onInsulinChange: (v: string) => void
+  onDheasChange: (v: string) => void
+  // Setters Panel 3
+  onHsCRPChange: (v: string) => void
+  onFerritinChange: (v: string) => void
+  onIl6Change: (v: string) => void
+  onTnfAlphaChange: (v: string) => void
+  // Setters Panel 4
+  onHorvathChange: (v: string) => void
+  onPhenoAgeChange: (v: string) => void
+  onGrimAgeChange: (v: string) => void
+  onDunedinPACEChange: (v: string) => void
+  // Setters Panel 5
+  onTelomereQPCRChange: (v: string) => void
+  onTelomereFISHChange: (v: string) => void
+  onTelomeraseActivityChange: (v: string) => void
+  // Setters Panel 6
+  onProteomicsChange: (v: string) => void
+  onMetabolomicsChange: (v: string) => void
+  onMicrobiomeChange: (v: string) => void
+  onGwasSNPChange: (v: string) => void
+  // Setters Panel 7
+  onGfapChange: (v: string) => void
+  onNflChange: (v: string) => void
+  onAmyloidBetaChange: (v: string) => void
+  onPTau217Change: (v: string) => void
+  // Setters Panel 8
+  onNtProBNPChange: (v: string) => void
+  onLpaChange: (v: string) => void
+  onCacScoreChange: (v: string) => void
+  onGdf15Change: (v: string) => void
+  // Autres — IDENTIQUES À L'ORIGINAL
   onBack: () => void
   onContinue: () => void
   onAgeChange: (value: number) => void
   onSexChange: (value: 'male' | 'female' | 'other') => void
   onHeightChange: (value: number) => void
   onWeightChange: (value: number) => void
-  onBloodGlucoseChange: (value: string) => void
-  onLdlChange: (value: string) => void
-  onHdlChange: (value: string) => void
-  onCrpChange: (value: string) => void
-  onVitaminDChange: (value: string) => void
-  onTshChange: (value: string) => void
-  onGeneticRiskChange: (value: string) => void
   country: string
   socioeconomic: string
   onCountryChange: (value: string) => void
@@ -47,43 +137,63 @@ onUnitSystemChange: (
 }
 
 export default function PreQuiz({
-  fullName,
-  email,
-  memberTier,
-  accessMode,
-  age,
-  sex,
-  height,
-  weight,
-unitSystem,
-onUnitSystemChange,
-
-  bloodGlucose,
-  ldl,
-  hdl,
-  crp,
-  vitaminD,
-  tsh,
-  geneticRisk,
-  onBack,
-  onContinue,
-  onAgeChange,
-  onSexChange,
-  onHeightChange,
-  onWeightChange,
-  onBloodGlucoseChange,
-  onLdlChange,
-  onHdlChange,
-  onCrpChange,
-  onVitaminDChange,
-  onTshChange,
-  onGeneticRiskChange,
-  country,
-  socioeconomic,
-  onCountryChange,
-  onSocioeconomicChange,
+  fullName, email, memberTier, accessMode,
+  age, sex, height, weight, unitSystem, onUnitSystemChange,
+  fastingGlucose, hba1c, ldl, hdl, triglycerides, apoB,
+  tsh, vitaminD, testosterone, homocysteine, igf1, insulin, dheas,
+  hsCRP, ferritin, il6, tnfAlpha,
+  horvath, phenoAge, grimAge, dunedinPACE,
+  telomereQPCR, telomereFISH, telomeraseActivity,
+  proteomics, metabolomics, microbiome, gwasSNP,
+  gfap, nfl, amyloidBeta, pTau217,
+  ntProBNP, lpa, cacScore, gdf15,
+  onFastingGlucoseChange, onHba1cChange, onLdlChange, onHdlChange, onTriglyceridesChange, onApoBChange,
+  onTshChange, onVitaminDChange, onTestosteroneChange, onHomocysteineChange, onIgf1Change, onInsulinChange, onDheasChange,
+  onHsCRPChange, onFerritinChange, onIl6Change, onTnfAlphaChange,
+  onHorvathChange, onPhenoAgeChange, onGrimAgeChange, onDunedinPACEChange,
+  onTelomereQPCRChange, onTelomereFISHChange, onTelomeraseActivityChange,
+  onProteomicsChange, onMetabolomicsChange, onMicrobiomeChange, onGwasSNPChange,
+  onGfapChange, onNflChange, onAmyloidBetaChange, onPTau217Change,
+  onNtProBNPChange, onLpaChange, onCacScoreChange, onGdf15Change,
+  onBack, onContinue,
+  onAgeChange, onSexChange, onHeightChange, onWeightChange,
+  country, socioeconomic, onCountryChange, onSocioeconomicChange,
 }: PreQuizProps) {
+
+
   const t = useTranslations('prequiz')
+
+const locale = useLocale()
+
+const handleLabRequisition = async () => {
+  // Validation — infos requises
+  if (!age || !sex || !country) {
+    setLabError(t('labRequisitionFillFirst'))
+    return
+  }
+  setLabError('')
+  setLabSending(true)
+  try {
+    const res = await fetch('/api/send-lab-requisition', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        fullName,
+        age,
+        sex,
+        memberTier,
+        locale,
+      }),
+    })
+    if (!res.ok) throw new Error('Failed')
+    setLabSent(true)
+  } catch {
+    setLabError(t('labRequisitionError'))
+  } finally {
+    setLabSending(false)
+  }
+}
 
   const bmi =
     height > 0 && weight > 0
@@ -96,6 +206,197 @@ const [pounds, setPounds] = useState('')
 const [validationError, setValidationError] =
   useState('')
 
+const [labSending, setLabSending] = useState(false)
+const [labSent, setLabSent] = useState(false)
+const [labError, setLabError] = useState('')
+
+const [openPanel, setOpenPanel] = useState<number | null>(null)
+
+  // ── Helpers d'accès par tier ───────────────────────────────────────────────
+  const isPremium   = memberTier === 'premium' || memberTier === 'executive'
+  const isExecutive = memberTier === 'executive'
+
+  const canAccess = (marker: string): boolean => {
+    if (isExecutive) return EXECUTIVE_MARKERS.has(marker)
+    if (isPremium)   return PREMIUM_MARKERS.has(marker)
+    return false
+  }
+
+  const inputClass = (marker: string) => {
+    const active = canAccess(marker)
+    return `w-full rounded-[1rem] border px-3 py-2 text-[13px] transition ${
+      active
+        ? 'border-[#035AA8]/40 bg-black/70 text-white placeholder:text-[#EAE4D5]/40 focus:border-[#C7AC60]/40 focus:outline-none'
+        : 'border-[#035AA8]/20 bg-black/70 text-white placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed'
+    }`
+  }
+
+  const PanelBadge = ({ required }: { required: 'premium' | 'executive' }) => {
+    const hasAccess = required === 'premium' ? isPremium : isExecutive
+    return (
+      <span className={`text-[9px] uppercase tracking-[0.22em] px-2 py-1 rounded-full border ml-2 ${
+        hasAccess
+          ? 'border-[#C7AC60]/30 text-[#C7AC60]/80 bg-[#C7AC60]/8'
+          : 'border-white/10 text-white/25 bg-white/5'
+      }`}>
+        {required === 'premium' ? 'Premium' : 'Executive'}
+      </span>
+    )
+  }
+
+const PANEL_INFO: Record<number, {
+  title: string
+  markers: { name: string; unit: string; optimal: string; format: string }[]
+}> = {
+  1: {
+    title: 'Standard Blood Panel',
+    markers: [
+      { name: 'Fasting Glucose', unit: 'mg/dL', optimal: '70 – 85', format: 'ex: 82' },
+      { name: 'HbA1c', unit: '%', optimal: '4.6 – 5.3', format: 'ex: 5.1' },
+      { name: 'LDL Cholesterol', unit: 'mg/dL', optimal: '< 100', format: 'ex: 95' },
+      { name: 'HDL Cholesterol', unit: 'mg/dL', optimal: '> 60', format: 'ex: 65' },
+      { name: 'Triglycerides', unit: 'mg/dL', optimal: '< 100', format: 'ex: 80' },
+      { name: 'ApoB', unit: 'mg/dL', optimal: '< 80', format: 'ex: 75' },
+    ],
+  },
+  2: {
+    title: 'Metabolic & Hormonal Panel',
+    markers: [
+      { name: 'IGF-1', unit: 'ng/mL', optimal: '150 – 250', format: 'ex: 185' },
+      { name: 'Fasting Insulin', unit: 'µIU/mL', optimal: '2 – 7', format: 'ex: 4.5' },
+      { name: 'Testosterone (Total)', unit: 'ng/dL', optimal: '500 – 900', format: 'ex: 650' },
+      { name: 'DHEA-S', unit: 'µg/dL', optimal: '200 – 400', format: 'ex: 280' },
+      { name: 'TSH', unit: 'mIU/L', optimal: '0.5 – 2.0', format: 'ex: 1.2' },
+      { name: 'Vitamin D (25-OH)', unit: 'ng/mL', optimal: '50 – 80', format: 'ex: 62' },
+      { name: 'Homocysteine', unit: 'µmol/L', optimal: '< 9', format: 'ex: 7.5' },
+    ],
+  },
+  3: {
+    title: 'Inflammatory Markers',
+    markers: [
+      { name: 'hs-CRP', unit: 'mg/L', optimal: '< 0.5', format: 'ex: 0.3' },
+      { name: 'IL-6', unit: 'pg/mL', optimal: '< 1.8', format: 'ex: 1.2' },
+      { name: 'TNF-alpha', unit: 'pg/mL', optimal: '< 2.8', format: 'ex: 1.9' },
+      { name: 'Ferritin', unit: 'ng/mL', optimal: '50 – 150', format: 'ex: 95' },
+    ],
+  },
+  4: {
+    title: 'Epigenetic Aging Clocks',
+    markers: [
+      { name: 'Horvath Clock', unit: 'years', optimal: '< chronological age', format: 'ex: 38' },
+      { name: 'PhenoAge', unit: 'years', optimal: '< chronological age', format: 'ex: 36' },
+      { name: 'GrimAge', unit: 'years', optimal: '< chronological age', format: 'ex: 40' },
+      { name: 'DunedinPACE', unit: 'pace', optimal: '0.6 – 0.85', format: 'ex: 0.75' },
+    ],
+  },
+  5: {
+    title: 'Telomere Biology',
+    markers: [
+      { name: 'Telomere Length (qPCR)', unit: 'T/S ratio', optimal: '> 1.2', format: 'ex: 1.35' },
+      { name: 'Telomere Length (FISH)', unit: 'kb', optimal: '7.5 – 12', format: 'ex: 9.2' },
+      { name: 'Telomerase Activity', unit: 'amoles/µg', optimal: '4 – 15', format: 'ex: 8.5' },
+    ],
+  },
+  6: {
+    title: 'Multi-Omics',
+    markers: [
+      { name: 'Proteomics Profile', unit: 'score', optimal: 'Lab-specific', format: 'ex: 82' },
+      { name: 'Metabolomics Panel', unit: 'score', optimal: 'Lab-specific', format: 'ex: 75' },
+      { name: 'Microbiome (Shannon)', unit: 'score', optimal: 'Lab-specific', format: 'ex: 68' },
+      { name: 'GWAS / SNP Risk Score', unit: 'score', optimal: 'Lab-specific', format: 'ex: 71' },
+    ],
+  },
+  7: {
+    title: 'Neurodegenerative Markers',
+    markers: [
+      { name: 'GFAP', unit: 'pg/mL', optimal: '< 80', format: 'ex: 52' },
+      { name: 'NfL', unit: 'pg/mL', optimal: '< 10', format: 'ex: 6.5' },
+      { name: 'Amyloid Beta 42/40', unit: 'ratio', optimal: '> 0.10', format: 'ex: 0.12' },
+      { name: 'pTau-217', unit: 'pg/mL', optimal: '< 0.2', format: 'ex: 0.14' },
+    ],
+  },
+  8: {
+    title: 'Advanced Cardiovascular',
+    markers: [
+      { name: 'NT-proBNP', unit: 'pg/mL', optimal: '< 125', format: 'ex: 80' },
+      { name: 'Lp(a)', unit: 'mg/dL', optimal: '< 30', format: 'ex: 18' },
+      { name: 'CAC Score', unit: 'AU', optimal: '0', format: 'ex: 0' },
+      { name: 'GDF-15', unit: 'pg/mL', optimal: '< 1200', format: 'ex: 850' },
+    ],
+  },
+}
+
+
+const PanelInfoModal = ({ panelNum }: { panelNum: number | null }) => {
+  if (panelNum === null) return null
+const info = PANEL_INFO[panelNum]
+  if (!info) return null
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
+      onClick={() => setOpenPanel(null)}
+    >
+      {/* BACKDROP */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px]" />
+ 
+      {/* MODAL */}
+      <div
+        className="relative z-10 w-full max-w-[680px] rounded-[1.4rem] border border-[#C7AC60]/20 bg-[rgba(3,10,20,0.92)] backdrop-blur-[20px] p-8 shadow-[0_0_60px_rgba(199,172,96,0.08)]"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* TOP LIGHT */}
+        <div className="absolute top-0 left-[12%] w-[76%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent" />
+ 
+        {/* HEADER */}
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <p className="text-[9px] uppercase tracking-[0.28em] text-[#C7AC60]/60 mb-1">Reference Values</p>
+            <h3
+              className="text-[1.4rem] font-light text-[#EAE4D5]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {info.title}
+            </h3>
+          </div>
+          <button
+            onClick={() => setOpenPanel(null)}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/40 hover:border-[#C7AC60]/30 hover:text-[#E7D19A] transition-all"
+          >
+            <span className="text-[14px] leading-none">×</span>
+          </button>
+        </div>
+ 
+        {/* TABLE HEADER */}
+        <div className="grid grid-cols-12 gap-2 px-3 mb-2">
+          <p className="col-span-5 text-[8px] uppercase tracking-[0.22em] text-white/30">Marker</p>
+          <p className="col-span-2 text-[8px] uppercase tracking-[0.22em] text-white/30 text-center">Unit</p>
+          <p className="col-span-3 text-[8px] uppercase tracking-[0.22em] text-white/30 text-center">Optimal</p>
+          <p className="col-span-2 text-[8px] uppercase tracking-[0.22em] text-white/30 text-right">Format</p>
+        </div>
+ 
+        {/* ROWS */}
+        <div className="space-y-1">
+          {info.markers.map((m: { name: string; unit: string; optimal: string; format: string }, i: number) => (
+            <div
+              key={i}
+              className={`grid grid-cols-12 gap-2 px-3 py-2.5 rounded-[0.7rem] ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}
+            >
+              <p className="col-span-5 text-[13px] text-[#EAE4D5]/80 leading-tight">{m.name}</p>
+<p className="col-span-2 text-[12px] text-[#C7AC60]/60 text-center self-center">{m.unit}</p>
+<p className="col-span-3 text-[12px] text-[#7EE2A8]/80 text-center self-center font-mono">{m.optimal}</p>
+<p className="col-span-2 text-[12px] text-white/30 text-right self-center">{m.format}</p>
+            </div>
+          ))}
+        </div>
+ 
+        {/* NOTE */}
+        <p className="mt-4 text-[9px] text-white/25 leading-relaxed px-1">
+          Values represent optimal ranges for longevity optimization. Clinical reference ranges may differ. Always consult your healthcare provider.
+        </p>
+      </div>
+    </div>
+  )
+}
 
   return (
   <div className="relative min-h-screen z-[60] overflow-visible max-w-[1800px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 pt-8 items-stretch bg-[#02040A] text-white">
@@ -132,393 +433,311 @@ const [validationError, setValidationError] =
             
     <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-4">
 
-  <div className="flex items-start gap-5">
-
+<div className="flex items-start gap-5">
     <img
       src="/lonara-logo.png"
       alt="Lonara"
       className="h-30 w-auto mt-1"
     />
-
     <div>
-
-      <p className="text-[10px] font-bold uppercase tracking-[0.38em] text-[#C7AC60]/80 mb-4">
-        {t('label')}
-      </p>
-
+      <p className="text-[10px] font-bold uppercase tracking-[0.38em] text-[#C7AC60]/80 mb-4">{t('label')}</p>
       <h2
         className="text-[2rem] md:text-[3rem] leading-[0.95] font-medium capitalize tracking-[0.04em] text-[#EAE4D5]"
-        style={{
-          fontFamily: "'Cormorant Garamond', serif",
-        }}
+        style={{ fontFamily: "'Cormorant Garamond', serif" }}
       >
-        Lonara Executive™
+        Lonara Premium & Executive™
       </h2>
-
-      <p className="mt-4 text-[#EAE4D5]/45 max-w-2xl leading-[1.9] text-[15px]">
-       {t('subtitle')}
-      </p>
-
+      <p className="mt-4 text-[#EAE4D5]/45 max-w-full sm:max-w-[60%] leading-[1.9] text-[15px]">{t('subtitle')}</p>
     </div>
-
-  </div>
-<div className="mt-[88px]">
-
-  <div className="rounded-[0.9rem] border border-[#C7AC60]/25 bg-[#C7AC60]/8 px-4 py-2">
-
-    <p className="text-[11px] uppercase tracking-[0.18em] text-[#E7D19A] whitespace-nowrap">
-      {t('executiveOnly')}
-    </p>
 </div>
-  </div>
 </div>
+
+{/* LAB REQUISITION BUTTON — premium + executive uniquement */}
+{isPremium && (
+  <div className="hidden sm:block absolute top-[88px] right-0">
+    <button
+      type="button"
+      onClick={handleLabRequisition}
+      disabled={labSending || labSent}
+      className={`rounded-[0.9rem] border px-3 py-2 text-left transition-all flex items-center gap-2 ${
+        labSent
+          ? 'border-[#7EE2A8]/30 bg-[#7EE2A8]/8 cursor-default'
+          : 'border-[#C7AC60]/25 bg-[#C7AC60]/5 hover:border-[#C7AC60]/40 hover:bg-[#C7AC60]/10'
+      } ${labSending ? 'opacity-60 cursor-wait' : ''}`}
+    >
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80">
+          {labSent
+            ? t('labRequisitionSent')
+            : labSending
+            ? t('labRequisitionSending')
+            : t('labRequisitionButton')}
+        </p>
+     {labSent && (
+  <p className="mt-1 text-[10px] text-[#7EE2A8]/70">
+    {email}
+  </p>
+)}
+      </div>
+      {!labSent && (
+        <span className="text-[#C7AC60]/60 text-lg">
+          {labSending ? '...' : '→'}
+        </span>
+      )}
+      {labSent && (
+        <span className="text-[#7EE2A8] text-lg">✓</span>
+      )}
+    </button>
+
+    {/* Message si infos manquantes */}
+  {labError && (
+  <p className="absolute top-full mt-1 right-0 text-[10px] text-[#FF9F43]/80 whitespace-nowrap">
+    ⚠ {labError}
+  </p>
+)}
+  </div>
+)}
+
+{isPremium && (
+  <div className="sm:hidden w-full mb-3">
+    <button
+      type="button"
+      onClick={handleLabRequisition}
+      disabled={labSending || labSent}
+      className={`w-full rounded-[0.9rem] border px-3 py-2 transition-all flex items-center justify-between ${
+        labSent
+          ? 'border-[#7EE2A8]/30 bg-[#7EE2A8]/8'
+          : 'border-[#C7AC60]/25 bg-[#C7AC60]/5 hover:border-[#C7AC60]/40'
+      }`}
+    >
+      <p className="text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80">
+        {labSent ? t('labRequisitionSent') : labSending ? t('labRequisitionSending') : t('labRequisitionButton')}
+      </p>
+      <span className="text-[#C7AC60]/60">{labSending ? '...' : labSent ? '✓' : '→'}</span>
+    </button>
+    {labError && <p className="mt-1 text-[10px] text-[#FF9F43]/80">⚠ {labError}</p>}
+    {labSent && <p className="mt-1 text-[10px] text-[#7EE2A8]/70">{email}</p>}
+  </div>
+)}
+
 <div className="mt-5 w-full space-y-3 pr-1">
 
-  {/* 1 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
+  {/* MESSAGE GUEST / MEMBER */}
+  {!isPremium && (
+    <div className="rounded-[1.4rem] border border-[#C7AC60]/20 bg-[#C7AC60]/5 px-6 py-4">
+      <p className="text-[12px] text-[#C7AC60]/80 leading-relaxed">
+        Scientific biomarkers are available for Premium and Executive members. Upgrade your plan to unlock blood panel integration.
+      </p>
+    </div>
+  )}
 
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel1')}
-    </p>
-
+  {/* PANEL 1 — MÉTABOLIQUE — premium + executive */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isPremium ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+   <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel1')}</p>
+    <PanelBadge required="premium" />
+  </div>
+  {isPremium && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 1 ? null : 1)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="Fasting Glucose"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="HbA1c"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="LDL Cholesterol"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="HDL Cholesterol"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Triglycerides"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="ApoB"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+      <input type="text" placeholder="Fasting Glucose" value={fastingGlucose} onChange={e => onFastingGlucoseChange(e.target.value)} disabled={!canAccess('fastingGlucose')} className={inputClass('fastingGlucose')} />
+      <input type="text" placeholder="HbA1c" value={hba1c} onChange={e => onHba1cChange(e.target.value)} disabled={!canAccess('hba1c')} className={inputClass('hba1c')} />
+      <input type="text" placeholder="LDL Cholesterol" value={ldl} onChange={e => onLdlChange(e.target.value)} disabled={!canAccess('ldl')} className={inputClass('ldl')} />
+      <input type="text" placeholder="HDL Cholesterol" value={hdl} onChange={e => onHdlChange(e.target.value)} disabled={!canAccess('hdl')} className={inputClass('hdl')} />
+      <input type="text" placeholder="Triglycerides" value={triglycerides} onChange={e => onTriglyceridesChange(e.target.value)} disabled={!canAccess('triglycerides')} className={inputClass('triglycerides')} />
+      <input type="text" placeholder="ApoB" value={apoB} onChange={e => onApoBChange(e.target.value)} disabled={!canAccess('apoB')} className={inputClass('apoB')} />
     </div>
   </div>
 
-  {/* 2 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel2')}
-    </p>
-
+  {/* PANEL 2 — HORMONAL — TSH/VitD/Testosterone/Homocysteine = premium | IGF-1/Insulin/DHEA-S = executive */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isPremium ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel2')}</p>
+    <PanelBadge required="premium" />
+  </div>
+  {isPremium && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 2 ? null : 2)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <input type="text" placeholder="IGF-1" value={igf1} onChange={e => onIgf1Change(e.target.value)} disabled={!canAccess('igf1')} className={inputClass('igf1')} />
+      <input type="text" placeholder="Insulin" value={insulin} onChange={e => onInsulinChange(e.target.value)} disabled={!canAccess('insulin')} className={inputClass('insulin')} />
+      <input type="text" placeholder="Testosterone" value={testosterone} onChange={e => onTestosteroneChange(e.target.value)} disabled={!canAccess('testosterone')} className={inputClass('testosterone')} />
+      <input type="text" placeholder="DHEA-S" value={dheas} onChange={e => onDheasChange(e.target.value)} disabled={!canAccess('dheas')} className={inputClass('dheas')} />
+      <input type="text" placeholder="TSH" value={tsh} onChange={e => onTshChange(e.target.value)} disabled={!canAccess('tsh')} className={inputClass('tsh')} />
+      <input type="text" placeholder="Vitamin D" value={vitaminD} onChange={e => onVitaminDChange(e.target.value)} disabled={!canAccess('vitaminD')} className={inputClass('vitaminD')} />
+      <input type="text" placeholder="Homocysteine" value={homocysteine} onChange={e => onHomocysteineChange(e.target.value)} disabled={!canAccess('homocysteine')} className={inputClass('homocysteine')} />
+    </div>
+    {isPremium && !isExecutive && (
+      <p className="mt-2 text-[10px] text-[#C7AC60]/40">IGF-1, Insulin, DHEA-S — Executive only</p>
+    )}
+  </div>
 
-      <input
-        type="text"
-disabled
-        placeholder="IGF-1"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
+  {/* PANEL 3 — INFLAMMATION — hs-CRP/Ferritin = premium | IL-6/TNF-alpha = executive */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isPremium ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel3')}</p>
+    <PanelBadge required="premium" />
+  </div>
+  {isPremium && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 3 ? null : 3)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <input type="text" placeholder="hs-CRP" value={hsCRP} onChange={e => onHsCRPChange(e.target.value)} disabled={!canAccess('hsCRP')} className={inputClass('hsCRP')} />
+      <input type="text" placeholder="IL-6" value={il6} onChange={e => onIl6Change(e.target.value)} disabled={!canAccess('il6')} className={inputClass('il6')} />
+      <input type="text" placeholder="TNF-alpha" value={tnfAlpha} onChange={e => onTnfAlphaChange(e.target.value)} disabled={!canAccess('tnfAlpha')} className={inputClass('tnfAlpha')} />
+      <input type="text" placeholder="Ferritin" value={ferritin} onChange={e => onFerritinChange(e.target.value)} disabled={!canAccess('ferritin')} className={inputClass('ferritin')} />
+    </div>
+    {isPremium && !isExecutive && (
+      <p className="mt-2 text-[10px] text-[#C7AC60]/40">IL-6, TNF-alpha — Executive only</p>
+    )}
+  </div>
 
-      <input
-        type="text"
-disabled
-        placeholder="Insulin"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Testosterone"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="DHEA-S"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="TSH"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Vitamin D"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Homocysteine"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+  {/* PANEL 4 — ÉPIGÉNÉTIQUE — executive only */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isExecutive ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel4')}</p>
+    <PanelBadge required="executive" />
+  </div>
+  {isExecutive && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 4 ? null : 4)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <input type="text" placeholder="Horvath Clock" value={horvath} onChange={e => onHorvathChange(e.target.value)} disabled={!canAccess('horvath')} className={inputClass('horvath')} />
+      <input type="text" placeholder="PhenoAge" value={phenoAge} onChange={e => onPhenoAgeChange(e.target.value)} disabled={!canAccess('phenoAge')} className={inputClass('phenoAge')} />
+      <input type="text" placeholder="GrimAge" value={grimAge} onChange={e => onGrimAgeChange(e.target.value)} disabled={!canAccess('grimAge')} className={inputClass('grimAge')} />
+      <input type="text" placeholder="DunedinPACE" value={dunedinPACE} onChange={e => onDunedinPACEChange(e.target.value)} disabled={!canAccess('dunedinPACE')} className={inputClass('dunedinPACE')} />
     </div>
   </div>
 
-  {/* 3 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel3')}
-    </p>
-
+  {/* PANEL 5 — TÉLOMÈRES — executive only */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isExecutive ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel5')}</p>
+    <PanelBadge required="executive" />
+  </div>
+  {isExecutive && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 5 ? null : 5)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="hs-CRP"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="IL-6"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="TNF-alpha"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Ferritin"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+      <input type="text" placeholder="Telomere Length qPCR" value={telomereQPCR} onChange={e => onTelomereQPCRChange(e.target.value)} disabled={!canAccess('telomereQPCR')} className={inputClass('telomereQPCR')} />
+      <input type="text" placeholder="Telomere Length FISH" value={telomereFISH} onChange={e => onTelomereFISHChange(e.target.value)} disabled={!canAccess('telomereFISH')} className={inputClass('telomereFISH')} />
+      <input type="text" placeholder="Telomerase Activity" value={telomeraseActivity} onChange={e => onTelomeraseActivityChange(e.target.value)} disabled={!canAccess('telomeraseActivity')} className={inputClass('telomeraseActivity')} />
     </div>
   </div>
 
-  {/* 4 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel4')}
-    </p>
-
+  {/* PANEL 6 — MULTI-OMICS — executive only */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isExecutive ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel6')}</p>
+    <PanelBadge required="executive" />
+  </div>
+  {isExecutive && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 6 ? null : 6)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="Horvath Clock"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="PhenoAge"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="GrimAge"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="DunedinPACE"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+      <input type="text" placeholder="Proteomics" value={proteomics} onChange={e => onProteomicsChange(e.target.value)} disabled={!canAccess('proteomics')} className={inputClass('proteomics')} />
+      <input type="text" placeholder="Metabolomics" value={metabolomics} onChange={e => onMetabolomicsChange(e.target.value)} disabled={!canAccess('metabolomics')} className={inputClass('metabolomics')} />
+      <input type="text" placeholder="Microbiome" value={microbiome} onChange={e => onMicrobiomeChange(e.target.value)} disabled={!canAccess('microbiome')} className={inputClass('microbiome')} />
+      <input type="text" placeholder="GWAS / SNP" value={gwasSNP} onChange={e => onGwasSNPChange(e.target.value)} disabled={!canAccess('gwasSNP')} className={inputClass('gwasSNP')} />
     </div>
   </div>
 
-  {/* 5 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel5')}
-    </p>
-
+  {/* PANEL 7 — NEURO — executive only */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isExecutive ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel7')}</p>
+    <PanelBadge required="executive" />
+  </div>
+  {isExecutive && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 7 ? null : 7)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="Telomere Length qPCR"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Telomere Length FISH"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Telomerase Activity"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+      <input type="text" placeholder="GFAP" value={gfap} onChange={e => onGfapChange(e.target.value)} disabled={!canAccess('gfap')} className={inputClass('gfap')} />
+      <input type="text" placeholder="NfL" value={nfl} onChange={e => onNflChange(e.target.value)} disabled={!canAccess('nfl')} className={inputClass('nfl')} />
+      <input type="text" placeholder="Amyloid Beta 42/40" value={amyloidBeta} onChange={e => onAmyloidBetaChange(e.target.value)} disabled={!canAccess('amyloidBeta')} className={inputClass('amyloidBeta')} />
+      <input type="text" placeholder="pTau-217" value={pTau217} onChange={e => onPTau217Change(e.target.value)} disabled={!canAccess('pTau217')} className={inputClass('pTau217')} />
     </div>
   </div>
 
-  {/* 6 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel6')}
-    </p>
-
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="Proteomics"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Metabolomics"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Microbiome"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="GWAS / SNP"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-    </div>
+  {/* PANEL 8 — CARDIO AVANCÉ — executive only */}
+  <div className={`rounded-[1.8rem] border p-3 transition ${isExecutive ? 'border-[#C7AC60]/20 bg-[#0d1f12]/60' : 'border-[#035AA8]/20 bg-[#102033]/82'}`}>
+    <div className="flex items-center justify-between mb-3">
+  <div className="flex items-center">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75">{t('panel8')}</p>
+    <PanelBadge required="executive" />
   </div>
-
-  {/* 7 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel7')}
-    </p>
-
+  {isExecutive && (
+    <button
+      type="button"
+      onClick={() => setOpenPanel(openPanel === 8 ? null : 8)}
+      className="text-[25px] text-[#C7AC60]/50 hover:text-[#C7AC60] transition-all leading-none"
+    >
+      ⓘ
+    </button>
+  )}
+</div>
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="GFAP"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="NfL"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Amyloid Beta 42/40"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="pTau-217"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-    </div>
-  </div>
-
-  {/* 8 */}
-  <div className="rounded-[1.8rem] border border-[#035AA8]/20 bg-[#102033]/82 p-3">
-
-    <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/75 mb-3">
-      {t('panel8')}
-    </p>
-
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-
-      <input
-        type="text"
-disabled
-        placeholder="NT-proBNP"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="Lp(a)"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="CAC Score"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
-      <input
-        type="text"
-disabled
-        placeholder="GDF-15"
-        className="w-full rounded-[1rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 opacity-50 cursor-not-allowed"
-      />
-
+      <input type="text" placeholder="NT-proBNP" value={ntProBNP} onChange={e => onNtProBNPChange(e.target.value)} disabled={!canAccess('ntProBNP')} className={inputClass('ntProBNP')} />
+      <input type="text" placeholder="Lp(a)" value={lpa} onChange={e => onLpaChange(e.target.value)} disabled={!canAccess('lpa')} className={inputClass('lpa')} />
+      <input type="text" placeholder="CAC Score" value={cacScore} onChange={e => onCacScoreChange(e.target.value)} disabled={!canAccess('cacScore')} className={inputClass('cacScore')} />
+      <input type="text" placeholder="GDF-15" value={gdf15} onChange={e => onGdf15Change(e.target.value)} disabled={!canAccess('gdf15')} className={inputClass('gdf15')} />
     </div>
   </div>
 
@@ -1133,8 +1352,12 @@ max={100}
             </p>
           </div>
 
-        </div>
+   </div>
       </aside>
+
+      {openPanel !== null && <PanelInfoModal panelNum={openPanel} />}
+
     </div>
+
   )
 }

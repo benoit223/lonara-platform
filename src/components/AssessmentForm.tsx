@@ -26,6 +26,7 @@ export default function AssessmentForm({
   memberTier,
   onStart,
   onClose,
+  
 }: AssessmentFormProps) {
 
 const t = useTranslations('assessment')
@@ -56,6 +57,10 @@ const [
   confirmPassword,
   setConfirmPassword,
 ] = useState<string>('')
+
+
+const [showPlans, setShowPlans] = useState<boolean>(false)
+
 
   return (
    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-black/10 backdrop-blur-[3px]">
@@ -164,7 +169,24 @@ const [
 
   </div>
 
-
+{/* VIEW PLANS BUTTON */}
+  <button
+    type="button"
+    onClick={() => setShowPlans(true)}
+    className="mt-5 w-full rounded-[1.0rem] border border-[#C7AC60]/20 bg-[#C7AC60]/5 px-4 py-3 text-left transition-all hover:border-[#C7AC60]/35 hover:bg-[#C7AC60]/8"
+  >
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80">
+          {t('viewPlans')}
+        </p>
+        <p className="mt-1 text-[10px] text-white/35">
+          {t('viewPlansSubtitle')}
+        </p>
+      </div>
+      <span className="text-[#C7AC60]/60 text-lg">→</span>
+    </div>
+  </button>
 
   <div className="mt-5 md:mt-6 flex rounded-full border border-white/8 bg-white/[0.02] p-1">
 
@@ -454,83 +476,45 @@ className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-white/[0.025] p
 
           )}
 
-          {/* BUTTON */}
+       {/* BUTTON */}
           <button
             onClick={async () => {
 
-             if (!email) {
-
-  setError(
-    t('errorEmail'),
-  )
-
+               if (!email) {
+  setError(t('errorEmail'))
   return
 }
 
 if (
   entryMode !== 'signin' &&
-  (
-    !firstName ||
-    !lastName
-  )
+  (!firstName || !lastName)
 ) {
-
-  setError(
-    t('errorName'),
-  )
-
+  setError(t('errorName'))
   return
 }
- 
 
               setError('')
 
-if (
-  entryMode === 'signup'
-) {
-
-  if (
-    !password ||
-    !confirmPassword
-  ) {
-
-    setError(
-      t('errorPassword'),
-    )
-
+if (entryMode === 'signup') {
+  if (!password || !confirmPassword) {
+    setError(t('errorPassword'))
     return
   }
-
-  if (
-    password !== confirmPassword
-  ) {
-
-    setError(
-      t('errorPasswordMatch'),
-    )
-
+  if (password !== confirmPassword) {
+    setError(t('errorPasswordMatch'))
     return
   }
-
   if (password.length < 8) {
-
-    setError(
-      t('errorPasswordLength'),
-    )
-
+    setError(t('errorPasswordLength'))
     return
   }
-
 }
 
-if (
-  entryMode === 'guest'
-) {
-
+if (entryMode === 'guest') {
  const { error: profileError } =
   await supabase
     .from('profiles')
-    .insert({
+    .upsert({
       first_name: firstName,
       last_name: lastName,
       full_name: `${firstName} ${lastName}`,
@@ -539,128 +523,252 @@ if (
       account_status: 'guest',
       subscription_status: 'none',
       subscription_plan: 'free',
-    })
+    }, { onConflict: 'email' })
 
 if (profileError) {
-
-  setError(
-    profileError.message,
-  )
-
+  setError(profileError.message)
   return
 }
-
 }
 
-if (
-  entryMode !== 'guest'
-) {
-
-  if (
-    entryMode === 'signup'
-  ) {
-
-    const {
-      data,
-      error: signupError,
-    } =
-      await supabase.auth.signUp({
-        email,
-        password,
-      })
+if (entryMode !== 'guest') {
+  if (entryMode === 'signup') {
+    const { data, error: signupError } =
+      await supabase.auth.signUp({ email, password })
 
    if (signupError?.message) {
-
-  setError(
-    signupError.message,
-  )
-
+  setError(signupError.message)
   return
 }
 
   if (data?.user) {
-
   await supabase
     .from('profiles')
-    .insert({
-
+    .upsert({
       id: data.user.id,
-
       first_name: firstName,
-
       last_name: lastName,
-
       full_name: `${firstName} ${lastName}`,
-
       email,
+      access_mode: 'registered',
+      account_status: 'active',
+      member_tier: 'member',
+      subscription_status: 'none',
+      subscription_plan: 'free',
+    }, { onConflict: 'email' })
 
-          access_mode:
-  'registered',
-
-        })
-
-// Si email non confirmé, afficher message et stopper
   if (!data.user.confirmed_at) {
     setError(t('checkYourEmail'))
     return
- }
-    }
-
+  }
+  }
   } else {
-
-    const {
-      error: signinError,
-    } =
-      await supabase.auth.signInWithPassword({
-      
-        email,
-        password,
-      })
+    const { error: signinError } =
+      await supabase.auth.signInWithPassword({ email, password })
 
    if (signinError?.message) {
-
-  setError(
-    signinError.message,
-  )
-
+  setError(signinError.message)
   return
 }
-
   }
-
 }
 
 onStart(
-  entryMode === 'guest'
-    ? 'guest'
-    : 'registered',
+  entryMode === 'guest' ? 'guest' : 'registered',
   `${firstName} ${lastName}`,
   email,
   password,
 )
 
             }}
-           className="group relative overflow-hidden mt-4 w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/5 px-6 py-3 text-[13px] tracking-[0.06em] text-[#C7AC60] backdrop-blur-xl transition-all hover:bg-[#C7AC60]/10 hover:text-[#E7D19A] shadow-[0_0_25px_rgba(199,172,96,0.10)] hover:shadow-[0_0_40px_rgba(199,172,96,0.18)]"
+            className="group relative overflow-hidden mt-4 w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/5 px-6 py-3 text-[13px] tracking-[0.06em] text-[#C7AC60] backdrop-blur-xl transition-all hover:bg-[#C7AC60]/10 hover:text-[#E7D19A] shadow-[0_0_25px_rgba(199,172,96,0.10)] hover:shadow-[0_0_40px_rgba(199,172,96,0.18)]"
           >
-            {/* TOP LIGHT LINE */}
-<div className="absolute top-0 left-[18%] w-[64%] h-[2px] blur-[0.3px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-
-{/* INNER GLOW */}
-<div className="absolute inset-0 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_24px_rgba(199,172,96,0.08)] pointer-events-none" />
+            <div className="absolute top-0 left-[18%] w-[64%] h-[2px] blur-[0.3px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
+            <div className="absolute inset-0 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_24px_rgba(199,172,96,0.08)] pointer-events-none" />
             <span className="relative z-10">
-  {
-    entryMode === 'guest'
-      ? t('startAssessment')
-      : entryMode === 'signup'
-      ? t('createAndContinue')
-      : t('signInAndContinue')
-  }
-</span>
+              {entryMode === 'guest'
+                ? t('startAssessment')
+                : entryMode === 'signup'
+                ? t('createAndContinue')
+                : t('signInAndContinue')}
+            </span>
           </button>
-</div>
+         </div>
+
         </div>
       </div>
           </div>
-    </div>
+    
+
+{/* ── MODAL MEMBERSHIP PLANS ─────────────────────────────────────── */}
+      {showPlans && (
+        <div className="fixed inset-0 z-[60] overflow-y-auto overflow-x-hidden bg-black/60 backdrop-blur-[6px]">
+          <div className="relative z-10 flex min-h-screen items-start md:items-center justify-center px-4 py-8">
+            <div className="relative w-full max-w-[1280px] rounded-[1.2rem] md:rounded-[1.8rem] border border-[#C7AC60]/14 bg-[rgba(3,10,20,0.82)] backdrop-blur-[24px] px-4 md:px-10 py-8 md:py-12 shadow-[0_0_80px_rgba(199,172,96,0.08)]">
+
+              {/* GLOW */}
+              <div className="absolute left-[-120px] top-[-120px] h-[300px] w-[300px] rounded-full bg-[#C7AC60]/6 blur-[140px]" />
+              <div className="absolute right-[-80px] bottom-[-80px] h-[240px] w-[240px] rounded-full bg-[#035AA8]/8 blur-[120px]" />
+              <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
+
+              {/* CLOSE */}
+              <button
+                type="button"
+                onClick={() => setShowPlans(false)}
+                className="absolute right-4 top-4 md:right-6 md:top-6 z-[100] flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/40 backdrop-blur-xl transition-all hover:border-[#C7AC60]/30 hover:bg-[#C7AC60]/10 hover:text-[#E7D19A]"
+              >
+                <span className="text-[16px] md:text-[18px] leading-none">×</span>
+              </button>
+
+              {/* HEADER */}
+              <div className="relative z-10 text-center mb-10">
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#C7AC60]/70 mb-3">
+                  {t('plansLabel')}
+                </p>
+                <h2
+                  className="text-[2.8rem] md:text-[4rem] leading-none font-light text-[#EAE4D5]"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  {t('plansTitle')}
+                </h2>
+                <p className="mt-4 text-[13px] text-white/40 max-w-[600px] mx-auto leading-relaxed">
+                  {t('plansSubtitle')}
+                </p>
+              </div>
+
+              {/* PLANS GRID */}
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+
+                {/* ── GUEST ── */}
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-white/8 bg-white/[0.02] p-6 flex flex-col">
+                  <div className="absolute top-0 left-[12%] w-[76%] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-white/40 mb-4">{t('planGuestLabel')}</p>
+                  <h3 className="text-[2rem] font-extralight text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    {t('planGuestName')}
+                  </h3>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-[2.2rem] font-light text-white/80">{t('planGuestPrice')}</span>
+                  </div>
+                  <p className="text-[10px] text-white/30 mb-6">{t('planGuestCommitment')}</p>
+                  <div className="space-y-2 flex-1 mb-6">
+                    <div className="text-[11px] text-white/50">✓ {t('planGuestF1')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planGuestF2')}</div>
+                    <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planGuestF3')}</div>
+                    <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planGuestF4')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setShowPlans(false); setEntryMode('guest') }}
+                    className="w-full rounded-full border border-white/12 bg-white/[0.04] py-3 text-[11px] uppercase tracking-[0.18em] text-white/60 transition hover:bg-white/[0.08] hover:text-white/80"
+                  >
+                    {t('planGuestCTA')}
+                  </button>
+                </div>
+
+                {/* ── MEMBER ── */}
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-[#035AA8]/25 bg-[#035AA8]/[0.06] p-6 flex flex-col">
+                  <div className="absolute top-0 left-[12%] w-[76%] h-[1px] bg-gradient-to-r from-transparent via-[#5C96D8]/40 to-transparent" />
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-[#5C96D8]/70 mb-4">{t('planMemberLabel')}</p>
+                  <h3 className="text-[2rem] font-extralight text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    {t('planMemberName')}
+                  </h3>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-[2.2rem] font-light text-[#5C96D8]">1€</span>
+                    <span className="text-[11px] text-white/30 mb-1">{t('perMonth')}</span>
+                  </div>
+                  <p className="text-[10px] text-white/30 mb-6">{t('planMemberCommitment')}</p>
+                  <div className="space-y-2 flex-1 mb-6">
+                    <div className="text-[11px] text-white/50">✓ {t('planMemberF1')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planMemberF2')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planMemberF3')}</div>
+                    <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planMemberF4')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full rounded-full border border-[#035AA8]/30 bg-[#035AA8]/10 py-3 text-[11px] uppercase tracking-[0.18em] text-[#5C96D8] opacity-50 cursor-not-allowed"
+                  >
+                    {t('planMemberCTA')}
+                  </button>
+                  <p className="mt-2 text-center text-[9px] text-white/20">{t('comingSoon')}</p>
+                </div>
+
+                {/* ── PREMIUM ── */}
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-[#C7AC60]/25 bg-[#C7AC60]/[0.06] p-6 flex flex-col">
+                  <div className="absolute top-0 left-[12%] w-[76%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent" />
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/70 mb-4">{t('planPremiumLabel')}</p>
+                  <h3 className="text-[2rem] font-extralight text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    {t('planPremiumName')}
+                  </h3>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-[2.2rem] font-light text-[#C7AC60]">4€</span>
+                    <span className="text-[11px] text-white/30 mb-1">{t('perMonth')}</span>
+                  </div>
+                  <p className="text-[10px] text-white/30 mb-6">{t('planPremiumCommitment')}</p>
+                  <div className="space-y-2 flex-1 mb-6">
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF1')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF2')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF3')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF4')}</div>
+                    <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planPremiumF5')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/8 py-3 text-[11px] uppercase tracking-[0.18em] text-[#C7AC60] opacity-50 cursor-not-allowed"
+                  >
+                    {t('planPremiumCTA')}
+                  </button>
+                  <p className="mt-2 text-center text-[9px] text-white/20">{t('comingSoon')}</p>
+                </div>
+
+                {/* ── EXECUTIVE ── */}
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-[#C7AC60]/35 bg-gradient-to-b from-[#C7AC60]/[0.10] to-[#C7AC60]/[0.04] p-6 flex flex-col">
+                  <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
+                  <div className="absolute inset-0 rounded-[1.4rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_40px_rgba(199,172,96,0.06)] pointer-events-none" />
+                  {/* BADGE */}
+                  <div className="absolute top-4 right-4 rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/10 px-3 py-1">
+                    <p className="text-[9px] uppercase tracking-[0.22em] text-[#E7D19A]">{t('planExecutiveBadge')}</p>
+                  </div>
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-[#C7AC60]/70 mb-4">{t('planExecutiveLabel')}</p>
+                  <h3 className="text-[2rem] font-extralight text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    {t('planExecutiveName')}
+                  </h3>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-[2.2rem] font-light text-[#E7D19A]">499€</span>
+                    <span className="text-[11px] text-white/30 mb-1">{t('perMonth')}</span>
+                  </div>
+                  <p className="text-[10px] text-white/30 mb-6">{t('planExecutiveCommitment')}</p>
+                  <div className="space-y-2 flex-1 mb-6">
+                    <div className="text-[11px] text-white/60">✓ {t('planExecutiveF1')}</div>
+                    <div className="text-[11px] text-white/60">✓ {t('planExecutiveF2')}</div>
+                    <div className="text-[11px] text-white/60">✓ {t('planExecutiveF3')}</div>
+                    <div className="text-[11px] text-white/60">✓ {t('planExecutiveF4')}</div>
+                    <div className="text-[11px] text-[#C7AC60]">✓ {t('planExecutiveF5')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full rounded-full border border-[#C7AC60]/40 bg-[#C7AC60]/10 py-3 text-[11px] uppercase tracking-[0.18em] text-[#E7D19A] opacity-50 cursor-not-allowed"
+                  >
+                    {t('planExecutiveCTA')}
+                  </button>
+                  <p className="mt-2 text-center text-[9px] text-white/20">{t('comingSoon')}</p>
+                </div>
+
+              </div>
+
+              {/* NOTE BAS */}
+              <div className="relative z-10 mt-8 text-center">
+                <p className="text-[11px] text-white/25 leading-relaxed max-w-[700px] mx-auto">
+                  {t('plansNote')}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+</div>
   )
 }
