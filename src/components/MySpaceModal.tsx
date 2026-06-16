@@ -13,10 +13,10 @@ interface MySpaceModalProps {
 const SLIDES = [
   { id: 'state',      bg: '/lonamatin.png',    character: 'Lona',    label: 'STATE' },
   { id: 'understand', bg: '/lonajour.png',     character: 'Lona',    label: 'UNDERSTAND' },
-  { id: 'protocols',  bg: '/engineAmatin.png', character: 'EngineA', label: 'OPTIMIZE — PROTOCOLS' },
-  { id: 'products',   bg: '/engineAjour.png',  character: 'EngineA', label: 'OPTIMIZE — PRODUCTS' },
-  { id: 'sleep',      bg: '/engineAsoir.png',  character: 'EngineA', label: 'OPTIMIZE — SLEEP' },
-  { id: 'nutrition',  bg: '/engineAnuit.png',  character: 'EngineA', label: 'OPTIMIZE — NUTRITION' },
+  { id: 'protocols',  bg: '/engineamatin.png', character: 'EngineA', label: 'OPTIMIZE — PROTOCOLS' },
+  { id: 'products',   bg: '/engineajour.png',  character: 'EngineA', label: 'OPTIMIZE — PRODUCTS' },
+  { id: 'sleep',      bg: '/engineasoir.png',  character: 'EngineA', label: 'OPTIMIZE — SLEEP' },
+  { id: 'nutrition',  bg: '/engineanuit.png',  character: 'EngineA', label: 'OPTIMIZE — NUTRITION' },
   { id: 'evolve',     bg: '/gummysoir.png',    character: 'Gummy',   label: 'EVOLVE' },
   { id: 'connect',    bg: '/gummynuit.png',    character: 'Gummy',   label: 'CONNECT' },
 ]

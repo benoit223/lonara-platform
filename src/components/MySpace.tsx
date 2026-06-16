@@ -312,7 +312,7 @@ type BgCharacter = 'lona' | 'enginea' | 'gummy'
 
 const BG_CHARACTERS: { id: BgCharacter; label: string; file: string }[] = [
   { id: 'lona',    label: 'Lona',    file: '/lona.png'     },
-  { id: 'enginea', label: 'EngineA', file: '/engineA.png'  },
+  { id: 'enginea', label: 'EngineA', file: '/enginea.png'  },
   { id: 'gummy',   label: 'Gummy',   file: '/gummy.png'    },
 ]
 
