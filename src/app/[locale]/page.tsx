@@ -17,42 +17,6 @@ export default function Home() {
 
   
 
-  useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('type=recovery')) {
-      router.push(`/reset-password${hash}`)
-      return
-    }
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setMemberTier('guest')
-        setFullName('')
-        setEmail('')
-        setStep('hero')
-      }
-
-      if (!session && event !== 'SIGNED_OUT') {
-        // Session perdue — remettre en état guest proprement
-        setMemberTier('guest')
-        setFullName('')
-        setEmail('')
-        if (step === 'myspace') setStep('hero')
-      }
-
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('member_tier, full_name, email')
-          .eq('id', session.user.id)
-          .single()
-        if (profile?.member_tier) setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
-        if (profile?.full_name) setFullName(profile.full_name)
-        if (profile?.email) setEmail(profile.email)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
-
   const [showReport, setShowReport] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
 
