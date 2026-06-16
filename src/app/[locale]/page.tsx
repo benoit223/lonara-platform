@@ -477,7 +477,7 @@ setPendingStep(true)
            <img
   src={`/${cachedBgCharacter}-medallion.png`}
   alt={cachedBgCharacter}
-  className="h-36 w-36 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
+  className="h-50 w-50 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
   style={{
     filter: cachedBgCharacter === 'gummy'
       ? 'brightness(1.2) contrast(0.95)'
@@ -526,10 +526,13 @@ setPendingStep(true)
               <button
               onClick={async () => {
   setShowSessionGuard(false)
-  await supabase.auth.signOut()
+  setMemberTier('guest')
+  setFullName('')
+  setEmail('')
   localStorage.clear()
   sessionStorage.clear()
   setStep('hero')
+  await supabase.auth.signOut()
 }}
                 className="w-full rounded-full border border-white/8 bg-white/[0.03] py-3.5 text-[11px] uppercase tracking-[0.25em] text-white/30 transition hover:text-white/50 hover:border-white/15"
               >
