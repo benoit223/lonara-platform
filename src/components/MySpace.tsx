@@ -15,6 +15,7 @@ interface MySpaceProps {
   onBack: () => void
   onStartAssessment: () => void
   initialAssessment?: any | null
+  initialHistory?: any[]
   onAssessmentLoaded?: (assessment: any) => void
 }
 
@@ -321,6 +322,7 @@ export default function MySpace({
   onBack,
   onStartAssessment,
   initialAssessment = null,
+  initialHistory = [],
   onAssessmentLoaded,
 }: MySpaceProps) {
 
@@ -335,7 +337,7 @@ export default function MySpace({
   const [localTier, setLocalTier] = useState<string>(memberTier)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [chronoAge, setChronoAge] = useState<number | null>(initialAssessment?.age ?? null)
-  const [assessmentHistory, setAssessmentHistory] = useState<any[]>([])
+  const [assessmentHistory, setAssessmentHistory] = useState<any[]>(initialHistory)
   const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([])
 
  const t = useTranslations('myspace')
