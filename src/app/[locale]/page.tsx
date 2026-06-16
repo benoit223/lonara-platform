@@ -61,30 +61,33 @@ const handleMySpaceBack = () => {
 }
 
 const handleGoToMySpace = async () => {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (session?.user) {
-    const userEmail = email || session.user.email || ''
-    if (userEmail) {
-      const { data: assessment } = await supabase
-        .from('assessments')
-        .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (assessment) {
-        setCachedAssessment(assessment)
-        sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
-      }
-      const { data: allAssessments } = await supabase
-        .from('assessments')
-        .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: true })
-      if (allAssessments) {
-        setCachedHistory(allAssessments)
-        sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
-      }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    setStep('hero')
+    return
+  }
+  const userEmail = user.email ?? ''
+  if (userEmail) {
+    setEmail(userEmail)
+    const { data: assessment } = await supabase
+      .from('assessments')
+      .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+      .eq('email', userEmail)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (assessment) {
+      setCachedAssessment(assessment)
+      sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
+    }
+    const { data: allAssessments } = await supabase
+      .from('assessments')
+      .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+      .eq('email', userEmail)
+      .order('created_at', { ascending: true })
+    if (allAssessments) {
+      setCachedHistory(allAssessments)
+      sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
     }
   }
   setMySpaceKey(k => k + 1)
@@ -489,7 +492,7 @@ setPendingStep(true)
            <img
   src={`/${cachedBgCharacter}-medallion.png`}
   alt={cachedBgCharacter}
-  className="h-28 w-28 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
+  className="h-36 w-36 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
   style={{
     filter: cachedBgCharacter === 'gummy'
       ? 'brightness(1.2) contrast(0.95)'
@@ -513,10 +516,10 @@ setPendingStep(true)
             </p>
             <div className="flex flex-col gap-3">
               <button
-                onClick={async () => {
-                  setShowSessionGuard(false)
-                  await handleGoToMySpace()
-                }}
+               onClick={async () => {
+  setShowSessionGuard(false)
+  await handleGoToMySpace()
+}}
                 className="relative w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/10 py-3.5 text-[11px] uppercase tracking-[0.25em] text-[#C7AC60] transition hover:bg-[#C7AC60]/20"
               >
                 <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent" />

@@ -499,6 +499,7 @@ if (allAssessments) setAssessmentHistory(allAssessments)
     if (user) {
       await supabase.from('profiles').update({ bg_character: id }).eq('id', user.id)
     }
+    onBgCharacterChange?.(id)
   }
 
 const getDotColor = (num: number | null, idx: number) => {
