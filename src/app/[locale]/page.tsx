@@ -432,8 +432,9 @@ setPendingStep(true)
         )}
 
        {/* ── MY SPACE ── */}
-<div style={{ display: step === 'myspace' ? 'block' : 'none' }}>
+{step === 'myspace' && (
   <MySpace
+    key={mySpaceKey}
     memberTier={memberTier}
     fullName={fullName}
     onBack={handleMySpaceBack}
@@ -445,7 +446,7 @@ setPendingStep(true)
     initialHistory={cachedHistory}
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
   />
-</div>
+)}
 
       </div>
 

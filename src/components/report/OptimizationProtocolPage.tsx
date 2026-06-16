@@ -1103,7 +1103,7 @@ onClick={async () => {
         const { supabase } = await import('@/lib/supabase')
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          fetch('/api/save-report', {
+          await fetch('/api/save-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1117,10 +1117,9 @@ onClick={async () => {
               biologicalAge: report.biologicalAge,
               report,
             }),
-          }).then(() => {
-            sessionStorage.removeItem('lonara-cached-history')
-            sessionStorage.removeItem('lonara-cached-assessment')
           })
+          sessionStorage.removeItem('lonara-cached-history')
+          sessionStorage.removeItem('lonara-cached-assessment')
         }
       } catch (e) {
         console.error('save-report error:', e)

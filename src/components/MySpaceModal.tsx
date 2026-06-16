@@ -514,7 +514,7 @@ export default function MySpaceModal({ onClose, onAccess }: MySpaceModalProps) {
       if (authError) {
         setError(locale === 'fr' ? 'Email ou mot de passe incorrect.' : locale === 'es' ? 'Email o contraseña incorrectos.' : 'Incorrect email or password.')
       } else {
-        setTimeout(() => onAccess(), 500)
+        window.location.reload()
       }
     } finally {
       setLoading(false)

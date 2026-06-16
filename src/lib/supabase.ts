@@ -5,6 +5,14 @@ let supabaseInstance: SupabaseClient | null = null
 function getSupabaseClient(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance
 
+  const isDev = process.env.NODE_ENV === 'development'
+
+  const storage = !isDev && typeof window !== 'undefined' ? {
+    getItem: (key: string) => window.sessionStorage.getItem(key),
+    setItem: (key: string, value: string) => window.sessionStorage.setItem(key, value),
+    removeItem: (key: string) => window.sessionStorage.removeItem(key),
+  } : undefined
+
   supabaseInstance = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -14,7 +22,7 @@ function getSupabaseClient(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: 'lonara-auth-token',
-      
+        ...(storage && { storage }),
       },
     }
   )
