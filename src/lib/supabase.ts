@@ -5,9 +5,7 @@ let supabaseInstance: SupabaseClient | null = null
 function getSupabaseClient(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance
 
-  const isDev = process.env.NODE_ENV === 'development'
-
-  const storage = !isDev && typeof window !== 'undefined' ? {
+  const storage = typeof window !== 'undefined' ? {
     getItem: (key: string) => window.sessionStorage.getItem(key),
     setItem: (key: string, value: string) => window.sessionStorage.setItem(key, value),
     removeItem: (key: string) => window.sessionStorage.removeItem(key),

@@ -170,62 +170,81 @@ const handleGoToMySpace = async () => {
   const [cacScore, setCacScore]             = useState<string>('')
   const [gdf15, setGdf15]                   = useState<string>('')
 
-  useEffect(() => {
-    if (!pendingStep) return
-    setPendingStep(false)
-    setStep('prequiz')
-  }, [pendingStep])
+ useEffect(() => {
+  const hash = window.location.hash
+  if (hash.includes('type=recovery')) {
+    router.push(`/reset-password${hash}`)
+    return
+  }
 
-// ── LIRE LE TIER AU MONTAGE si session active ─────────────────────────────
-  useEffect(() => {
-    const checkSession = async () => {
-      // Forcer la lecture depuis sessionStorage
-      await supabase.auth.initialize?.()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        setMemberTier('guest')
-        return
-      }
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('member_tier, full_name, email, bg_character')
-        .eq('id', session.user.id)
-        .single()
-      if (!profile) return
-      if (profile.member_tier) 
-      
-        setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
-      if (profile.full_name) setFullName(profile.full_name)
-      if (profile.email) setEmail(profile.email)
-      if ((profile as any).bg_character) setCachedBgCharacter((profile as any).bg_character)
-      if ((profile as any).bg_character) setCachedBgCharacter((profile as any).bg_character)
-      const userEmail = profile.email ?? session.user.email ?? ''
-      if (userEmail) {
-        const { data: assessment } = await supabase
-          .from('assessments')
-          .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-          .eq('email', userEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        if (assessment) {
-          setCachedAssessment(assessment)
-          sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
-        }
-        const { data: allAssessments } = await supabase
-          .from('assessments')
-          .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-          .eq('email', userEmail)
-          .order('created_at', { ascending: true })
-        if (allAssessments) {
-          setCachedHistory(allAssessments)
-          sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
-        }
-      }
+  const loadUserData = async (userId: string, userEmail: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('member_tier, full_name, email, bg_character')
+      .eq('id', userId)
+      .single()
+
+    if (profile?.member_tier) setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
+    if (profile?.full_name) setFullName(profile.full_name)
+    if (profile?.email) setEmail(profile.email)
+    if ((profile as any)?.bg_character) setCachedBgCharacter((profile as any).bg_character)
+
+    const resolvedEmail = profile?.email ?? userEmail
+    if (!resolvedEmail) return
+
+    const { data: assessment } = await supabase
+      .from('assessments')
+      .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+      .eq('email', resolvedEmail)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (assessment) {
+      setCachedAssessment(assessment)
+      sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
     }
-    checkSession()
-  }, [])
+
+    const { data: allAssessments } = await supabase
+      .from('assessments')
+      .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+      .eq('email', resolvedEmail)
+      .order('created_at', { ascending: true })
+
+    if (allAssessments) {
+      setCachedHistory(allAssessments)
+      sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
+    }
+  }
+
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_OUT') {
+      setMemberTier('guest')
+      setFullName('')
+      setEmail('')
+      setStep('hero')
+      return
+    }
+
+    if (!session) {
+      setMemberTier('guest')
+      setFullName('')
+      setEmail('')
+      setStep((prev) => prev === 'myspace' ? 'hero' : prev)
+      return
+    }
+
+    if (
+      event === 'SIGNED_IN' ||
+      event === 'TOKEN_REFRESHED' ||
+      event === 'INITIAL_SESSION'
+    ) {
+      await loadUserData(session.user.id, session.user.email ?? '')
+    }
+  })
+
+  return () => subscription.unsubscribe()
+}, [])
 
 
 

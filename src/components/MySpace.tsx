@@ -332,14 +332,18 @@ export default function MySpace({
   onStartAssessment,
   initialAssessment = null,
   initialHistory = [],
+  initialBgCharacter,
   onAssessmentLoaded,
+  onBgCharacterChange,
 }: MySpaceProps) {
 
 
   const [activeSection, setActiveSection] = useState<MenuItem | null>(null)
   const [phrase, setPhrase] = useState<string>('')
   const [phraseLoading, setPhraseLoading] = useState<boolean>(true)
-  const [bgCharacter, setBgCharacter] = useState<BgCharacter>('lona')
+  const [bgCharacter, setBgCharacter] = useState<BgCharacter>(
+    initialBgCharacter ?? 'lona'
+  )
   const [bgFading, setBgFading] = useState<boolean>(false)
   const [lastAssessment, setLastAssessment] = useState<LastAssessment | null>(initialAssessment)
   const [localFullName, setLocalFullName] = useState<string>(fullName)
