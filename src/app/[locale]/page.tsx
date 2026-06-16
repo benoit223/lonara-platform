@@ -208,7 +208,7 @@ useEffect(() => {
       return
     }
 
-   if (!session && event !== 'INITIAL_SESSION' && event !== 'TOKEN_REFRESHED') {
+if (!session) {
   if (sessionConfirmed.current) {
     sessionConfirmed.current = false
     return
@@ -216,7 +216,7 @@ useEffect(() => {
   setMemberTier('guest')
   setFullName('')
   setEmail('')
-  setStep((prev) => prev === 'myspace' ? 'hero' : prev)
+  setStep('hero')
   return
 }
 
