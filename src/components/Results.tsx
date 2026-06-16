@@ -169,6 +169,10 @@ if (assessmentId && data) {
           biologicalAge: data.biologicalAge,
           report: data,
         }),
+      }).then(() => {
+        // Vider le cache pour forcer rechargement dans MySpace
+        sessionStorage.removeItem('lonara-cached-history')
+        sessionStorage.removeItem('lonara-cached-assessment')
       })
     }
   }
