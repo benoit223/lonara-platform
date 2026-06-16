@@ -87,13 +87,39 @@ const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
     return stored ? JSON.parse(stored) : []
   } catch { return [] }
 })
+const [cachedBgCharacter, setCachedBgCharacter] = useState<'lona' | 'enginea' | 'gummy'>('lona')
 
 const handleMySpaceBack = () => {
   setStep('hero')
 }
 
-const handleGoToMySpace = () => {
-
+const handleGoToMySpace = async () => {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session?.user) {
+    const userEmail = email || session.user.email || ''
+    if (userEmail) {
+      const { data: assessment } = await supabase
+        .from('assessments')
+        .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (assessment) {
+        setCachedAssessment(assessment)
+        sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
+      }
+      const { data: allAssessments } = await supabase
+        .from('assessments')
+        .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: true })
+      if (allAssessments) {
+        setCachedHistory(allAssessments)
+        sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
+      }
+    }
+  }
   setMySpaceKey(k => k + 1)
   setStep('myspace')
 }
@@ -163,7 +189,7 @@ const handleGoToMySpace = () => {
       
       const { data: profile } = await supabase
         .from('profiles')
-        .select('member_tier, full_name, email')
+        .select('member_tier, full_name, email, bg_character')
         .eq('id', session.user.id)
         .single()
       if (!profile) return
@@ -172,8 +198,8 @@ const handleGoToMySpace = () => {
         setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
       if (profile.full_name) setFullName(profile.full_name)
       if (profile.email) setEmail(profile.email)
-
-      // Précharger le dernier assessment
+      if ((profile as any).bg_character) setCachedBgCharacter((profile as any).bg_character)
+      if ((profile as any).bg_character) setCachedBgCharacter((profile as any).bg_character)
       const userEmail = profile.email ?? session.user.email ?? ''
       if (userEmail) {
         const { data: assessment } = await supabase
@@ -436,7 +462,6 @@ setPendingStep(true)
        {/* ── MY SPACE ── */}
 {step === 'myspace' && (
   <MySpace
-    key={mySpaceKey}
     memberTier={memberTier}
     fullName={fullName}
     onBack={handleMySpaceBack}
@@ -446,7 +471,9 @@ setPendingStep(true)
     }}
     initialAssessment={cachedAssessment}
     initialHistory={cachedHistory}
+    initialBgCharacter={cachedBgCharacter}
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
+    onBgCharacterChange={(bg: any) => setCachedBgCharacter(bg)}
   />
 )}
 

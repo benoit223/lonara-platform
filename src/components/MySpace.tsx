@@ -16,7 +16,9 @@ interface MySpaceProps {
   onStartAssessment: () => void
   initialAssessment?: any | null
   initialHistory?: any[]
+  initialBgCharacter?: 'lona' | 'enginea' | 'gummy'
   onAssessmentLoaded?: (assessment: any) => void
+  onBgCharacterChange?: (bg: 'lona' | 'enginea' | 'gummy') => void
 }
 
 type MenuItem = 'state' | 'understand' | 'optimize' | 'evolve' | 'connect'
@@ -423,7 +425,7 @@ const isNight = getTimeOfDay() === 'nuit'
       if (profile) {
         if (profile.full_name) setLocalFullName(profile.full_name)
         if (profile.member_tier) setLocalTier(profile.member_tier)
-        if (profile.bg_character) setBgCharacter(profile.bg_character as BgCharacter)
+        // bgCharacter vient de page.tsx via initialBgCharacter — pas besoin de recharger
       }
 
      const { data: assessment } = await supabase
@@ -469,15 +471,8 @@ if (allAssessments) setAssessmentHistory(allAssessments)
     }
     load()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        load()
-      }
-    })
-
-    return () => {
+  return () => {
       clearTimeout(timeout)
-      subscription.unsubscribe()
     }
   }, [])
 
