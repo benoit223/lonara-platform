@@ -5,8 +5,6 @@ let supabaseInstance: SupabaseClient | null = null
 function getSupabaseClient(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance
 
-  const isDev = process.env.NODE_ENV === 'development'
-
   supabaseInstance = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -16,7 +14,6 @@ function getSupabaseClient(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: 'lonara-auth-token',
-      
       },
     }
   )
