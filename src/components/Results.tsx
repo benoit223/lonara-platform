@@ -151,31 +151,7 @@ if (assessmentId && data) {
   })
   .eq('id', assessmentId)
 
-  // Générer PDF automatiquement pour premium et executive
-  if (memberTier === 'premium' || memberTier === 'executive') {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      fetch('/api/save-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assessmentId,
-          userId: user.id,
-          fullName,
-          scores: data.scores,
-          insights: [data.aiNarrative ?? data.aiKeyInsight ?? ''],
-          protocols: [],
-          longevityScore: data.longevityScore,
-          biologicalAge: data.biologicalAge,
-          report: data,
-        }),
-      }).then(() => {
-        // Vider le cache pour forcer rechargement dans MySpace
-        sessionStorage.removeItem('lonara-cached-history')
-        sessionStorage.removeItem('lonara-cached-assessment')
-      })
-    }
-  }
+ 
 }
 
     }

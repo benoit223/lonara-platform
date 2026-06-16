@@ -1097,30 +1097,33 @@ function PDFButtons({ report, onMySpace }: { report: any; onMySpace?: () => void
       {/* MY SPACE — premium et executive seulement */}
       {(report?.memberType === 'premium' || report?.memberType === 'executive') && (
      <button
-onClick={() => {
-    if (report?.user?.memberType === 'premium' || report?.user?.memberType === 'executive') {
-      if (report.assessmentId) {
-        import('@/lib/supabase').then(({ supabase }) => {
-          supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) {
-              fetch('/api/save-report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  assessmentId: report.assessmentId,
-                  userId: user.id,
-                  fullName: report.user?.name,
-                  scores: report.scores,
-                  insights: [report.aiNarrative ?? report.aiKeyInsight ?? ''],
-                  protocols: report.priorities ?? [],
-                  longevityScore: report.longevityScore,
-                  biologicalAge: report.biologicalAge,
-                  report,
-                }),
-              })
-            }
+onClick={async () => {
+    if ((report?.memberType === 'premium' || report?.memberType === 'executive') && report.assessmentId) {
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          fetch('/api/save-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              assessmentId: report.assessmentId,
+              userId: user.id,
+              fullName: report.user?.name,
+              scores: report.scores,
+              insights: [report.aiNarrative ?? report.aiKeyInsight ?? ''],
+              protocols: report.priorities ?? [],
+              longevityScore: report.longevityScore,
+              biologicalAge: report.biologicalAge,
+              report,
+            }),
+          }).then(() => {
+            sessionStorage.removeItem('lonara-cached-history')
+            sessionStorage.removeItem('lonara-cached-assessment')
           })
-        })
+        }
+      } catch (e) {
+        console.error('save-report error:', e)
       }
     }
     onMySpace?.()
