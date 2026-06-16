@@ -213,6 +213,9 @@ if (!session) {
     sessionConfirmed.current = false
     return
   }
+  // Vérifier si session réellement perdue avant de reset
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) return  // session encore valide — ignorer le null transitoire
   setMemberTier('guest')
   setFullName('')
   setEmail('')
