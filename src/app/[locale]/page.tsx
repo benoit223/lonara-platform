@@ -518,6 +518,18 @@ setPendingStep(true)
               <button
                onClick={async () => {
   setShowSessionGuard(false)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('member_tier, full_name, email, bg_character')
+      .eq('id', user.id)
+      .single()
+    if (profile?.member_tier) setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
+    if (profile?.full_name) setFullName(profile.full_name)
+    if (profile?.email) setEmail(profile.email)
+    if ((profile as any)?.bg_character) setCachedBgCharacter((profile as any).bg_character)
+  }
   await handleGoToMySpace()
 }}
                 className="relative w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/10 py-3.5 text-[11px] uppercase tracking-[0.25em] text-[#C7AC60] transition hover:bg-[#C7AC60]/20"

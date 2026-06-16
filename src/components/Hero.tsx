@@ -258,15 +258,12 @@ export default function Hero({ onStart, onReports, onAbout, onMySpace, memberTie
 
   // ── Logique My Space : session active → direct, sinon → modal login
   const handleMySpaceClick = () => {
-    if (memberTier === 'premium' || memberTier === 'executive') {
-      onMySpace()
-    } else if (memberTier === 'member') {
-      setShowMySpaceModal(true)
-    } else {
-      setShowMySpaceModal(true)
-    }
+  if (memberTier === 'guest') {
+    setShowMySpaceModal(true)
+  } else {
+    onMySpace()
   }
-
+}
   return (
     <section
       className="fixed inset-0 overflow-hidden bg-cover bg-center"
