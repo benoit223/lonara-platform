@@ -9,13 +9,14 @@ import PreQuiz from '@/components/PreQuiz'
 import About from '@/components/About'
 import UnderstandingReport from '@/components/UnderstandingReport'
 import MySpace from '@/components/MySpace'
+import { useLocale } from 'next-intl'
 
 export default function Home() {
 
   const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace'>('hero')
   const router = useRouter()
 
-  
+  const locale = useLocale()
 
   const [showReport, setShowReport] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
@@ -52,6 +53,8 @@ const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
   } catch { return [] }
 })
 const [cachedBgCharacter, setCachedBgCharacter] = useState<'lona' | 'enginea' | 'gummy'>('lona')
+
+const [showSessionGuard, setShowSessionGuard] = useState(false)
 
 const handleMySpaceBack = () => {
   setStep('hero')
@@ -134,7 +137,19 @@ const handleGoToMySpace = async () => {
   const [cacScore, setCacScore]             = useState<string>('')
   const [gdf15, setGdf15]                   = useState<string>('')
 
- useEffect(() => {
+
+  
+useEffect(() => {
+  const handleVisibility = () => {
+    if (document.visibilityState === 'visible' && step === 'myspace') {
+      setShowSessionGuard(true)
+    }
+  }
+  document.addEventListener('visibilitychange', handleVisibility)
+  return () => document.removeEventListener('visibilitychange', handleVisibility)
+}, [step])
+
+useEffect(() => {
   const hash = window.location.hash
   if (hash.includes('type=recovery')) {
     router.push(`/reset-password${hash}`)
@@ -464,6 +479,63 @@ setPendingStep(true)
 
       {showAbout && <About onClose={() => setShowAbout(false)} />}
       {showReport && <UnderstandingReport onClose={() => setShowReport(false)} />}
+
+      {showSessionGuard && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#02040A]/70 backdrop-blur-md" />
+          <div className="relative z-10 w-full max-w-[400px] mx-4 rounded-[28px] border border-white/8 bg-[#02040A]/90 backdrop-blur-xl px-8 py-10 shadow-[0_0_80px_rgba(0,0,0,0.6)]">
+            <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-80" />
+            <div className="flex justify-center mb-6">
+           <img
+  src={`/${cachedBgCharacter}-medallion.png`}
+  alt={cachedBgCharacter}
+  className="h-28 w-28 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
+  style={{
+    filter: cachedBgCharacter === 'gummy'
+      ? 'brightness(1.2) contrast(0.95)'
+      : 'brightness(1.05) contrast(0.98)'
+  }}
+/>
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[#C7AC60]/70 text-center mb-3">
+              {locale === 'fr' ? 'Données Confidentielles' : locale === 'es' ? 'Datos Confidenciales' : 'Confidential Data'}
+            </p>
+            <h2 className="text-[1.6rem] font-light text-[#EAE4D5] text-center mb-3"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {locale === 'fr' ? 'Toujours là ?' : locale === 'es' ? '¿Sigues ahí?' : 'Still there?'}
+            </h2>
+            <p className="text-[13px] text-[#EAE4D5]/40 text-center leading-relaxed mb-8">
+              {locale === 'fr'
+                ? 'Votre session est active. Souhaitez-vous continuer ou mettre fin à votre session pour protéger vos données ?'
+                : locale === 'es'
+                ? 'Su sesión está activa. ¿Desea continuar o cerrar su sesión para proteger sus datos?'
+                : 'Your session is active. Would you like to continue or end your session to protect your data?'}
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={async () => {
+                  setShowSessionGuard(false)
+                  await handleGoToMySpace()
+                }}
+                className="relative w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/10 py-3.5 text-[11px] uppercase tracking-[0.25em] text-[#C7AC60] transition hover:bg-[#C7AC60]/20"
+              >
+                <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent" />
+                {locale === 'fr' ? 'Continuer la session' : locale === 'es' ? 'Continuar sesión' : 'Continue session'}
+              </button>
+              <button
+                onClick={async () => {
+                  setShowSessionGuard(false)
+                  await supabase.auth.signOut()
+                }}
+                className="w-full rounded-full border border-white/8 bg-white/[0.03] py-3.5 text-[11px] uppercase tracking-[0.25em] text-white/30 transition hover:text-white/50 hover:border-white/15"
+              >
+                {locale === 'fr' ? 'Terminer la session' : locale === 'es' ? 'Cerrar sesión' : 'End session'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   )
 }
