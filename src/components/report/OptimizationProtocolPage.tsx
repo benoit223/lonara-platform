@@ -1106,10 +1106,11 @@ onClick={async () => {
           await fetch('/api/save-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              assessmentId: report.assessmentId,
-              userId: user.id,
-              fullName: report.user?.name,
+          body: JSON.stringify({
+  assessmentId: report.assessmentId,
+  userId: user.id,
+  fullName: report.user?.name,
+  locale,
               scores: report.scores,
               insights: [report.aiNarrative ?? report.aiKeyInsight ?? ''],
               protocols: report.priorities ?? [],

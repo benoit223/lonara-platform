@@ -190,18 +190,18 @@ const handleGoToMySpace = async () => {
       return
     }
 
-    if (!session) {
-      setMemberTier('guest')
-      setFullName('')
-      setEmail('')
-      setStep((prev) => prev === 'myspace' ? 'hero' : prev)
-      return
-    }
+   if (!session && event !== 'INITIAL_SESSION' && event !== 'TOKEN_REFRESHED') {
+  setMemberTier('guest')
+  setFullName('')
+  setEmail('')
+  setStep((prev) => prev === 'myspace' ? 'hero' : prev)
+  return
+}
 
-    if (
-      event === 'SIGNED_IN' ||
+ if (
+      (event === 'SIGNED_IN' ||
       event === 'TOKEN_REFRESHED' ||
-      event === 'INITIAL_SESSION'
+      event === 'INITIAL_SESSION') && session
     ) {
       await loadUserData(session.user.id, session.user.email ?? '')
     }

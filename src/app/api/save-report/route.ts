@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   )
   try {
     const body = await req.json()
-    const { assessmentId, fullName, scores, insights, protocols, longevityScore, biologicalAge, report, userId } = body
+    const { assessmentId, fullName, scores, insights, protocols, longevityScore, biologicalAge, report, userId, locale } = body
 
     const tier = report?.user?.memberType ?? 'member'
     const isFullAccess = tier === 'executive' || tier === 'premium'
@@ -23,22 +23,28 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Not authorized' }, { status: 403 })
     }
 
-    // Générer le PDF Classic
-    const element = PDFReport({
-      fullName,
-      scores,
-      insights: insights ?? [],
-      protocols: protocols ?? [],
-      longevityScore,
-      biologicalAge,
-      report,
-      variant: 'bw',
-      tier,
-      showPage1: true,
-      showPage2: isFullAccess,
-      showPage3: true,
-      logoPath: `data:image/png;base64,${fs.readFileSync(LOGO_BL_PATH).toString('base64')}`,
-    })
+    const watermarkBuffer = fs.readFileSync(
+  path.join(process.cwd(), 'public', 'LOGOOFFICIELTRANSPNOIR.png')
+)
+const watermarkPath = `data:image/png;base64,${watermarkBuffer.toString('base64')}`
+
+const element = PDFReport({
+  fullName,
+  scores,
+  insights: insights ?? [],
+  protocols: protocols ?? [],
+  longevityScore,
+  biologicalAge,
+  report,
+  variant: 'bw',
+  tier,
+  showPage1: true,
+  showPage2: isFullAccess,
+  showPage3: true,
+  logoPath: `data:image/png;base64,${fs.readFileSync(LOGO_BL_PATH).toString('base64')}`,
+  watermarkPath,
+  locale: locale ?? 'en',
+})
 
     const pdfBuffer = await renderToBuffer(element)
 
