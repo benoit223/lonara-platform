@@ -7,6 +7,8 @@
     "myspace": "MON ESPACE"
   },
 "myspace": {
+  "state_previous": "Préc.",
+"state_current": "Actuel",
   "state_nextNote": "*Tout changement significatif — nouvelle habitude, évolution de santé ou mode de vie — est aussi le bon moment pour réévaluer.",
   "chatLimitReached": "Vous avez atteint la limite journalière de votre compagnon. Votre voyage de longévité reprend demain.",
   "timing_withmeals": "Avec repas",
@@ -1449,6 +1451,9 @@
   }
 ,
 "biological": {
+  "lifestyle_label": "Intelligence Lifestyle",
+"lifestyle_title": "Cohérence Habitudes & Biologie",
+"lifestyle_badge": "Analyse IA",
   "header_label": "Intelligence Biologique",
 "header_title": "Analyse Systémique",
 "header_desc": "Interprétation biologique multi-systèmes basée sur la dynamique de récupération, la modulation du stress, la charge inflammatoire et la résilience adaptative.",

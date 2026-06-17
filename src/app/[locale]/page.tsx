@@ -14,6 +14,10 @@ import { useLocale } from 'next-intl'
 export default function Home() {
 
   const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace'>('hero')
+useEffect(() => {
+ 
+}, [step])
+
   const router = useRouter()
 
   const locale = useLocale()
@@ -37,6 +41,10 @@ export default function Home() {
   // ── MEMBER TIER — lu depuis Supabase après login ──────────────────────────
   const [memberTier, setMemberTier] = useState<'guest' | 'member' | 'premium' | 'executive'>('guest')
 
+  useEffect(() => {
+
+}, [memberTier])
+
 const [pendingStep, setPendingStep] = useState<boolean>(false)
 const [previousStep, setPreviousStep] = useState<string>('hero')
 const [mySpaceKey, setMySpaceKey] = useState(0)
@@ -54,42 +62,20 @@ const [cachedHistory, setCachedHistory] = useState<any[]>(() => {
 })
 const [cachedBgCharacter, setCachedBgCharacter] = useState<'lona' | 'enginea' | 'gummy'>('lona')
 
+useEffect(() => {
+}, [cachedBgCharacter])
+
+
 const [showSessionGuard, setShowSessionGuard] = useState(false)
 
 const handleMySpaceBack = () => {
+  console.trace('MYSPACE BACK CALLED')
+
   setStep('hero')
 }
 
 const handleGoToMySpace = async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    setStep('hero')
-    return
-  }
-  const userEmail = user.email ?? ''
-  if (userEmail) {
-    setEmail(userEmail)
-    const { data: assessment } = await supabase
-      .from('assessments')
-      .select('id, created_at, scores, protocols, biomarkers, biological_age, longevity_score, recovery_index, stress_load, age, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-      .eq('email', userEmail)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (assessment) {
-      setCachedAssessment(assessment)
-      sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
-    }
-    const { data: allAssessments } = await supabase
-      .from('assessments')
-      .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-      .eq('email', userEmail)
-      .order('created_at', { ascending: true })
-    if (allAssessments) {
-      setCachedHistory(allAssessments)
-      sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
-    }
-  }
+  
   setMySpaceKey(k => k + 1)
   setStep('myspace')
 }
@@ -187,29 +173,51 @@ useEffect(() => {
       sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
     }
 
-    const { data: allAssessments } = await supabase
-      .from('assessments')
-      .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
-      .eq('email', resolvedEmail)
-      .order('created_at', { ascending: true })
+    
+const { data: allAssessments } = await supabase
+  .from('assessments')
+  .select('id, created_at, biological_age, longevity_score, recovery_index, stress_load, age, pdf_url, pillar_activate, pillar_balance, pillar_protect, pillar_restore')
+  .eq('email', resolvedEmail)
+  .order('created_at', { ascending: true })
 
-    if (allAssessments) {
-      setCachedHistory(allAssessments)
-      sessionStorage.setItem('lonara-cached-history', JSON.stringify(allAssessments))
-    }
-  }
+
+
+if (allAssessments) {
+  setCachedHistory(allAssessments)
+  sessionStorage.setItem(
+    'lonara-cached-history',
+    JSON.stringify(allAssessments)
+  )
+}
+
+
+}
 
  const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+
+
     if (event === 'SIGNED_OUT') {
       setMemberTier('guest')
       setFullName('')
       setEmail('')
+
+
       setStep('hero')
+     
+      
       return
     }
-    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
-      await loadUserData(session.user.id, session.user.email ?? '')
-    }
+if (
+  (event === 'SIGNED_IN' ||
+    event === 'TOKEN_REFRESHED' ||
+    event === 'INITIAL_SESSION') &&
+  session
+) {
+  loadUserData(
+    session.user.id,
+    session.user.email ?? ''
+  )
+}
   })
 
   return () => subscription.unsubscribe()
@@ -237,6 +245,8 @@ useEffect(() => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setMemberTier('member'); return }
 
+
+    
   const { data: profile } = await supabase
   .from('profiles')
   .select('member_tier, subscription_plan, full_name, email')
@@ -474,15 +484,14 @@ setPendingStep(true)
           <div className="relative z-10 w-full max-w-[400px] mx-4 rounded-[28px] border border-white/8 bg-[#02040A]/90 backdrop-blur-xl px-8 py-10 shadow-[0_0_80px_rgba(0,0,0,0.6)]">
             <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-80" />
             <div className="flex justify-center mb-6">
+       
            <img
   src={`/${cachedBgCharacter}-medallion.png`}
   alt={cachedBgCharacter}
-  className="h-50 w-50 object-contain border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
-  style={{
-    filter: cachedBgCharacter === 'gummy'
-      ? 'brightness(1.2) contrast(0.95)'
-      : 'brightness(1.05) contrast(0.98)'
-  }}
+  className="h-38 w-38 object-cover scale-80 border border-[#C7AC60]/20 rounded-full bg-[#C7AC60]/5 shadow-[0_0_20px_rgba(199,172,96,0.25)]"
+ style={{
+  filter: 'brightness(1.00) contrast(1.00)'
+}}
 />
             </div>
             <p className="text-[10px] uppercase tracking-[0.35em] text-[#C7AC60]/70 text-center mb-3">
@@ -501,38 +510,39 @@ setPendingStep(true)
             </p>
             <div className="flex flex-col gap-3">
               <button
-               onClick={async () => {
-  
+    onClick={() => {
+
   setShowSessionGuard(false)
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('member_tier, full_name, email, bg_character')
-      .eq('id', user.id)
-      .single()
-    if (profile?.member_tier) setMemberTier(profile.member_tier as 'guest' | 'member' | 'premium' | 'executive')
-    if (profile?.full_name) setFullName(profile.full_name)
-    if (profile?.email) setEmail(profile.email)
-    if ((profile as any)?.bg_character) setCachedBgCharacter((profile as any).bg_character)
-  }
-  await handleGoToMySpace()
 }}
                 className="relative w-full rounded-full border border-[#C7AC60]/30 bg-[#C7AC60]/10 py-3.5 text-[11px] uppercase tracking-[0.25em] text-[#C7AC60] transition hover:bg-[#C7AC60]/20"
               >
                 <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent" />
                 {locale === 'fr' ? 'Continuer la session' : locale === 'es' ? 'Continuar sesión' : 'Continue session'}
               </button>
+
+           
               <button
-  onClick={async () => {
+onClick={() => {
+  
+
+  
+  supabase.auth.signOut()
+ 
+
   setShowSessionGuard(false)
+
   setMemberTier('guest')
   setFullName('')
   setEmail('')
+
   localStorage.removeItem('lonara-auth-token')
   sessionStorage.clear()
-  await supabase.auth.signOut()
+
+ 
+
   setStep('hero')
+
+  
 }}
                 className="w-full rounded-full border border-white/8 bg-white/[0.03] py-3.5 text-[11px] uppercase tracking-[0.25em] text-white/30 transition hover:text-white/50 hover:border-white/15"
               >

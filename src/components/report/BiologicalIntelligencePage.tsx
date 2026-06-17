@@ -499,6 +499,37 @@ ly: cy + (maxR + 57) * Math.sin(angle),
 
 </div>
 
+          {/* ── LIFESTYLE COHERENCE ── */}
+          {report.aiLifestyleInsight && (
+            <div className="relative overflow-hidden rounded-[32px] border border-[#C7AC60]/12 bg-[rgba(7,17,29,0.55)] p-5 sm:p-6 md:p-8 backdrop-blur-xl">
+              <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
+              <div className="absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_35px_rgba(3,90,168,0.05)] pointer-events-none" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-[#C7AC60]/60 mb-1">
+                    {tb('lifestyle_label')}
+                  </p>
+                  <h3 className="text-[22px] md:text-[28px] font-extralight text-[#EAE4D5]">
+                    {tb('lifestyle_title')}
+                  </h3>
+                </div>
+                <div className="sm:ml-auto flex items-center gap-2 rounded-full border border-[#C7AC60]/20 bg-[#C7AC60]/5 px-3 py-1.5 self-start">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#C7AC60] animate-pulse" />
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#C7AC60]/70">
+                    {tb('lifestyle_badge')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-[20px] border border-[#C7AC60]/8 bg-black/20 px-6 py-5">
+                <p className="text-[14px] leading-[2] text-[#EAE4D5]/75">
+                  {report.aiLifestyleInsight}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ── 1. AI BIOMARKER ANALYSIS ── */}
           {report.hasBiomarkers && report.aiBiomarkerAnalysis && (
           <div className="relative overflow-hidden rounded-[32px] border border-[#C7AC60]/12 bg-[rgba(7,17,29,0.55)] p-5 sm:p-6 md:p-8 backdrop-blur-xl">

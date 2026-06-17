@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import en from '../../../messages/en.json'
 import fr from '../../../messages/fr.json'
 import es from '../../../messages/es.json'
@@ -432,6 +433,59 @@ export async function POST(req: Request) {
       return { ...item, color, exceedsUpper }
     })
 
+ // ── LIFESTYLE DATA — fetch depuis Supabase ────────────────────────────────
+  let lifestyleData: any = undefined
+  if (body.email && (memberTier === 'premium' || memberTier === 'executive')) {
+    try {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      )
+
+      // Récupérer le profile_id depuis l'email
+      const { data: profileRow } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', body.email)
+        .maybeSingle()
+
+      const profileId = profileRow?.id ?? null
+
+      if (profileId) {
+        // Supplements actifs
+        const { data: sups } = await supabaseAdmin
+          .from('supplements')
+          .select('name, dose, timing')
+          .eq('profile_id', profileId)
+
+        // Lifestyle log
+        const { data: log } = await supabaseAdmin
+          .from('lifestyle_logs')
+          .select('sleep_bedtime, sleep_waketime, sleep_hours, sleep_tracker, sleep_aids, diet_type, meals_per_day, fasting, alcohol, caffeine')
+          .eq('profile_id', profileId)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        lifestyleData = {
+          supplements:       sups ?? [],
+          sleepBedtime:      log?.sleep_bedtime  ?? undefined,
+          sleepWaketime:     log?.sleep_waketime ?? undefined,
+          sleepDuration:     log?.sleep_hours    ? `${log.sleep_hours}h` : undefined,
+          sleepTracker:      log?.sleep_tracker  ?? undefined,
+          sleepAids:         log?.sleep_aids     ? 'yes' : undefined,
+          nutritionDiet:     log?.diet_type      ?? undefined,
+          nutritionMeals:    log?.meals_per_day  ? String(log.meals_per_day) : undefined,
+          nutritionFasting:  log?.fasting        ?? undefined,
+          nutritionAlcohol:  log?.alcohol        ?? undefined,
+          nutritionCaffeine: log?.caffeine       ?? undefined,
+        }
+      }
+    } catch (e) {
+      console.error('Lifestyle fetch error:', e)
+    }
+  }
+
   // ── NARRATIVES IA — enrichies avec contexte biomarqueurs ──────────────────
   const aiNarratives = engineA
     ? await generateAINarrative({
@@ -462,6 +516,7 @@ export async function POST(req: Request) {
         country:        body.country        ?? '',
         socioeconomic:  body.socioeconomic  ?? '',
         locale:         body.locale         ?? 'en',
+        lifestyleData,
       })
     : null
 
@@ -550,10 +605,11 @@ const aiBiomarkerAnalysis = bioOutput.hasBiomarkers
 
       // Narratives IA
       ...(aiNarratives && {
-        aiNarrative:     aiNarratives.aiNarrative,
-        aiKeyInsight:    aiNarratives.aiKeyInsight,
-        aiSynthesis:     aiNarratives.aiSynthesis,
-        aiProtocolIntro: aiNarratives.aiProtocolIntro,
+        aiNarrative:        aiNarratives.aiNarrative,
+        aiKeyInsight:       aiNarratives.aiKeyInsight,
+        aiSynthesis:        aiNarratives.aiSynthesis,
+        aiProtocolIntro:    aiNarratives.aiProtocolIntro,
+        aiLifestyleInsight: aiNarratives.aiLifestyleInsight,
       }),
     }),
 

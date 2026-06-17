@@ -505,21 +505,44 @@ export default function MySpaceModal({ onClose, onAccess }: MySpaceModalProps) {
 
   const slide = SLIDES[currentSlide]
 
-  const handleLogin = async () => {
-    if (!email || !password) return
-    setLoading(true)
-    setError('')
-    try {
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-      if (authError) {
-        setError(locale === 'fr' ? 'Email ou mot de passe incorrect.' : locale === 'es' ? 'Email o contraseña incorrectos.' : 'Incorrect email or password.')
-      } else {
-        onAccess()
-      }
-    } finally {
-      setLoading(false)
+const handleLogin = async () => {
+  if (!email || !password) return
+
+  
+
+  setLoading(true)
+  setError('')
+
+  try {
+  
+
+const result = await supabase.auth.signInWithPassword({
+  email,
+  password
+})
+
+
+
+const { data, error: authError } = result
+
+   
+
+    if (authError) {
+      setError(
+        locale === 'fr'
+          ? 'Email ou mot de passe incorrect.'
+          : locale === 'es'
+          ? 'Email o contraseña incorrectos.'
+          : 'Incorrect email or password.'
+      )
+    } else {
+
+      onAccess()
     }
+  } finally {
+    setLoading(false)
   }
+}
 
   const slideComponents: Record<string, React.ReactElement> = {
     state:      <SlideState />,

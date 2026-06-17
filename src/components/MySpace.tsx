@@ -222,6 +222,7 @@ function SectionContent({
   active,
   memberTier,
   lastAssessment,
+  previousAssessment,
   onStartAssessment,
   bgCharacter,
   assessmentHistory,
@@ -232,6 +233,7 @@ function SectionContent({
   active: MenuItem
   memberTier: string
   lastAssessment: LastAssessment | null
+  previousAssessment: any | null
   onStartAssessment: () => void
   bgCharacter: string
   assessmentHistory: any[]
@@ -257,7 +259,7 @@ function SectionContent({
   eyebrow: t('stateEyebrow'),
   title: t('stateTitle'),
   description: t('stateDesc'),
-  extra: <StateSection lastAssessment={lastAssessment} chronoAge={chronoAge} />,
+  extra: <StateSection lastAssessment={lastAssessment} previousAssessment={previousAssessment} chronoAge={chronoAge} />,
 },
     understand: {
       eyebrow: t('understandEyebrow'),
@@ -344,6 +346,13 @@ export default function MySpace({
   const [bgCharacter, setBgCharacter] = useState<BgCharacter>(
     initialBgCharacter ?? 'lona'
   )
+
+useEffect(() => {
+  if (initialBgCharacter) {
+    setBgCharacter(initialBgCharacter)
+  }
+}, [initialBgCharacter])
+
   const [bgFading, setBgFading] = useState<boolean>(false)
   const [lastAssessment, setLastAssessment] = useState<LastAssessment | null>(initialAssessment)
   const [localFullName, setLocalFullName] = useState<string>(fullName)
@@ -351,7 +360,8 @@ export default function MySpace({
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [chronoAge, setChronoAge] = useState<number | null>(initialAssessment?.age ?? null)
   const [assessmentHistory, setAssessmentHistory] = useState<any[]>(initialHistory)
-  const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([])
+const [previousAssessment, setPreviousAssessment] = useState<any | null>(null)
+const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([])
 
  const t = useTranslations('myspace')
 const tLegal = useTranslations()
@@ -440,6 +450,15 @@ const isNight = getTimeOfDay() === 'nuit'
   .limit(1)
   .maybeSingle()
 
+const { data: prevAssessmentData } = await supabase
+  .from('assessments')
+  .select('id, created_at, scores')
+  .eq('email', email)
+  .order('created_at', { ascending: false })
+  .range(1, 1)
+  .maybeSingle()
+
+  
   
 const { data: allAssessments } = await supabase
   .from('assessments')
@@ -449,10 +468,11 @@ const { data: allAssessments } = await supabase
 
 if (allAssessments) setAssessmentHistory(allAssessments)
 
-      if (assessment) {
-        setLastAssessment(assessment as LastAssessment)
-        const a = assessment as any
-        if (a.age) setChronoAge(a.age)
+     if (assessment) {
+  setLastAssessment(assessment as LastAssessment)
+  if (prevAssessmentData) setPreviousAssessment(prevAssessmentData)
+  const a = assessment as any
+  if (a.age) setChronoAge(a.age)
         setScoreCards([
           { label: t('cardBioAge'),    value: a.biological_age  != null ? String(Math.round(a.biological_age))  : '—', unit: 'yrs'  },
           { label: t('cardLongevity'), value: a.longevity_score != null ? String(Math.round(a.longevity_score)) : '—', unit: '/100' },
@@ -514,16 +534,17 @@ const getDotColor = (num: number | null, idx: number) => {
     return 'bg-[#FF4444]'
   }
 
-  const sectionContentProps = {
-    memberTier: localTier || memberTier,
-    lastAssessment,
-    onStartAssessment,
-    bgCharacter,
-    assessmentHistory,
-    chronoAge,
-    chatMessages,
-    setChatMessages,
-  }
+ const sectionContentProps = {
+  memberTier: localTier || memberTier,
+  lastAssessment,
+  previousAssessment,
+  onStartAssessment,
+  bgCharacter,
+  assessmentHistory,
+  chronoAge,
+  chatMessages,
+  setChatMessages,
+}
 
   if (isLoading) return (
     <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-[#040B14] text-white">
@@ -666,6 +687,7 @@ const getDotColor = (num: number | null, idx: number) => {
   active={activeSection}
   memberTier={localTier || memberTier}
   lastAssessment={lastAssessment}
+  previousAssessment={previousAssessment}
   onStartAssessment={onStartAssessment}
   bgCharacter={bgCharacter}
   assessmentHistory={assessmentHistory}

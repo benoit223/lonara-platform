@@ -110,6 +110,8 @@ const PDF_STRINGS: Record<string, Record<string, string | string[]>> = {
   domains_label:      { en: 'Biological Domains', fr: 'Domaines Biologiques', es: 'Dominios Biológicos' },
   scores_32:          { en: '32 System Scores', fr: '32 Scores Systémiques', es: '32 Puntuaciones Sistémicas' },
   ai_clinical:        { en: 'AI Clinical Biomarker Intelligence', fr: 'Intelligence Clinique IA sur les Biomarqueurs', es: 'Inteligencia Clínica IA de Biomarcadores' },
+  lifestyle_intel:    { en: 'Lifestyle Intelligence', fr: 'Intelligence Lifestyle', es: 'Inteligencia Lifestyle' },
+  lifestyle_coherence:{ en: 'Habit & Biology Coherence', fr: 'Cohérence Habitudes & Biologie', es: 'Coherencia Hábitos & Biología' },
   markers_analyzed:   { en: 'markers analyzed', fr: 'marqueurs analysés', es: 'marcadores analizados' },
   traj_label:         { en: 'Longevity Trajectory', fr: 'Trajectoire de Longévité', es: 'Trayectoria de Longevidad' },
   optim_horizon:      { en: 'Optimization Horizon', fr: 'Horizon d\'Optimisation', es: 'Horizonte de Optimización' },
@@ -1020,8 +1022,9 @@ function Page2A({ report, longevityScore, biologicalAge, scores, v, s, logoPath,
   const IF         = (100 - longevityScore) / 100
   const proj12m    = Math.max(18, biologicalAge - Math.round(IF * 3.2))
   const pillarScores = report?.pillarScores ?? {}
-  const aiBiomarker = report?.aiBiomarkerAnalysis ?? ''
-  const biomarkers  = report?.biomarkers ?? []
+  const aiBiomarker        = report?.aiBiomarkerAnalysis ?? ''
+  const biomarkers         = report?.biomarkers ?? []
+  const aiLifestyleInsight = report?.aiLifestyleInsight ?? ''
 
   const domainGroups = [
     { key: 'activate', domains: ['energy','cognition','performance','exercise','mobility','metabolism','nutrition','sexual'] },
@@ -1127,13 +1130,25 @@ function Page2A({ report, longevityScore, biologicalAge, scores, v, s, logoPath,
         </View>
       </View>
 
+      {/* LIFESTYLE COHERENCE */}
+      {report?.aiLifestyleInsight ? (
+        <>
+          <View style={s.divider} />
+          <Text style={s.label}>{tr('lifestyle_intel', l)}</Text>
+          <Text style={{ fontSize: 11, fontWeight: 700, color: pal.text, marginBottom: 6 }}>{tr('lifestyle_coherence', l)}</Text>
+          <View style={s.cardGold}>
+            <Text style={s.body}>{report.aiLifestyleInsight}</Text>
+          </View>
+        </>
+      ) : null}
+
       {/* AI BIOMARKER */}
       {aiBiomarker ? (
         <>
-          <View style={s.divider} />
+          <View style={s.divider} break />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <Text style={s.label}>{tr('ai_clinical', l)}</Text>
-          {biomarkers.length > 0 && (
+            <Text style={s.label}>{tr('ai_clinical', l)}</Text>
+            {biomarkers.length > 0 && (
               <View style={{ borderRadius: 10, paddingVertical: 2, paddingHorizontal: 8, borderWidth: 1, borderStyle: 'solid', borderColor: pal.borderGold, backgroundColor: v === 'color' ? C.bgGold : BW.bgGold }}>
                 <Text style={{ fontSize: 7, color: pal.gold }}>{biomarkers.length} {tr('markers_analyzed', l)}</Text>
               </View>
@@ -1339,29 +1354,28 @@ function Page3A({ report, scores, v, s, logoPath, watermarkPath, l }: any) {
         <Text style={s.pageNumTop}>{tr('page3a_pagenum', l)}</Text>
       </View>
 
-      {/* 3 COLUMNS */}
-      <View style={{ flexDirection: 'row', gap: 7 }}>
+  {/* 3 COLUMNS */}
+      <View style={{ flexDirection: 'row', gap: 5 }}>
         {protocols.map((proto) => (
-          <View key={proto.period} style={{ flex: 1, borderRadius: 8, borderWidth: 1, borderStyle: 'solid', borderColor: proto.borderColor, backgroundColor: proto.bgColor, padding: 10 }}>
-            <View style={{ alignItems: 'center', marginBottom: 8 }}>
-              
-              <Text style={{ fontSize: 6.5, color: pal.textLight, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>{proto.period}</Text>
-              <Text style={{ fontSize: 10, fontWeight: 700, color: pal.text, textAlign: 'center', lineHeight: 1.3 }}>{proto.title}</Text>
+          <View key={proto.period} style={{ flex: 1, borderRadius: 8, borderWidth: 1, borderStyle: 'solid', borderColor: proto.borderColor, backgroundColor: proto.bgColor, padding: 7 }}>
+            <View style={{ alignItems: 'center', marginBottom: 5 }}>
+              <Text style={{ fontSize: 6, color: pal.textLight, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 1 }}>{proto.period}</Text>
+              <Text style={{ fontSize: 9, fontWeight: 700, color: pal.text, textAlign: 'center', lineHeight: 1.2 }}>{proto.title}</Text>
             </View>
-            <Text style={[s.bodySmall, { textAlign: 'center', marginBottom: 8, fontSize: 7.5 }]}>{proto.objective}</Text>
+            <Text style={[s.bodySmall, { textAlign: 'center', marginBottom: 5, fontSize: 7 }]}>{proto.objective}</Text>
             {/* Strategic Focus */}
-            <View style={{ borderRadius: 6, padding: 7, marginBottom: 7, borderWidth: 1, borderStyle: 'solid', borderColor: pal.borderGold, backgroundColor: v === 'color' ? '#120E03' : '#FFFDF0' }}>
-              <Text style={{ fontSize: 6, color: pal.gold, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>{tr('strategic_focus', l)}</Text>
-              <Text style={[s.bodySmall, { fontSize: 7 }]}>{proto.focus}</Text>
+            <View style={{ borderRadius: 6, padding: 5, marginBottom: 5, borderWidth: 1, borderStyle: 'solid', borderColor: pal.borderGold, backgroundColor: v === 'color' ? '#120E03' : '#FFFDF0' }}>
+              <Text style={{ fontSize: 5.5, color: pal.gold, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>{tr('strategic_focus', l)}</Text>
+              <Text style={[s.bodySmall, { fontSize: 6.5 }]}>{proto.focus}</Text>
             </View>
             {/* Systems */}
             {proto.systems.map((sys, i) => (
-              <View key={i} style={{ borderRadius: 6, padding: 7, marginBottom: 5, borderWidth: 1, borderStyle: 'solid', borderColor: pal.borderNormal, backgroundColor: pal.bgCard }}>
-                <Text style={{ fontSize: 6.5, color: pal.gold, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{sys.title}</Text>
-                <Text style={[s.bodySmall, { marginBottom: 5, fontSize: 7 }]}>{sys.desc}</Text>
+              <View key={i} style={{ borderRadius: 6, padding: 5, marginBottom: 4, borderWidth: 1, borderStyle: 'solid', borderColor: pal.borderNormal, backgroundColor: pal.bgCard }}>
+                <Text style={{ fontSize: 6, color: pal.gold, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>{sys.title}</Text>
+                <Text style={[s.bodySmall, { marginBottom: 4, fontSize: 6.5 }]}>{sys.desc}</Text>
                 <View style={s.tagsRow}>
                   {sys.items.map((item, j) => (
-                    <Text key={j} style={[s.tag, { fontSize: 6.5 }]}>{item}</Text>
+                    <Text key={j} style={[s.tag, { fontSize: 6 }]}>{item}</Text>
                   ))}
                 </View>
               </View>

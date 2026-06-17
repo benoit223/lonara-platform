@@ -8,6 +8,8 @@
     "myspace": "MY SPACE"
   },
 "myspace": {
+  "state_previous": "Prev.",
+"state_current": "Current",
   "state_nextNote": "*Any significant lifestyle change, new habit, or health shift is also a good moment to reassess.",
   "chatLimitReached": "You have reached your daily companion limit. Your longevity journey continues tomorrow.",
   "timing_withmeals": "With meals",
@@ -1452,6 +1454,9 @@
 
   
 "biological": {
+  "lifestyle_label": "Lifestyle Intelligence",
+"lifestyle_title": "Habit & Biology Coherence",
+"lifestyle_badge": "AI Analysis",
   "header_label": "Biological Intelligence",
 "header_title": "Systemic Analysis",
 "header_desc": "Multi-system biological interpretation based on recovery dynamics, stress modulation, inflammatory load, and adaptive resilience.",

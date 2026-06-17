@@ -3,6 +3,7 @@ import { useTranslations, useLocale } from 'next-intl'
 
 interface StateSectionProps {
   lastAssessment: any
+  previousAssessment?: any
   chronoAge: number | null
 }
 
@@ -52,7 +53,7 @@ function CircleCard({ label, color, desc, score }: { label: string; color: strin
   )
 }
 
-export default function StateSection({ lastAssessment, chronoAge }: StateSectionProps) {
+export default function StateSection({ lastAssessment, previousAssessment, chronoAge }: StateSectionProps) {
   const t = useTranslations('myspace')
   const locale = useLocale()
   const a = lastAssessment as any
@@ -87,6 +88,12 @@ export default function StateSection({ lastAssessment, chronoAge }: StateSection
   const top3 = scoreEntries.slice(0, 3)
   const bottom3 = scoreEntries.slice(-3).reverse()
 
+const prevScore = (key: string): number | null => {
+  const prev = previousAssessment?.scores?.[key]
+  return prev != null ? Math.round(prev) : null
+}
+
+
   if (!lastAssessment) {
     return (
       <div className="mt-4 rounded-[1.2rem] border border-[#035AA8]/40 bg-[#0A3566]/40 px-6 py-5 text-center">
@@ -108,26 +115,58 @@ export default function StateSection({ lastAssessment, chronoAge }: StateSection
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-[1.2rem] border border-[#035AA8]/40 bg-[#0A3566]/40 backdrop-blur-xl px-5 py-4">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-[#4ADE80]/60 mb-3">{t('state_topStrengths')}</p>
-          <div className="space-y-2">
-            {top3.map(([key, val]) => (
-              <div key={key} className="flex items-center justify-between">
-                <p className="text-[11px] text-white/60 capitalize">{t(`domain_${key}` as any)}</p>
-                <span className="text-[12px] font-light text-[#4ADE80]">{Math.round(val)}</span>
-              </div>
-            ))}
-          </div>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#4ADE80]/60 mb-2">{t('state_topStrengths')}</p>
+<div className="flex justify-end gap-4 mb-2 pr-0.5">
+  <span className="text-[8px] uppercase tracking-[0.18em] text-white/20">{t('state_previous')}</span>
+  <span className="text-[8px] uppercase tracking-[0.18em] text-white/35">{t('state_current')}</span>
+</div>
+<div className="space-y-2">
+  {top3.map(([key, val]) => {
+    const prev = prevScore(key)
+    const delta = prev != null ? Math.round(val) - prev : null
+    return (
+      <div key={key} className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-white/60 capitalize flex-1">{t(`domain_${key}` as any)}</p>
+        <div className="flex items-center gap-3">
+          {prev != null && (
+            <span className="text-[12px] text-white/25">{prev}</span>
+          )}
+          {delta != null && delta > 0 && <span className="text-[10px] text-[#4ADE80]">↑</span>}
+          {delta != null && delta < 0 && <span className="text-[10px] text-[#FF4444]">↓</span>}
+          {delta === 0 && <span className="text-[10px] text-white/30">–</span>}
+          <span className="text-[12px] font-light text-[#4ADE80]">{Math.round(val)}</span>
+        </div>
+      </div>
+    )
+  })}
+</div>
         </div>
         <div className="rounded-[1.2rem] border border-[#035AA8]/40 bg-[#0A3566]/40 backdrop-blur-xl px-5 py-4">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-[#FF4444]/60 mb-3">{t('state_focusAreas')}</p>
-          <div className="space-y-2">
-            {bottom3.map(([key, val]) => (
-              <div key={key} className="flex items-center justify-between">
-                <p className="text-[11px] text-white/60 capitalize">{t(`domain_${key}` as any)}</p>
-                <span className="text-[12px] font-light text-[#FF4444]">{Math.round(val)}</span>
-              </div>
-            ))}
-          </div>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#FF4444]/60 mb-2">{t('state_focusAreas')}</p>
+<div className="flex justify-end gap-4 mb-2 pr-0.5">
+  <span className="text-[8px] uppercase tracking-[0.18em] text-white/20">{t('state_previous')}</span>
+  <span className="text-[8px] uppercase tracking-[0.18em] text-white/35">{t('state_current')}</span>
+</div>
+<div className="space-y-2">
+  {bottom3.map(([key, val]) => {
+    const prev = prevScore(key)
+    const delta = prev != null ? Math.round(val) - prev : null
+    return (
+      <div key={key} className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-white/60 capitalize flex-1">{t(`domain_${key}` as any)}</p>
+        <div className="flex items-center gap-3">
+          {prev != null && (
+            <span className="text-[12px] text-white/25">{prev}</span>
+          )}
+          {delta != null && delta > 0 && <span className="text-[10px] text-[#4ADE80]">↑</span>}
+          {delta != null && delta < 0 && <span className="text-[10px] text-[#FF4444]">↓</span>}
+          {delta === 0 && <span className="text-[10px] text-white/30">–</span>}
+          <span className="text-[12px] font-light text-[#FF4444]">{Math.round(val)}</span>
+        </div>
+      </div>
+    )
+  })}
+</div>
         </div>
       </div>
 

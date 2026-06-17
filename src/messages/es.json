@@ -7,6 +7,8 @@
     "myspace": "MI ESPACIO"
   },
 "myspace": {
+  "state_previous": "Ant.",
+"state_current": "Actual",
   "state_nextNote": "*Cualquier cambio significativo — nuevo hábito, evolución de salud o estilo de vida — es también el momento adecuado para reevaluar.",
   "chatLimitReached": "Ha alcanzado el límite diario de su compañero. Su viaje de longevidad continúa mañana.",
   "timing_withmeals": "Con comidas",
@@ -1448,6 +1450,9 @@
   }
 ,
 "biological": {
+  "lifestyle_label": "Inteligencia Lifestyle",
+"lifestyle_title": "Coherencia Hábitos & Biología",
+"lifestyle_badge": "Análisis IA",
   "header_label": "Inteligencia Biológica",
 "header_title": "Análisis Sistémico",
 "header_desc": "Interpretación biológica multisistémica basada en la dinámica de recuperación, modulación del estrés, carga inflamatoria y resiliencia adaptativa.",
