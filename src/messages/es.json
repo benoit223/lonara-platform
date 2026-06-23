@@ -7,6 +7,24 @@
     "myspace": "MI ESPACIO"
   },
 "myspace": {
+  "optimize_conditions": "Condiciones",
+"condition_cat_cardiovascular": "Cardiovascular",
+"condition_cat_metabolic": "Metabólico",
+"condition_cat_inflammation": "Inflamación & Inmunidad",
+"condition_cat_neurological": "Neurológico",
+"condition_cat_oncological": "Oncológico",
+"condition_cat_musculoskeletal": "Musculoesquelético",
+"condition_cat_genetic": "Genético & Familiar",
+"condition_mild": "Leve",
+"condition_moderate": "Moderado",
+"condition_severe": "Severo",
+"condition_familyHistory": "Antecedente familiar",
+"condition_notesPlaceholder": "Notas adicionales...",
+"condition_freeField": "Otras condiciones o notas",
+"condition_freePlaceholder": "Describa cualquier otra condición, medicación o predisposición relevante...",
+"condition_save": "Guardar",
+"condition_saving": "Guardando...",
+"condition_saved": "Guardado",
   "state_previous": "Ant.",
 "state_current": "Actual",
   "state_nextNote": "*Cualquier cambio significativo — nuevo hábito, evolución de salud o estilo de vida — es también el momento adecuado para reevaluar.",
@@ -739,6 +757,8 @@
   "signInAndContinue": "Iniciar Sesión & Continuar"
 },
   "prequiz": {
+    "dateOfBirth": "Fecha de nacimiento",
+"years": "años",
     "labRequisitionButton": "Requisición de Laboratorio",
 "labRequisitionSubtitle": "Enviada a su email como PDF adjunto",
 "labRequisitionSending": "Generando y enviando...",

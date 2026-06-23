@@ -10,6 +10,7 @@ import About from '@/components/About'
 import UnderstandingReport from '@/components/UnderstandingReport'
 import MySpace from '@/components/MySpace'
 import { useLocale } from 'next-intl'
+import { calculateAge } from '@/lib/utils'
 
 export default function Home() {
 
@@ -28,7 +29,8 @@ useEffect(() => {
   // ── PROFIL UTILISATEUR ────────────────────────────────────────────────────
   const [fullName, setFullName]       = useState<string>('')
   const [email, setEmail]             = useState<string>('')
-  const [age, setAge]                 = useState<number>(0)
+  const [age, setAge] = useState<number>(0)
+const [dateOfBirth, setDateOfBirth] = useState<string>('')
   const [sex, setSex]                 = useState<'male' | 'female' | 'other'>('male')
   const [height, setHeight]           = useState<number>(0)
   const [weight, setWeight]           = useState<number>(0)
@@ -148,7 +150,7 @@ useEffect(() => {
   const loadUserData = async (userId: string, userEmail: string) => {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('member_tier, full_name, email, bg_character')
+      .select('member_tier, full_name, email, bg_character, date_of_birth')
       .eq('id', userId)
       .single()
 
@@ -156,6 +158,11 @@ useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name)
     if (profile?.email) setEmail(profile.email)
     if ((profile as any)?.bg_character) setCachedBgCharacter((profile as any).bg_character)
+if ((profile as any)?.date_of_birth) {
+  setDateOfBirth((profile as any).date_of_birth)
+  setAge(calculateAge((profile as any).date_of_birth))
+}
+
 
     const resolvedEmail = profile?.email ?? userEmail
     if (!resolvedEmail) return
@@ -249,7 +256,7 @@ if (
     
   const { data: profile } = await supabase
   .from('profiles')
-  .select('member_tier, subscription_plan, full_name, email')
+  .select('member_tier, subscription_plan, full_name, email, date_of_birth')
   .eq('id', user.id)
   .single()
 
@@ -258,6 +265,10 @@ if (!profile) { setMemberTier('member'); return }
 // Remplir le nom et email depuis le profil
 if (profile.full_name) setFullName(profile.full_name)
 if (profile.email) setEmail(profile.email)
+if ((profile as any)?.date_of_birth) {
+  setDateOfBirth((profile as any).date_of_birth)
+  setAge(calculateAge((profile as any).date_of_birth))
+}  
 
 const tier = profile.member_tier
   ?? mapSubscriptionPlan(profile.subscription_plan)
@@ -300,13 +311,13 @@ setMemberTier(tier as 'guest' | 'member' | 'premium' | 'executive')
             memberTier={memberTier}
             onClose={() => setStep('hero')}
   
-            onStart={async (mode, name, mail, pw) => {
+ onStart={async (mode, name, mail, pw) => {
   setFullName(name)
   setEmail(mail)
   setAccessMode(mode)
   setPassword(pw)
   await resolveMemberTier(mode)
-setPendingStep(true)
+  setStep('prequiz')
 }}
           />
         )}
@@ -422,6 +433,17 @@ setPendingStep(true)
   }
 }}         onContinue={() => setStep('quiz')}
             onAgeChange={setAge}
+dateOfBirth={dateOfBirth}
+onDateOfBirthChange={async (dob) => {
+  setDateOfBirth(dob)
+  setAge(calculateAge(dob))
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('profiles')
+      .update({ date_of_birth: dob })
+      .eq('id', user.id)
+  }
+}}
             onSexChange={setSex}
             onHeightChange={setHeight}
             onWeightChange={setWeight}

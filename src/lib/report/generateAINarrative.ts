@@ -16,6 +16,14 @@ interface LifestyleData {
   nutritionFasting?: string
   nutritionAlcohol?: string
   nutritionCaffeine?: string
+  healthConditions?: Array<{
+    condition_label: string
+    category: string
+    severity: string
+    family_history: boolean
+    notes?: string
+  }>
+  freeNotes?: string
 }
 
 interface NarrativeInput {
@@ -54,6 +62,14 @@ interface NarrativeInput {
   socioeconomic: string
   locale?: string
   lifestyleData?: LifestyleData
+  healthConditions?: Array<{
+    condition_label: string
+    category: string
+    severity: string
+    family_history: boolean
+    notes?: string
+  }>
+  freeNotes?: string
 }
 
 export interface AINarrativeResult {
@@ -166,8 +182,21 @@ function buildPrompt(input: NarrativeInput): string {
     : null
 
 
+  // Contexte conditions de santé
+  const conditionsContext = (() => {
+    const conditions = input.healthConditions ?? input.lifestyleData?.healthConditions ?? []
+    const freeNotes = input.freeNotes ?? input.lifestyleData?.freeNotes ?? ''
+    if (conditions.length === 0 && !freeNotes) return null
+    const lines = conditions.map(c =>
+      `- ${c.condition_label} (${c.severity}${c.family_history ? ', family history' : ''})${c.notes ? `: ${c.notes}` : ''}`
+    )
+    if (freeNotes) lines.push(`- Additional notes: ${freeNotes}`)
+    return lines.join('\n')
+  })()
+
   return `Generate three personalized narrative sections for this biological profile. Respond ONLY with valid JSON.
-${isOptimal ? 'IMPORTANT: This is a fully optimized biological profile. DO NOT mention any weakness, limiting factor, or pillar needing attention. Focus on longevity maintenance, excellence, and advanced optimization.' : ''}
+${isOptimal ? 'IMPORTANT: This is a fully optimized biological profile...' : ''}
+${conditionsContext ? `\nKNOWN HEALTH CONDITIONS & PREDISPOSITIONS (MANDATORY — integrate into all narrative sections, adjust biological interpretation and recommendations accordingly):\n${conditionsContext}\n` : ''}
 
 BIOLOGICAL PROFILE:
 - Age: ${input.age} years old, ${input.sex}

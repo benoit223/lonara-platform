@@ -101,6 +101,13 @@ async function generateBiomarkerAnalysis(
   age: number,
   sex: string,
   locale: string,
+  healthConditions?: Array<{
+    condition_label: string
+    category: string
+    severity: string
+    family_history: boolean
+    notes?: string
+  }>,
 ): Promise<string> {
   if (!bioResults || bioResults.length === 0) return ''
 
@@ -110,6 +117,14 @@ async function generateBiomarkerAnalysis(
       : `unit: ${m.unit}`
     return `- ${m.label}: ${m.value} ${m.unit} [${optRange}] → ${m.status}${m.flagMessage ? ` ⚠ ${m.flagMessage}` : ''}`
   }).join('\n')
+
+  const conditionsContext = healthConditions && healthConditions.length > 0
+    ? `\nKNOWN HEALTH CONDITIONS & PREDISPOSITIONS (adjust clinical interpretation accordingly):\n${
+        healthConditions.map(c =>
+          `- ${c.condition_label} (${c.severity}${c.family_history ? ', family history' : ''})${c.notes ? `: ${c.notes}` : ''}`
+        ).join('\n')
+      }\n`
+    : ''
 
   const langInstruction = locale === 'fr'
     ? 'Respond entirely in French.'
@@ -121,17 +136,18 @@ async function generateBiomarkerAnalysis(
 
 BIOMARKER RESULTS:
 ${markerSummary}
-
+${conditionsContext}
 ${langInstruction}
 
 Write a concise professional clinical commentary (150-200 words) analyzing ONLY these biomarker results. Focus on:
 1. Which values are concerning and why (reference clinical norms)
-2. Key metabolic/hormonal/inflammatory patterns visible in the data
+2. Key metabolic/hormonal/inflammatory patterns visible in the data — and how they interact with known conditions if present
 3. The most significant finding and its biological implication
 
 Rules:
 - Be purely scientific and clinical — no lifestyle advice, no protocol recommendations
 - Reference specific values and their deviation from optimal ranges
+- If health conditions are present, explicitly note how biomarker values relate to those predispositions
 - Write as a physician reviewing lab results, not as a wellness coach
 - No introduction like "Based on your results" — start directly with the analysis
 - No conclusion paragraph about what to do
@@ -249,58 +265,7 @@ export async function POST(req: Request) {
     restore:  Math.round(((bioAdjustedScores.recovery ?? 50) + (bioAdjustedScores.longevity ?? 50) + (bioAdjustedScores.resilience ?? 50)) / 3),
   }
 
-  // ── PRIORITIES — Engine A + flags biomarqueurs ───────────────────────────
-  const priorities = engineA
-    ? [
-        // Flags critiques biomarqueurs en premier
-        ...bioOutput.additionalFlags
-          .filter(f => f.severity === 'critical')
-          .slice(0, 2)
-          .map(f => ({
-            title: f.message,
-            impact: 'impact_immediate',
-            severity: 'critical',
-          })),
-        // Flags critiques Engine A
-        ...(engineA.flags ?? [])
-          .filter((f: any) => f.severity === 'critical')
-          .slice(0, 2)
-          .map((f: any) => ({
-            title: f.message,
-            impact: 'impact_immediate',
-            severity: 'critical',
-          })),
-        // Weaknesses Engine A
-        ...(engineA.weaknesses ?? [])
-          .slice(0, 3)
-          .map((w: string) => ({
-            title: `priority_${w}`,
-            impact: (bioAdjustedScores[w] ?? 50) < 45
-              ? 'impact_immediate'
-              : (bioAdjustedScores[w] ?? 50) < 70
-              ? 'impact_optimization'
-              : 'impact_stable',
-            severity: (bioAdjustedScores[w] ?? 50) < 45
-              ? 'critical'
-              : (bioAdjustedScores[w] ?? 50) < 70
-              ? 'moderate'
-              : 'low',
-          })),
-      ]
-        .filter((p, i, arr) => arr.findIndex(x => x.title === p.title) === i)
-        .slice(0, 5)
-    : []
 
-  // ── RISKS ─────────────────────────────────────────────────────────────────
-  const risks = engineA
-    ? (engineA.flags ?? [])
-        .map((f: any) => ({
-          label: f.message,
-          severity: f.severity === 'critical' ? 'Elevated'
-            : f.severity === 'warning' ? 'Moderate'
-            : 'Low',
-        }))
-    : []
 
   // ── PRODUITS ──────────────────────────────────────────────────────────────
   const weaknessBoosts: Record<string, any> = {}
@@ -451,40 +416,132 @@ export async function POST(req: Request) {
 
       const profileId = profileRow?.id ?? null
 
-      if (profileId) {
-        // Supplements actifs
-        const { data: sups } = await supabaseAdmin
-          .from('supplements')
-          .select('name, dose, timing')
-          .eq('profile_id', profileId)
+   if (profileId) {
+  // Supplements actifs
+  const { data: sups } = await supabaseAdmin
+    .from('supplements')
+    .select('name, dose, timing')
+    .eq('profile_id', profileId)
 
-        // Lifestyle log
-        const { data: log } = await supabaseAdmin
-          .from('lifestyle_logs')
-          .select('sleep_bedtime, sleep_waketime, sleep_hours, sleep_tracker, sleep_aids, diet_type, meals_per_day, fasting, alcohol, caffeine')
-          .eq('profile_id', profileId)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
+  // Lifestyle log
+  const { data: log } = await supabaseAdmin
+    .from('lifestyle_logs')
+    .select('sleep_bedtime, sleep_waketime, sleep_hours, sleep_tracker, sleep_aids, diet_type, meals_per_day, fasting, alcohol, caffeine')
+    .eq('profile_id', profileId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
-        lifestyleData = {
-          supplements:       sups ?? [],
-          sleepBedtime:      log?.sleep_bedtime  ?? undefined,
-          sleepWaketime:     log?.sleep_waketime ?? undefined,
-          sleepDuration:     log?.sleep_hours    ? `${log.sleep_hours}h` : undefined,
-          sleepTracker:      log?.sleep_tracker  ?? undefined,
-          sleepAids:         log?.sleep_aids     ? 'yes' : undefined,
-          nutritionDiet:     log?.diet_type      ?? undefined,
-          nutritionMeals:    log?.meals_per_day  ? String(log.meals_per_day) : undefined,
-          nutritionFasting:  log?.fasting        ?? undefined,
-          nutritionAlcohol:  log?.alcohol        ?? undefined,
-          nutritionCaffeine: log?.caffeine       ?? undefined,
-        }
-      }
+  // Conditions de santé et prédispositions
+  const { data: conditions } = await supabaseAdmin
+    .from('health_conditions')
+    .select('condition_label, category, severity, family_history, notes')
+    .eq('profile_id', profileId)
+    .neq('condition_key', 'free_notes')
+
+  const { data: freeNotesRow } = await supabaseAdmin
+    .from('health_conditions')
+    .select('notes')
+    .eq('profile_id', profileId)
+    .eq('condition_key', 'free_notes')
+    .maybeSingle()
+
+  lifestyleData = {
+    supplements:       sups ?? [],
+    sleepBedtime:      log?.sleep_bedtime  ?? undefined,
+    sleepWaketime:     log?.sleep_waketime ?? undefined,
+    sleepDuration:     log?.sleep_hours    ? `${log.sleep_hours}h` : undefined,
+    sleepTracker:      log?.sleep_tracker  ?? undefined,
+    sleepAids:         log?.sleep_aids     ? 'yes' : undefined,
+    nutritionDiet:     log?.diet_type      ?? undefined,
+    nutritionMeals:    log?.meals_per_day  ? String(log.meals_per_day) : undefined,
+    nutritionFasting:  log?.fasting        ?? undefined,
+    nutritionAlcohol:  log?.alcohol        ?? undefined,
+    nutritionCaffeine: log?.caffeine       ?? undefined,
+    healthConditions:  conditions ?? [],
+    freeNotes:         freeNotesRow?.notes ?? undefined,
+  }
+}
     } catch (e) {
       console.error('Lifestyle fetch error:', e)
     }
   }
+
+  // ── FLAGS CONDITIONS — prédispositions critiques ──────────────────────────
+  const conditionFlags = (lifestyleData?.healthConditions ?? [])
+    .filter((c: any) =>
+      c.severity === 'severe' ||
+      (c.severity === 'moderate' && c.family_history) ||
+      ['genetic', 'oncological', 'neurological'].includes(c.category)
+    )
+    .slice(0, 2)
+    .map((c: any) => ({
+      title: `${c.condition_label}${c.family_history ? ' (family history)' : ''} — predisposition requiring monitoring`,
+      impact: c.severity === 'severe' ? 'impact_immediate' : 'impact_optimization',
+      severity: c.severity === 'severe' ? 'critical' : 'moderate',
+    }))
+
+  const conditionRisks = (lifestyleData?.healthConditions ?? [])
+    .filter((c: any) => c.severity === 'severe' || c.family_history)
+    .slice(0, 2)
+    .map((c: any) => ({
+      label: `${c.condition_label}${c.family_history ? ' — family history' : ''}`,
+      severity: c.severity === 'severe' ? 'Elevated' : 'Moderate',
+    }))
+
+// ── PRIORITIES — Engine A + flags biomarqueurs + conditions ──────────────
+  const priorities = engineA
+    ? [
+        ...bioOutput.additionalFlags
+          .filter(f => f.severity === 'critical')
+          .slice(0, 2)
+          .map(f => ({
+            title: f.message,
+            impact: 'impact_immediate',
+            severity: 'critical',
+          })),
+        ...conditionFlags,
+        ...(engineA.flags ?? [])
+          .filter((f: any) => f.severity === 'critical')
+          .slice(0, 2)
+          .map((f: any) => ({
+            title: f.message,
+            impact: 'impact_immediate',
+            severity: 'critical',
+          })),
+        ...(engineA.weaknesses ?? [])
+          .slice(0, 3)
+          .map((w: string) => ({
+            title: `priority_${w}`,
+            impact: (bioAdjustedScores[w] ?? 50) < 45
+              ? 'impact_immediate'
+              : (bioAdjustedScores[w] ?? 50) < 70
+              ? 'impact_optimization'
+              : 'impact_stable',
+            severity: (bioAdjustedScores[w] ?? 50) < 45
+              ? 'critical'
+              : (bioAdjustedScores[w] ?? 50) < 70
+              ? 'moderate'
+              : 'low',
+          })),
+      ]
+        .filter((p, i, arr) => arr.findIndex(x => x.title === p.title) === i)
+        .slice(0, 5)
+    : []
+
+  // ── RISKS — Engine A + conditions ─────────────────────────────────────────
+  const risks = engineA
+    ? [
+        ...(engineA.flags ?? [])
+          .map((f: any) => ({
+            label: f.message,
+            severity: f.severity === 'critical' ? 'Elevated'
+              : f.severity === 'warning' ? 'Moderate'
+              : 'Low',
+          })),
+        ...conditionRisks,
+      ]
+    : []
 
   // ── NARRATIVES IA — enrichies avec contexte biomarqueurs ──────────────────
   const aiNarratives = engineA
@@ -517,17 +574,20 @@ export async function POST(req: Request) {
         socioeconomic:  body.socioeconomic  ?? '',
         locale:         body.locale         ?? 'en',
         lifestyleData,
+healthConditions: lifestyleData?.healthConditions ?? [],
+freeNotes: lifestyleData?.freeNotes ?? '',
       })
     : null
 
 const aiBiomarkerAnalysis = bioOutput.hasBiomarkers
-    ? await generateBiomarkerAnalysis(
-        bioOutput.results,
-        body.age ?? 35,
-        body.sex ?? 'unknown',
-        body.locale ?? 'en',
-      )
-    : ''
+  ? await generateBiomarkerAnalysis(
+      bioOutput.results,
+      body.age ?? 35,
+      body.sex ?? 'unknown',
+      body.locale ?? 'en',
+      lifestyleData?.healthConditions ?? [],
+    )
+  : ''
 
   // ── RAPPORT WRAPPER ───────────────────────────────────────────────────────
   const report = generateLongevityReport({

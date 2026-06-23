@@ -692,6 +692,13 @@ export function interpretBiomarkers(
   raw: Record<string, string | number | undefined>,
   memberTier: 'guest' | 'member' | 'premium' | 'executive',
   chronologicalAge: number,
+  healthConditions?: Array<{
+    condition_key: string
+    condition_label: string
+    category: string
+    severity: string
+    family_history: boolean
+  }>,
 ): BiomarkerEngineOutput {
 
   const allowedMarkers = MARKERS_BY_TIER[memberTier] ?? new Set<string>()
@@ -704,8 +711,93 @@ export function interpretBiomarkers(
   let biologicalAgeAdjustment = 0
   const narrativeParts: string[] = []
 
+  // ── AJUSTEMENTS DE SEUILS SELON CONDITIONS ────────────────────────────────
+  // Copie locale des refs pour ajustements sans modifier les refs globales
+  const adjustedRefs: Record<string, BiomarkerRef> = {}
+  const conditionKeys = new Set((healthConditions ?? []).map(c => c.condition_key))
+  const hasCondition = (...keys: string[]) => keys.some(k => conditionKeys.has(k))
+
+  // APOE4 ou family Alzheimer → amyloidBeta plus sensible
+  if (hasCondition('apoe4', 'family_alzheimer')) {
+    adjustedRefs['amyloidBeta'] = {
+      ...BIOMARKER_REFS['amyloidBeta'],
+      criticalLowMax: 0.07,  // était 0.05
+      lowMax: 0.09,          // était 0.079
+      borderlineHighMax: 0.109, // était 0.099
+    }
+    // pTau217 plus sensible aussi
+    adjustedRefs['pTau217'] = {
+      ...BIOMARKER_REFS['pTau217'],
+      borderlineHighMin: 0.15,  // était 0.21
+      borderlineHighMax: 0.35,  // était 0.5
+      highMin: 0.36,            // était 0.51
+      criticalHighMin: 0.7,     // était 1.0
+    }
+  }
+
+  // Cardiovasculaire familial ou hypertension → apoB et lpa plus sensibles
+  if (hasCondition('family_cardiovascular', 'hypertension', 'atherosclerosis')) {
+    adjustedRefs['apoB'] = {
+      ...BIOMARKER_REFS['apoB'],
+      optimalMax: 70,           // était 80
+      borderlineHighMin: 71,    // était 81
+      borderlineHighMax: 90,    // était 100
+      highMin: 91,              // était 101
+      criticalHighMin: 110,     // était 130
+    }
+    adjustedRefs['lpa'] = {
+      ...BIOMARKER_REFS['lpa'],
+      optimalMax: 20,           // était 30
+      borderlineHighMin: 21,    // était 31
+      borderlineHighMax: 35,    // était 50
+      highMin: 36,              // était 51
+      criticalHighMin: 55,      // était 75
+    }
+  }
+
+  // Diabète ou résistance insuline → glucose et HbA1c plus sensibles
+  if (hasCondition('type2_diabetes', 'insulin_resistance', 'metabolic_syndrome')) {
+    adjustedRefs['fastingGlucose'] = {
+      ...BIOMARKER_REFS['fastingGlucose'],
+      optimalMax: 80,           // était 85
+      borderlineHighMin: 81,    // était 86
+      highMin: 95,              // était 100
+      criticalHighMin: 110,     // était 126
+    }
+    adjustedRefs['hba1c'] = {
+      ...BIOMARKER_REFS['hba1c'],
+      optimalMax: 5.1,          // était 5.3
+      borderlineHighMin: 5.2,   // était 5.4
+      highMin: 5.5,             // était 5.7
+      criticalHighMin: 6.0,     // était 6.5
+    }
+  }
+
+  // Inflammation chronique ou autoimmune → hsCRP et IL-6 plus sensibles
+  if (hasCondition('chronic_inflammation', 'autoimmune', 'rheumatoid_arthritis', 'lupus', 'crohn')) {
+    adjustedRefs['hsCRP'] = {
+      ...BIOMARKER_REFS['hsCRP'],
+      optimalMax: 0.3,          // était 0.5
+      borderlineHighMin: 0.4,   // était 0.6
+      borderlineHighMax: 0.8,   // était 1.0
+      highMin: 0.9,             // était 1.1
+      criticalHighMin: 2.0,     // était 3.0
+    }
+    adjustedRefs['il6'] = {
+      ...BIOMARKER_REFS['il6'],
+      optimalMax: 1.2,          // était 1.8
+      borderlineHighMin: 1.3,   // était 1.9
+      criticalHighMin: 5.0,     // était 7.0
+    }
+  }
+
+  // Fonction helper — utilise le ref ajusté si disponible, sinon le ref global
+  const getRef = (key: string): BiomarkerRef =>
+    adjustedRefs[key] ?? BIOMARKER_REFS[key]
+
   // ── Itérer sur chaque marqueur défini ─────────────────────────────────────
-  for (const [key, ref] of Object.entries(BIOMARKER_REFS)) {
+  for (const [key] of Object.entries(BIOMARKER_REFS)) {
+    const ref = getRef(key)
 
     // Vérifier accès au marqueur selon le niveau
     if (!allowedMarkers.has(key)) continue
@@ -861,14 +953,19 @@ function computeScoreImpact(
     : status === 'elevated' ? -4
     : status === 'low' ? -4
     : -8 // critical
-
-  ref.scoreImpactDomains.forEach(({ domain, direction }) => {
-    // Pour 'direct' : low → négatif, optimal → positif
-    // Pour 'inverse' : high → négatif, optimal → positif
-    result[domain] = direction === 'inverse'
-      ? (status === 'optimal' ? magnitude : -magnitude)
-      : (status === 'optimal' ? magnitude : -magnitude)
-  })
+    
+ref.scoreImpactDomains.forEach(({ domain, direction }) => {
+  if (direction === 'inverse') {
+    // Valeur haute = mauvais : elevated/critical/low → pénalité, optimal → bonus
+    result[domain] = status === 'optimal' ? magnitude : -magnitude
+  } else {
+    // Valeur haute = bon (HDL, IGF-1, testosterone, vitaminD, télomères...)
+    // low/critical = manque → pénalité, optimal/elevated = abondance → bonus
+    result[domain] = (status === 'low' || status === 'critical')
+      ? -Math.abs(magnitude)
+      : Math.abs(magnitude)
+  }
+})
 
   return result
 }

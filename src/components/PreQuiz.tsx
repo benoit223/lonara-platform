@@ -127,6 +127,8 @@ interface PreQuizProps {
   onBack: () => void
   onContinue: () => void
   onAgeChange: (value: number) => void
+  dateOfBirth: string
+  onDateOfBirthChange: (value: string) => void
   onSexChange: (value: 'male' | 'female' | 'other') => void
   onHeightChange: (value: number) => void
   onWeightChange: (value: number) => void
@@ -157,6 +159,7 @@ export default function PreQuiz({
   onNtProBNPChange, onLpaChange, onCacScoreChange, onGdf15Change,
   onBack, onContinue,
   onAgeChange, onSexChange, onHeightChange, onWeightChange,
+  dateOfBirth, onDateOfBirthChange,
   country, socioeconomic, onCountryChange, onSocioeconomicChange,
 }: PreQuizProps) {
 
@@ -926,16 +929,36 @@ onContinue()
               </select>
             </div>
             <div>
-              <label className="text-[9px] uppercase tracking-[0.22em] text-[#EAE4D5]/50 block mb-2">{t('age')}</label>
-              <input
-                type="number"
-                value={age || ''}
-                min={18}
-max={100}
-                onChange={(event) => onAgeChange(Number(event.target.value))}
-                placeholder={t('age')}
-                className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 transition focus:border-[#035AA8]/45 focus:outline-none"
-              />
+        <label className="text-[9px] uppercase tracking-[0.22em] text-[#EAE4D5]/50 block mb-2">
+  {isPremium ? t('dateOfBirth') : t('age')}
+</label>
+{isPremium ? (
+  <>
+    <input
+      type="date"
+      value={dateOfBirth || ''}
+      max={new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000)
+        .toISOString().split('T')[0]}
+      onChange={(e) => onDateOfBirthChange(e.target.value)}
+      className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] transition focus:border-[#035AA8]/45 focus:outline-none"
+    />
+    {age > 0 && (
+      <p className="mt-1 text-[11px] text-[#C7AC60]/60">
+        {age} {t('years')}
+      </p>
+    )}
+  </>
+) : (
+  <input
+    type="number"
+    value={age || ''}
+    min={18}
+    max={100}
+    onChange={(event) => onAgeChange(Number(event.target.value))}
+    placeholder={t('age')}
+    className="w-full rounded-[0.9rem] border border-[#035AA8]/20 bg-black/70 text-white px-3 py-2 text-[13px] placeholder:text-[#EAE4D5]/75 transition focus:border-[#035AA8]/45 focus:outline-none"
+  />
+)}
             </div>
            </div>
 

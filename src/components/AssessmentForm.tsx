@@ -511,22 +511,20 @@ if (entryMode === 'signup') {
 }
 
 if (entryMode === 'guest') {
- const { error: profileError } =
-  await supabase
-    .from('profiles')
-    .upsert({
-      first_name: firstName,
-      last_name: lastName,
-      full_name: `${firstName} ${lastName}`,
-      email,
-      access_mode: 'guest',
-      account_status: 'guest',
-      subscription_status: 'none',
-      subscription_plan: 'free',
-    }, { onConflict: 'email' })
+ const res = await fetch('/api/guest-profile', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    first_name: firstName,
+    last_name:  lastName,
+    full_name:  `${firstName} ${lastName}`,
+    email,
+  }),
+})
 
-if (profileError) {
-  setError(profileError.message)
+if (!res.ok) {
+  const data = await res.json()
+  setError(data.error ?? 'Profile error')
   return
 }
 }
