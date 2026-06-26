@@ -76,55 +76,11 @@ export default function CapturePage() {
     init()
   }, [])
 
-  // Face ID
+  // Auth — passe directement à idle
   useEffect(() => {
     if (status !== 'auth') return
-    authenticateWithFaceId()
+    setStatus('idle')
   }, [status])
-
-  const authenticateWithFaceId = async () => {
-    if (!window.PublicKeyCredential) { setStatus('idle'); return }
-    try {
-      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      if (!available) { setStatus('idle'); return }
-
-      const challenge = new Uint8Array(32)
-      crypto.getRandomValues(challenge)
-      const credentialId = localStorage.getItem('lonara_credential_id')
-
-      if (!credentialId) {
-        const credential = await navigator.credentials.create({
-          publicKey: {
-            challenge,
-            rp: { name: 'Lonara Labs', id: window.location.hostname },
-            user: {
-              id: new TextEncoder().encode(userId!),
-              name: 'Lonara User',
-              displayName: 'Lonara User',
-            },
-            pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-            authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
-            timeout: 60000,
-          },
-        }) as PublicKeyCredential
-        localStorage.setItem('lonara_credential_id',
-          btoa(String.fromCharCode(...new Uint8Array(credential.rawId))))
-      } else {
-        const rawId = Uint8Array.from(atob(credentialId), c => c.charCodeAt(0))
-        await navigator.credentials.get({
-          publicKey: {
-            challenge,
-            allowCredentials: [{ id: rawId, type: 'public-key' }],
-            userVerification: 'required',
-            timeout: 60000,
-          },
-        })
-      }
-      setStatus('idle')
-    } catch {
-      setStatus('idle')
-    }
-  }
 
   const getMealTime = () => {
     const h = new Date().getHours()
@@ -185,26 +141,31 @@ export default function CapturePage() {
               </div>
               <div className="rounded-[16px] border border-white/8 bg-white/[0.03] px-6 py-5 flex flex-col gap-4 w-full">
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/80">①</span>
-                  <p className="text-[13px] text-white/80 text-left">
-                    Appuyez sur
-                    <svg className="inline mx-1 mb-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2v13M6 7l6-6 6 6"/><rect x="3" y="18" width="18" height="4" rx="1"/>
+                  {/* Icône partage iOS */}
+                  <div className="w-8 h-8 rounded-[7px] bg-white/10 flex items-center justify-center shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3v13M6 8l6-6 6 6"/><path d="M3 18h18v3H3z" strokeWidth="1.5"/>
                     </svg>
-                    dans Safari
-                  </p>
+                  </div>
+                  <p className="text-[13px] text-white/80 text-left">Appuyez sur ce bouton dans Safari</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/80">②</span>
-                  <p className="text-[13px] text-white/80 text-left">
-                    Choisissez <span className="text-white">"Ajouter à l'écran d'accueil"</span>
-                  </p>
+                  {/* Icône "En voir plus" */}
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </div>
+                  <p className="text-[13px] text-white/80 text-left">Défilez et appuyez sur <span className="text-white">"En voir plus"</span></p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/80">③</span>
-                  <p className="text-[13px] text-white/80 text-left">
-                    Ouvrez <span className="text-white">My Fuel</span> depuis votre écran
-                  </p>
+                  {/* Icône "Sur l'écran d'accueil" */}
+                  <div className="w-8 h-8 rounded-[7px] bg-white/10 flex items-center justify-center shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/>
+                    </svg>
+                  </div>
+                  <p className="text-[13px] text-white/80 text-left">Appuyez sur <span className="text-white">"Sur l'écran d'accueil"</span></p>
                 </div>
               </div>
               <div className="animate-bounce text-[#3DD4A0] text-2xl">↑</div>
