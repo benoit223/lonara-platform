@@ -40,12 +40,7 @@ export default function CapturePage() {
         localStorage.setItem(LS_UID, data.userId)
         localStorage.setItem(LS_SID, data.sprintId ?? '')
 
-        // Supprimer le token maintenant qu'il est consommé
-        await fetch('/api/capture-token-delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        })
+        // Token conservé — la PWA en aura besoin au premier lancement
 
         setUserId(data.userId)
         setSprintId(data.sprintId)
@@ -211,6 +206,11 @@ export default function CapturePage() {
                 </div>
               </div>
               <div className="animate-bounce text-[#3DD4A0] text-2xl">↑</div>
+              <button
+                onClick={() => setStatus('auth')}
+                className="text-[11px] uppercase tracking-[0.18em] text-white/30 mt-2">
+                Déjà installé
+              </button>
             </div>
           )}
 
