@@ -25,7 +25,9 @@ interface HeroProps {
   onReports: () => void
   onAbout: () => void
   onMySpace: () => void
-  memberTier: 'guest' | 'member' | 'premium' | 'executive'  // ← ajouter
+  onFuel: () => void
+  memberTier: 'guest' | 'member' | 'premium' | 'executive'
+  hasFuelSprint: boolean
 }
 
 interface FeatureCardProps {
@@ -74,11 +76,16 @@ function Navbar({
   onAbout,
   onScience,
   onReports,
+  onMySpace,
   onMySpaceClick,
-    memberTier,
+  onFuel,
+  onFuelClick,
+  memberTier,
+  hasFuelSprint,
 }: HeroProps & {
   onScience: () => void
   onMySpaceClick: () => void
+  onFuelClick: () => void
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const t = useTranslations()
@@ -126,6 +133,19 @@ function Navbar({
             {t('nav.labs')}
           </a>
 
+<button
+  onClick={onFuelClick}
+  className="relative group flex items-center gap-2 rounded-full border border-[#1D9E75]/25 bg-[#1D9E75]/5 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#1D9E75]/80 backdrop-blur-xl transition-all hover:border-[#1D9E75]/45 hover:bg-[#1D9E75]/10 hover:text-[#5DCAA5]"
+>
+  <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#5DCAA5]/60 to-transparent pointer-events-none" />
+<span className={`h-1.5 w-1.5 rounded-full transition-colors ${
+    hasFuelSprint
+      ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
+      : 'bg-[#1D9E75]/30'
+  }`} />
+  My Fuel
+</button>
+
           {/* ── MY SPACE ── */}
           <button
             onClick={onMySpaceClick}
@@ -133,11 +153,11 @@ function Navbar({
           >
             {/* top line accent */}
             <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#E7D19A]/60 to-transparent pointer-events-none" />
-            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
-  memberTier === 'premium' || memberTier === 'executive'
-    ? 'bg-[#0D96FF] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_12px_4px_rgba(13,150,255,0.8)]'
-    : 'bg-[#C7AC60]/50'
-}`} />
+    <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
+          memberTier === 'premium' || memberTier === 'executive'
+  ? 'bg-[#E7D19A] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(231,209,154,0.7)]'
+  : 'bg-[#C7AC60]/50'
+            }`} />
             {t('nav.myspace')}
           </button>
         </div>
@@ -186,13 +206,29 @@ function Navbar({
             {t('nav.science')}
           </button>
           <a
-            href="https://www.lonaralabs.com"
+       href="https://www.lonaralabs.com"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-[#C7AC60] transition-all"
           >
             {t('nav.labs')}
           </a>
+
+          {/* ── FUEL mobile ── */}
+          <button
+            onClick={() => {
+              onFuelClick()
+              setMobileMenuOpen(false)
+            }}
+            className="flex items-center gap-2 rounded-full border border-[#1D9E75]/25 bg-[#1D9E75]/5 px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] text-[#1D9E75]/80 transition-all hover:border-[#1D9E75]/45 hover:text-[#5DCAA5]"
+          >
+         <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
+    hasFuelSprint
+      ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
+      : 'bg-[#1D9E75]/30'
+  }`} />
+  My Fuel
+</button>
 
           {/* ── MY SPACE mobile ── */}
           <button
@@ -203,9 +239,9 @@ function Navbar({
             className="flex items-center gap-2 rounded-full border border-[#C7AC60]/25 bg-[#C7AC60]/5 px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] text-[#C7AC60]/80 transition-all hover:border-[#C7AC60]/45 hover:text-[#E7D19A]"
           >
             <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
-  memberTier === 'premium' || memberTier === 'executive'
-    ? 'bg-[#0D96FF] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_12px_4px_rgba(13,150,255,0.8)]'
-    : 'bg-[#C7AC60]/50'
+ memberTier === 'premium' || memberTier === 'executive'
+  ? 'bg-[#E7D19A] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(231,209,154,0.7)]'
+  : 'bg-[#C7AC60]/50'
 }`} />
             {t('nav.myspace')}
           </button>
@@ -220,7 +256,7 @@ function Navbar({
 // ─────────────────────────────────────────────
 // HERO
 // ─────────────────────────────────────────────
-export default function Hero({ onStart, onReports, onAbout, onMySpace, memberTier }: HeroProps) {
+export default function Hero({ onStart, onReports, onAbout, onMySpace, onFuel, memberTier, hasFuelSprint }: HeroProps) {
   const [cellularHealth, setCellularHealth] = useState(92)
   useEffect(() => {
     const interval = setInterval(
@@ -310,15 +346,20 @@ export default function Hero({ onStart, onReports, onAbout, onMySpace, memberTie
       <div className="absolute left-[54%] top-[20%] h-[420px] w-[420px] rounded-full bg-[#1A2A44]/30 blur-[160px] animate-slowPulse" />
       <div className="absolute right-[12%] bottom-[16%] h-[260px] w-[260px] rounded-full bg-[#C7AC60]/10 blur-[140px] animate-floatSlow" />
 
-      <Navbar
-        onStart={onStart}
-        onAbout={onAbout}
-        onReports={onReports}
-        onScience={() => setShowScience(true)}
-        onMySpace={onMySpace}
-        onMySpaceClick={handleMySpaceClick}
-        memberTier={memberTier}  
-      />
+    <Navbar
+  onStart={onStart}
+  onAbout={onAbout}
+  onReports={onReports}
+  onScience={() => setShowScience(true)}
+  onMySpace={onMySpace}
+  onFuel={onFuel}
+  onMySpaceClick={handleMySpaceClick}
+  onFuelClick={() => {
+  if (memberTier !== 'guest') onFuel()
+}}
+  memberTier={memberTier}
+  hasFuelSprint={hasFuelSprint}
+/>
 
       {/* Desktop CTA */}
       <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1850px] z-40 px-6 lg:px-0">

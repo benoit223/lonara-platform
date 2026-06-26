@@ -11,10 +11,11 @@ import UnderstandingReport from '@/components/UnderstandingReport'
 import MySpace from '@/components/MySpace'
 import { useLocale } from 'next-intl'
 import { calculateAge } from '@/lib/utils'
+import FuelSpace from '@/components/FuelSpace'
 
 export default function Home() {
 
-  const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace'>('hero')
+  const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace' | 'fuel'>('hero')
 useEffect(() => {
  
 }, [step])
@@ -25,7 +26,7 @@ useEffect(() => {
 
   const [showReport, setShowReport] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
-
+const [hasFuelSprint, setHasFuelSprint] = useState(false)
   // ── PROFIL UTILISATEUR ────────────────────────────────────────────────────
   const [fullName, setFullName]       = useState<string>('')
   const [email, setEmail]             = useState<string>('')
@@ -150,7 +151,7 @@ useEffect(() => {
   const loadUserData = async (userId: string, userEmail: string) => {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('member_tier, full_name, email, bg_character, date_of_birth')
+      .select('member_tier, full_name, email, bg_character, date_of_birth, height_cm, weight_kg')
       .eq('id', userId)
       .single()
 
@@ -162,6 +163,8 @@ if ((profile as any)?.date_of_birth) {
   setDateOfBirth((profile as any).date_of_birth)
   setAge(calculateAge((profile as any).date_of_birth))
 }
+if ((profile as any)?.height_cm) setHeight((profile as any).height_cm)
+if ((profile as any)?.weight_kg) setWeight((profile as any).weight_kg)
 
 
     const resolvedEmail = profile?.email ?? userEmail
@@ -179,6 +182,15 @@ if ((profile as any)?.date_of_birth) {
       setCachedAssessment(assessment)
       sessionStorage.setItem('lonara-cached-assessment', JSON.stringify(assessment))
     }
+
+    const { data: fuelSprint } = await supabase
+      .from('fuel_sprints')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    setHasFuelSprint(!!fuelSprint)
 
     
 const { data: allAssessments } = await supabase
@@ -268,7 +280,9 @@ if (profile.email) setEmail(profile.email)
 if ((profile as any)?.date_of_birth) {
   setDateOfBirth((profile as any).date_of_birth)
   setAge(calculateAge((profile as any).date_of_birth))
-}  
+}
+if ((profile as any)?.height_cm) setHeight((profile as any).height_cm)
+if ((profile as any)?.weight_kg) setWeight((profile as any).weight_kg)  
 
 const tier = profile.member_tier
   ?? mapSubscriptionPlan(profile.subscription_plan)
@@ -289,8 +303,7 @@ setMemberTier(tier as 'guest' | 'member' | 'premium' | 'executive')
       <div className="relative z-10">
 
         {(step === 'hero' || step === 'assessment') && (
-         <Hero
-
+   <Hero
   onStart={() => {
   if (memberTier !== 'guest') {
     setAccessMode('registered')
@@ -299,10 +312,13 @@ setMemberTier(tier as 'guest' | 'member' | 'premium' | 'executive')
   } else {
     setStep('assessment')
   }
-}}          onAbout={() => setShowAbout(true)}
+}}
+  onAbout={() => setShowAbout(true)}
   onReports={() => setShowReport(true)}
   onMySpace={() => handleGoToMySpace()}
+  onFuel={() => setStep('fuel')}
   memberTier={memberTier}
+  hasFuelSprint={hasFuelSprint}
 />
         )}
 
@@ -445,8 +461,24 @@ onDateOfBirthChange={async (dob) => {
   }
 }}
             onSexChange={setSex}
-            onHeightChange={setHeight}
-            onWeightChange={setWeight}
+        onHeightChange={async (h) => {
+  setHeight(h)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('profiles')
+      .update({ height_cm: h })
+      .eq('id', user.id)
+  }
+}}
+onWeightChange={async (w) => {
+  setWeight(w)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('profiles')
+      .update({ weight_kg: w })
+      .eq('id', user.id)
+  }
+}}
             country={country}
             socioeconomic={socioeconomic}
             onCountryChange={setCountry}
@@ -477,7 +509,7 @@ onDateOfBirthChange={async (dob) => {
           />
         )}
 
-       {/* ── MY SPACE ── */}
+     {/* ── MY SPACE ── */}
 {step === 'myspace' && (
   <MySpace
     memberTier={memberTier}
@@ -492,6 +524,15 @@ onDateOfBirthChange={async (dob) => {
     initialBgCharacter={cachedBgCharacter}
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
     onBgCharacterChange={(bg: any) => setCachedBgCharacter(bg)}
+  />
+)}
+
+{/* ── FUEL ── */}
+{step === 'fuel' && (
+  <FuelSpace
+    memberTier={memberTier}
+    fullName={fullName}
+    onBack={() => setStep('hero')}
   />
 )}
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 
 
@@ -206,6 +206,17 @@ const handleLabRequisition = async () => {
 const [feet, setFeet] = useState('')
 const [inches, setInches] = useState('')
 const [pounds, setPounds] = useState('')
+
+useEffect(() => {
+  if (unitSystem === 'imperial' && height > 0) {
+    const totalInches = height / 2.54
+    setFeet(String(Math.floor(totalInches / 12)))
+    setInches(String(Math.round(totalInches % 12)))
+  }
+  if (unitSystem === 'imperial' && weight > 0) {
+    setPounds(String(Math.round(weight * 2.20462)))
+  }
+}, [unitSystem, height, weight])
 const [validationError, setValidationError] =
   useState('')
 

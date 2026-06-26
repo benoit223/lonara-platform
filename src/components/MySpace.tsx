@@ -8,6 +8,7 @@ import EvolveSection from './EvolveSection'
 import UnderstandSection from './UnderstandSection'
 import OptimizeSection from './OptimizeSection'
 import StateSection from './StateSection'
+import { getTimeOfDay, getMySpaceBg, isNightTime } from '../lib/timeOfDay'
 
 interface MySpaceProps {
   memberTier: 'guest' | 'member' | 'premium' | 'executive'
@@ -396,17 +397,9 @@ const locale = useLocale()
   const greeting = getGreeting(localFullName || fullName, t)
   const greetingBase = greeting.replace(/,.*/, ',')
   const greetingName = greeting.replace(/.*,\s*/, '')
-  const getTimeOfDay = () => {
-  const h = new Date().getHours()
-  const m = new Date().getMinutes()
-  if (h >= 5 && h < 10) return 'matin'
-  if (h >= 10 && h < 17) return 'jour'
-  if (h >= 17 && (h < 21 || (h === 21 && m < 30))) return 'soir'
-  return 'nuit'
-}
-
-const currentBg = `/${bgCharacter}${getTimeOfDay()}.png`
-const isNight = getTimeOfDay() === 'nuit'
+  
+const currentBg = getMySpaceBg(bgCharacter)
+const isNight = isNightTime()
 
 
 
