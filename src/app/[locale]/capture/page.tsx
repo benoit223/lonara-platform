@@ -5,6 +5,9 @@ import { useSearchParams } from 'next/navigation'
 
 type Status = 'loading' | 'auth' | 'idle' | 'uploading' | 'done' | 'error' | 'install'
 
+const LS_UID = 'lonara_capture_uid'
+const LS_SID = 'lonara_capture_sid'
+
 export default function CapturePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const searchParams = useSearchParams()
@@ -13,13 +16,12 @@ export default function CapturePage() {
   const [sprintId, setSprintId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string>('')
 
-  // ── INIT ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const init = async () => {
       const token = searchParams.get('token')
 
       if (token) {
-        // Valider le token QR — le cookie est set côté serveur
+        // Valider le token
         const res = await fetch('/api/capture-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -32,50 +34,52 @@ export default function CapturePage() {
           return
         }
 
-        // Cookie set — vérifier si PWA installée
+        const data = await res.json()
+
+        // Stocker dans localStorage
+        localStorage.setItem(LS_UID, data.userId)
+        localStorage.setItem(LS_SID, data.sprintId ?? '')
+
+        // Supprimer le token maintenant qu'il est consommé
+        await fetch('/api/capture-token-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        })
+
+        setUserId(data.userId)
+        setSprintId(data.sprintId)
+
+        // Si pas encore installé comme PWA — afficher écran installation
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches
         if (!isInstalled) {
           setStatus('install')
           return
         }
 
-        // PWA installée — lire la session
-        await loadSession()
+        setStatus('auth')
         return
       }
 
-      // Pas de token — lire la session existante via cookie
-      const res = await fetch('/api/capture-session')
-      if (!res.ok) {
-        setErrorMsg('Scannez le QR code depuis My Fuel → Connect Phone')
-        setStatus('error')
+      // Pas de token — lire localStorage
+      const uid = localStorage.getItem(LS_UID)
+      const sid = localStorage.getItem(LS_SID)
+
+      if (uid) {
+        setUserId(uid)
+        setSprintId(sid)
+        setStatus('auth')
         return
       }
-      const data = await res.json()
-      setUserId(data.userId)
-      setSprintId(data.sprintId)
-      setStatus('auth')
+
+      setErrorMsg('Scannez le QR code depuis My Fuel → Connect Phone')
+      setStatus('error')
     }
 
     init()
   }, [])
 
-  const loadSession = async () => {
-    const res = await fetch('/api/capture-session')
-
-    if (!res.ok) {
-      setErrorMsg('Scannez le QR code depuis My Fuel → Connect Phone')
-      setStatus('error')
-      return
-    }
-
-    const data = await res.json()
-    setUserId(data.userId)
-    setSprintId(data.sprintId)
-    setStatus('auth')
-  }
-
-  // ── FACE ID via WebAuthn ──────────────────────────────────────────────────
+  // Face ID
   useEffect(() => {
     if (status !== 'auth') return
     authenticateWithFaceId()
@@ -83,7 +87,6 @@ export default function CapturePage() {
 
   const authenticateWithFaceId = async () => {
     if (!window.PublicKeyCredential) { setStatus('idle'); return }
-
     try {
       const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
       if (!available) { setStatus('idle'); return }
@@ -103,17 +106,12 @@ export default function CapturePage() {
               displayName: 'Lonara User',
             },
             pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-            authenticatorSelection: {
-              authenticatorAttachment: 'platform',
-              userVerification: 'required',
-            },
+            authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
             timeout: 60000,
           },
         }) as PublicKeyCredential
-
         localStorage.setItem('lonara_credential_id',
-          btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
-        )
+          btoa(String.fromCharCode(...new Uint8Array(credential.rawId))))
       } else {
         const rawId = Uint8Array.from(atob(credentialId), c => c.charCodeAt(0))
         await navigator.credentials.get({
@@ -131,7 +129,6 @@ export default function CapturePage() {
     }
   }
 
-  // ── UPLOAD ────────────────────────────────────────────────────────────────
   const getMealTime = () => {
     const h = new Date().getHours()
     if (h >= 5 && h < 10) return 'breakfast'
@@ -165,7 +162,6 @@ export default function CapturePage() {
     e.target.value = ''
   }
 
-  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
     <main className="relative min-h-screen overflow-hidden bg-black">
       <img src="/qqq.png" alt=""
@@ -174,19 +170,17 @@ export default function CapturePage() {
       <div className="relative min-h-screen flex items-center justify-center">
         <div className="relative z-10 w-full max-w-lg h-screen flex flex-col items-center justify-start px-6 pt-[8vh]">
 
-          {/* Logo */}
           <img src="/LOGOOFFICIELTRANSP.png" alt="Lonara" className="w-64 object-contain select-none" />
           <p className="mt-1 text-[18px] uppercase tracking-[0.28em] text-white/60"
             style={{ fontFamily: 'Inter, sans-serif' }}>MY FUEL</p>
 
           <div className="h-[6vh]" />
 
-          {/* Écran installation PWA */}
+          {/* Écran installation */}
           {status === 'install' && (
             <div className="flex flex-col items-center gap-8 px-4 text-center">
-              
               <div>
-                <p className="text-[22px] font-light text-[#EAE4D5] mb-2"
+                <p className="text-[24px] font-light text-[#EAE4D5] mb-2"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}>Une dernière étape</p>
                 <p className="text-[14px] text-white/70 leading-relaxed">
                   Installez l'app pour un accès instantané à la caméra
@@ -196,19 +190,23 @@ export default function CapturePage() {
                 <div className="flex items-center gap-4">
                   <span className="text-xl text-white/80">①</span>
                   <p className="text-[13px] text-white/80 text-left">
-                    Appuyez sur <svg className="inline mx-1 mb-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v13M6 7l6-6 6 6"/><rect x="3" y="18" width="18" height="4" rx="1"/></svg> dans Safari
+                    Appuyez sur
+                    <svg className="inline mx-1 mb-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2v13M6 7l6-6 6 6"/><rect x="3" y="18" width="18" height="4" rx="1"/>
+                    </svg>
+                    dans Safari
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xl text-white/80">②</span>
                   <p className="text-[13px] text-white/80 text-left">
-                    Choisissez <span className="text-white/90">"Ajouter à l'écran d'accueil"</span>
+                    Choisissez <span className="text-white">"Ajouter à l'écran d'accueil"</span>
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xl text-white/80">③</span>
                   <p className="text-[13px] text-white/80 text-left">
-                    Ouvrez <span className="text-white/90">My Fuel</span> depuis votre écran
+                    Ouvrez <span className="text-white">My Fuel</span> depuis votre écran
                   </p>
                 </div>
               </div>
@@ -216,11 +214,9 @@ export default function CapturePage() {
             </div>
           )}
 
-          {/* Input caméra */}
           <input ref={fileInputRef} type="file" accept="image/*" capture="environment"
             className="hidden" onChange={handleImageChange} />
 
-          {/* Bouton principal — caché pendant install */}
           {status !== 'install' && (
             <>
               <div className="relative flex items-center justify-center w-full h-[28vh]">
@@ -257,11 +253,8 @@ export default function CapturePage() {
               </div>
 
               <div className="mt-2 h-[90px] flex flex-col items-center justify-center">
-                {status === 'loading' && (
+                {(status === 'loading' || status === 'auth') && (
                   <p className="text-[13px] text-white/35 font-light">Initialisation...</p>
-                )}
-                {status === 'auth' && (
-                  <p className="text-[13px] text-white/35 font-light">Vérification...</p>
                 )}
                 {status === 'idle' && (
                   <>
@@ -280,10 +273,8 @@ export default function CapturePage() {
                   </div>
                 )}
                 {status === 'error' && (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center gap-3 rounded-full border border-red-500/20 bg-white/5 backdrop-blur-xl px-6 py-3">
-                      <span className="text-red-400 text-[13px] text-center">{errorMsg}</span>
-                    </div>
+                  <div className="rounded-full border border-red-500/20 bg-white/5 backdrop-blur-xl px-6 py-3">
+                    <span className="text-red-400 text-[13px] text-center">{errorMsg}</span>
                   </div>
                 )}
               </div>

@@ -23,24 +23,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Expired token' }, { status: 410 })
   }
 
-  const response = NextResponse.json({ success: true })
-
-  // Cookie httpOnly — persiste entre Safari et PWA sur iOS
-response.cookies.set('lonara_capture_uid', data.user_id, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 365,
-    path: '/',
+  // Ne pas supprimer le token — il sera réutilisé par la PWA
+  // Retourner userId et sprintId pour que le client les stocke
+  return NextResponse.json({
+    userId: data.user_id,
+    sprintId: data.sprint_id ?? null,
   })
-
-  response.cookies.set('lonara_capture_sid', data.sprint_id ?? '', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 365,
-    path: '/',
-  })
-
-  return response
 }
