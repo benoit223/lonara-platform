@@ -45,7 +45,16 @@ export default function CapturePage() {
       }
 
       // Pas de token — lire la session existante via cookie
-      await loadSession()
+      const res = await fetch('/api/capture-session')
+      if (!res.ok) {
+        setErrorMsg('Scannez le QR code depuis My Fuel → Connect Phone')
+        setStatus('error')
+        return
+      }
+      const data = await res.json()
+      setUserId(data.userId)
+      setSprintId(data.sprintId)
+      setStatus('auth')
     }
 
     init()
@@ -175,36 +184,30 @@ export default function CapturePage() {
           {/* Écran installation PWA */}
           {status === 'install' && (
             <div className="flex flex-col items-center gap-8 px-4 text-center">
-              <div className="w-20 h-20 rounded-[22px] bg-black border border-white/10 flex items-center justify-center shadow-[0_0_40px_rgba(61,212,160,0.15)]">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-                  stroke="#3DD4A0" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-              </div>
+              
               <div>
                 <p className="text-[22px] font-light text-[#EAE4D5] mb-2"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}>Une dernière étape</p>
-                <p className="text-[14px] text-white/45 leading-relaxed">
+                <p className="text-[14px] text-white/70 leading-relaxed">
                   Installez l'app pour un accès instantané à la caméra
                 </p>
               </div>
               <div className="rounded-[16px] border border-white/8 bg-white/[0.03] px-6 py-5 flex flex-col gap-4 w-full">
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/50">①</span>
-                  <p className="text-[13px] text-white/65 text-left">
-                    Appuyez sur <span className="text-white/90">⬆</span> dans Safari
+                  <span className="text-xl text-white/80">①</span>
+                  <p className="text-[13px] text-white/80 text-left">
+                    Appuyez sur <svg className="inline mx-1 mb-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v13M6 7l6-6 6 6"/><rect x="3" y="18" width="18" height="4" rx="1"/></svg> dans Safari
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/50">②</span>
-                  <p className="text-[13px] text-white/65 text-left">
+                  <span className="text-xl text-white/80">②</span>
+                  <p className="text-[13px] text-white/80 text-left">
                     Choisissez <span className="text-white/90">"Ajouter à l'écran d'accueil"</span>
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xl text-white/50">③</span>
-                  <p className="text-[13px] text-white/65 text-left">
+                  <span className="text-xl text-white/80">③</span>
+                  <p className="text-[13px] text-white/80 text-left">
                     Ouvrez <span className="text-white/90">My Fuel</span> depuis votre écran
                   </p>
                 </div>

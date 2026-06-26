@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Expired token' }, { status: 410 })
   }
 
-  await supabase.from('capture_tokens').delete().eq('token', token)
-
   const response = NextResponse.json({ success: true })
 
   // Cookie httpOnly — persiste entre Safari et PWA sur iOS
