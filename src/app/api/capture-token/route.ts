@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.json({ success: true })
 
   // Cookie httpOnly — persiste entre Safari et PWA sur iOS
-  response.cookies.set('lonara_capture_uid', data.user_id, {
+response.cookies.set('lonara_capture_uid', data.user_id, {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 365, // 1 an
-    path: '/capture',
+    maxAge: 60 * 60 * 24 * 365,
+    path: '/',
   })
 
   response.cookies.set('lonara_capture_sid', data.sprint_id ?? '', {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     secure: true,
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 365,
-    path: '/capture',
+    path: '/',
   })
 
   return response
