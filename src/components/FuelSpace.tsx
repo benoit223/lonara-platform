@@ -678,12 +678,12 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const token = crypto.randomUUID()
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
     await supabase.from('capture_tokens').insert({
       token,
       user_id: user.id,
       sprint_id: activeSprint?.id ?? null,
-      expires_at: expiresAt.toISOString(),
+      expires_at: expiresAt,
     })
     setQrToken(token)
     setShowQR(true)
