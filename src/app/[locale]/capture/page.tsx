@@ -20,34 +20,26 @@ export default function CapturePage() {
       const token = searchParams.get('token')
 
       if (token) {
-        // Valider le token QR
-        const { data, error } = await supabase
-          .from('capture_tokens')
-          .select('user_id, sprint_id, expires_at')
-          .eq('token', token)
-          .single()
+        const res = await fetch('/api/capture-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        })
 
-        if (error || !data) {
+        if (!res.ok) {
           setErrorMsg('QR code invalide ou expiré')
           setStatus('error')
           return
         }
 
-        if (new Date(data.expires_at) < new Date()) {
-          setErrorMsg('QR code expiré — regenerez-en un depuis My Fuel')
-          setStatus('error')
-          return
-        }
+        const data = await res.json()
 
         // Stocker dans localStorage
-        localStorage.setItem('lonara_capture_userId', data.user_id)
-        localStorage.setItem('lonara_capture_sprintId', data.sprint_id ?? '')
+        localStorage.setItem('lonara_capture_userId', data.userId)
+        localStorage.setItem('lonara_capture_sprintId', data.sprintId ?? '')
 
-        // Supprimer le token utilisé
-        await supabase.from('capture_tokens').delete().eq('token', token)
-
-        setUserId(data.user_id)
-        setSprintId(data.sprint_id ?? null)
+        setUserId(data.userId)
+        setSprintId(data.sprintId ?? null)
         setStatus('auth')
         return
       }
