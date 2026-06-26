@@ -38,7 +38,6 @@ export default function CapturePage() {
 
         // Stocker dans localStorage
         localStorage.setItem(LS_UID, data.userId)
-        localStorage.setItem(LS_SID, data.sprintId ?? '')
 
         // Token conservé — la PWA en aura besoin au premier lancement
 
@@ -60,11 +59,9 @@ export default function CapturePage() {
 
       // Lire uid depuis URL (PWA installée avec cette URL)
       const uid = searchParams.get('uid') || localStorage.getItem(LS_UID)
-      const sid = searchParams.get('sid') || localStorage.getItem(LS_SID)
 
       if (uid) {
         setUserId(uid)
-        setSprintId(sid)
         setStatus('auth')
         return
       }
