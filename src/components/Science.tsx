@@ -131,7 +131,7 @@ const sectionContent = locale === 'fr' ? sectionContentFR
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-[3px] px-4 py-4">
       <div
         ref={containerRef}
-        className="relative w-full max-w-[1280px] max-h-[92vh] overflow-y-auto overflow-x-hidden rounded-[1.2rem] md:rounded-[1.8rem] border border-[#71BFE3]/10 bg-[rgba(3,10,20,0.72)] backdrop-blur-[24px] shadow-[0_0_80px_rgba(0,220,255,0.04)]"
+        className="relative w-full max-w-[1280px] max-h-[92vh] overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden scrollbar-none rounded-[1.2rem] md:rounded-[1.8rem] border border-[#71BFE3]/10 bg-[rgba(3,10,20,0.72)] backdrop-blur-[24px] shadow-[0_0_80px_rgba(0,220,255,0.04)]"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,140,255,0.08),transparent_40%)] pointer-events-none" />
         <div className="absolute top-[-120px] right-[-10%] w-[320px] h-[320px] rounded-full bg-cyan-400/10 blur-3xl opacity-40" />
@@ -147,7 +147,7 @@ const sectionContent = locale === 'fr' ? sectionContentFR
 
         <div className="relative z-10 flex">
           {/* Sidebar — desktop only, unchanged */}
-          <div className="sticky top-0 max-h-[calc(92vh-4rem)] overflow-y-auto pr-4 w-[260px] border-r border-white/[0.04] px-8 py-10 hidden lg:block">
+          <div className="sticky top-0 max-h-[calc(92vh-4rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none pr-4 w-[260px] border-r border-white/[0.04] px-8 py-10 hidden lg:block">
             <p className="text-[10px] uppercase tracking-[0.32em] text-[#C7AC60]/70 mb-8">
               Framework
             </p>

@@ -51,7 +51,7 @@ const imageUrl = urlData?.signedUrl ?? null
       .from('fuel_logs')
       .insert({
         user_id: userId,
-        sprint_id: sprintId || null,
+        sprint_id: sprintId,
         meal_time: mealTime,
         time_of_day: timeOfDay,
         image_url: imageUrl,

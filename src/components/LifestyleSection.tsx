@@ -247,11 +247,13 @@ export default function LifestyleSection({ initialTab = 'sleep' }: { initialTab?
         </div>
       )}
 
-      <button onClick={save} disabled={saving}
-        className="flex items-center gap-2 rounded-full border border-[#035AA8]/60 bg-[#0A3566]/40 ml-auto px-6 py-2 text-[10px] uppercase tracking-[0.2em] text-white/70 hover:bg-[#0A3566]/60 transition disabled:opacity-40">
-        <Save className="h-3 w-3" />
-        {saving ? t('lifestyle_saving') : saved ? t('lifestyle_saved') : t('lifestyle_save')}
-      </button>
+<div className="flex items-center justify-end gap-2">
+  <button onClick={save} disabled={saving}
+          className="flex items-center gap-2 rounded-full border border-[#035AA8]/60 bg-[#0A3566]/40 px-6 py-2 text-[10px] uppercase tracking-[0.2em] text-white/70 hover:bg-[#0A3566]/60 transition disabled:opacity-40">
+          <Save className="h-3 w-3" />
+          {saving ? t('lifestyle_saving') : saved ? t('lifestyle_saved') : t('lifestyle_save')}
+        </button>
+      </div>
 
     </div>
   )

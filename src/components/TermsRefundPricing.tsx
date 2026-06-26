@@ -11,7 +11,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-[3px] px-4 py-4">
-      <div className="relative w-full max-w-[1100px] max-h-[88vh] overflow-y-auto overflow-x-hidden rounded-[1.2rem] md:rounded-[1.8rem] border border-[#C7AC60]/10 bg-[rgba(3,10,20,0.68)] backdrop-blur-[20px] px-4 md:px-8 py-6 md:py-8 shadow-[0_0_50px_rgba(199,172,96,0.04)]">
+      <div className="relative w-full max-w-[1100px] max-h-[88vh] overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden scrollbar-none rounded-[1.2rem] md:rounded-[1.8rem] border border-[#C7AC60]/10 bg-[rgba(3,10,20,0.68)] backdrop-blur-[20px] px-4 md:px-8 py-6 md:py-8 shadow-[0_0_50px_rgba(199,172,96,0.04)]">
 
         {/* AMBIENT GLOW */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(199,172,96,0.06),transparent_40%)] pointer-events-none" />

@@ -225,6 +225,7 @@ function SectionContent({
   lastAssessment,
   previousAssessment,
   onStartAssessment,
+  onGoToFuel,
   bgCharacter,
   assessmentHistory,
   chronoAge,
@@ -236,6 +237,7 @@ function SectionContent({
   lastAssessment: LastAssessment | null
   previousAssessment: any | null
   onStartAssessment: () => void
+  onGoToFuel?: () => void
   bgCharacter: string
   assessmentHistory: any[]
   chronoAge: number | null
@@ -268,12 +270,12 @@ function SectionContent({
       description: t('understandDesc'),
      extra: <UnderstandSection assessmentHistory={assessmentHistory} />,
     },
-   optimize: {
-      eyebrow: t('optimizeEyebrow'),
-      title: t('optimizeTitle'),
-      description: t('optimizeDesc'),
-      extra: <OptimizeSection lastAssessment={lastAssessment} />,
-    },
+  optimize: {
+  eyebrow: t('optimizeEyebrow'),
+  title: t('optimizeTitle'),
+  description: t('optimizeDesc'),
+  extra: <OptimizeSection lastAssessment={lastAssessment} onGoToFuel={onStartAssessment} />,
+},
    evolve: {
   eyebrow: t('evolveEyebrow'),
   title: t('evolveTitle'),

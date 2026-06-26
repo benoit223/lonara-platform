@@ -143,7 +143,7 @@ function Navbar({
       ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
       : 'bg-[#1D9E75]/30'
   }`} />
-  My Fuel
+  {t('nav.myfuel')}
 </button>
 
           {/* ── MY SPACE ── */}
@@ -227,7 +227,7 @@ function Navbar({
       ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
       : 'bg-[#1D9E75]/30'
   }`} />
-  My Fuel
+  {t('nav.myfuel')}
 </button>
 
           {/* ── MY SPACE mobile ── */}

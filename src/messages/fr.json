@@ -4,9 +4,11 @@
     "reports": "RAPPORTS",
     "science": "SCIENCE",
     "labs": "LABS",
-    "myspace": "MON ESPACE"
+    "myspace": "MON ESPACE",
+    "myfuel": "Mon Carburant"
   },
 "myspace": {
+  "fuel_plateOfMonth": "Plat du Mois",
   "fuel_connectPhoneClose": "Fermer",
   "fuel_connectPhoneDesc": "Scannez avec l'appareil photo de votre téléphone — expire dans 10 minutes",
   "fuel_connectPhone": "Connecter le téléphone",

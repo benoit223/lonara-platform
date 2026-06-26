@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getFuelBg, isNightTime, getTimeOfDay } from '../lib/timeOfDay'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 // ── PROPS ─────────────────────────────────────────────────────────────────────
 interface FuelSpaceProps {
@@ -370,8 +370,95 @@ function FeedSection({ logs }: { logs: FuelLog[] }) {
   )
 }
 
-function ScanSection({ activeSprint, imageFile, setImageFile, imagePreview, setImagePreview, mealTime, setMealTime, note, setNote, isAnalyzing, handleAnalyze, fileInputRef, handleImageChange }: {
+
+
+function BestMealCards({ userId }: { userId: string }) {
+  const t = useTranslations('myspace')
+  const [bestMeals, setBestMeals] = useState<{ meal_time: string; fuel_score: number; signedUrl: string | null }[]>([])
+
+  useEffect(() => {
+    if (!userId) return
+    const load = async () => {
+      const currentMonth = new Date().toISOString().slice(0, 7)
+      const { data } = await supabase
+        .from('fuel_best_meals')
+        .select('meal_time, fuel_score, image_url')
+        .eq('user_id', userId)
+        .eq('month', currentMonth)
+
+      if (!data || data.length === 0) return
+
+      const resolved = await Promise.all(
+        data.map(async (row: any) => {
+          let signedUrl: string | null = null
+          if (row.image_url) {
+            const res = await fetch('/api/fuel-signed-url', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: row.image_url }),
+            })
+            const json = await res.json()
+            signedUrl = json.url ?? null
+          }
+          return { meal_time: row.meal_time, fuel_score: row.fuel_score, signedUrl }
+        })
+      )
+      setBestMeals(resolved)
+    }
+    load()
+  }, [userId])
+
+  const mealKeys: Record<string, string> = {
+    breakfast: 'fuel_breakfast',
+    lunch: 'fuel_lunch',
+    dinner: 'fuel_dinner',
+    snack: 'fuel_snack',
+  }
+
+  const allMeals = ['breakfast', 'lunch', 'dinner', 'snack'].map(meal => {
+    const found = bestMeals.find(b => b.meal_time === meal)
+    return { meal, score: found?.fuel_score ?? null, signedUrl: found?.signedUrl ?? null }
+  })
+
+  return (
+    <div className="mt-6">
+      <p className="text-[10px] uppercase tracking-[0.22em] text-[#3DD4A0]/60 mb-3">{t('fuel_plateOfMonth')}</p>
+      <div className="grid grid-cols-4 gap-2">
+        {allMeals.map(({ meal, score, signedUrl }) => {
+          const col = score ? scoreColor(score) : '#ffffff20'
+          return (
+            <div key={meal}
+              className="relative rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl overflow-hidden"
+              style={{ height: '110px' }}>
+              {signedUrl ? (
+                <img src={signedUrl} alt={meal}
+                  className="absolute inset-0 w-full h-full object-cover opacity-45" />
+              ) : (
+                <div className="absolute inset-0 bg-white/[0.02]" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-[0.16em] text-white/50 mb-0.5">
+                  {t(mealKeys[meal] as any)}
+                </p>
+                <p className="text-[1.2rem] font-light leading-none"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: col }}>
+                  {score ?? '—'}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+
+
+function ScanSection({ activeSprint, userId, imageFile, setImageFile, imagePreview, setImagePreview, mealTime, setMealTime, note, setNote, isAnalyzing, handleAnalyze, fileInputRef, handleImageChange }: {
   activeSprint: FuelSprint | null
+  userId: string | null
   imageFile: File | null
   setImageFile: (f: File | null) => void
   imagePreview: string | null
@@ -445,6 +532,7 @@ function ScanSection({ activeSprint, imageFile, setImageFile, imagePreview, setI
         </div>
       </div>
     </div>
+    {userId && <BestMealCards userId={userId} />}
     </div>
   )
 }
@@ -542,7 +630,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
   const [activeSection, setActiveSection] = useState<ActiveSection>(null)
 
   // Setup
-  const [selectedMode,     setSelectedMode]     = useState<SprintMode>('rhythm')
+  const [selectedMode,     setSelectedMode]     = useState<SprintMode>('pulse')
   const [selectedDuration, setSelectedDuration] = useState(14)
   const [selectedGoal,     setSelectedGoal]     = useState<string | null>(null)
 
@@ -554,9 +642,12 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
   const [isAnalyzing,  setIsAnalyzing]  = useState(false)
   const [showQR,       setShowQR]       = useState(false)
   const [qrToken,      setQrToken]      = useState<string | null>(null)
+  const [userId,       setUserId]       = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const t = useTranslations('myspace')
+  const tGlobal = useTranslations()
+  const locale = useLocale()
   const firstName = fullName.split(' ')[0] || fullName
   const isNight   = isNightTime()
 
@@ -567,6 +658,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { setIsLoading(false); return }
+        setUserId(user.id)
 
         const { data: sprint } = await supabase
           .from('fuel_sprints').select('*')
@@ -624,14 +716,17 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
       .insert({ user_id: user.id, mode: selectedMode, goal: selectedGoal, ends_at: endsAt.toISOString(), is_active: true })
       .select().single()
 
+  
+
     if (sprint) {
       setActiveSprint(sprint as FuelSprint)
       setView('dashboard')
+      setActiveSection('today')
       try {
         const res = await fetch('/api/fuel-targets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, sprintId: sprint.id, mode: selectedMode, goal: selectedGoal }),
+          body: JSON.stringify({ userId: user.id, sprintId: sprint.id, mode: selectedMode, goal: selectedGoal, locale }),
         })
         const data = await res.json()
         if (data.targets) setActiveSprint({ ...sprint as FuelSprint, macro_targets: data.targets })
@@ -659,8 +754,15 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
       if (imageFile) formData.append('image', imageFile)
       formData.append('mealTime', mealTime)
       formData.append('note', note)
-      formData.append('sprintId', activeSprint?.id ?? '')
+      const { data: currentSprint } = await supabase
+        .from('fuel_sprints')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle()
+      formData.append('sprintId', currentSprint?.id ?? '')
       formData.append('userId', user.id)
+      formData.append('locale', locale)
       const response = await fetch('/api/fuel-analyze', { method: 'POST', body: formData })
       const result = await response.json()
       const newLog = result.log as FuelLog
@@ -733,7 +835,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
               </span>
             )}
             <span className="text-[11px] md:text-[13px] uppercase tracking-[0.18em] text-white/52">
-              {t('fuel_navLabel')} — {firstName}
+              {tGlobal('nav.myfuel')} — {firstName}
             </span>
             <button onClick={onBack}
               className="flex items-center gap-2 text-white/60 hover:text-white/80 transition-all text-[11px] md:text-[13px] uppercase tracking-[0.18em]">
@@ -813,7 +915,8 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 </div>
                 <div className="mt-auto">
                   <button onClick={handleStartSprint}
-                    className="relative w-full rounded-full border border-[#1D9E75]/65 bg-[#1D9E75]/15 py-4 text-[12px] uppercase tracking-[0.22em] text-[#3DD4A0] transition hover:bg-[#1D9E75]/50">
+                    disabled={!selectedGoal}
+                    className="relative w-full rounded-full border border-[#1D9E75]/65 bg-[#1D9E75]/15 py-4 text-[12px] uppercase tracking-[0.22em] text-[#3DD4A0] transition hover:bg-[#1D9E75]/50 disabled:opacity-40 disabled:cursor-not-allowed">
                     <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#5DCAA5]/70 to-transparent" />
                     {t('fuel_startSprint')}
                   </button>
@@ -920,7 +1023,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
-                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
+                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>
             </div>
@@ -1188,7 +1291,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
-                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
+                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>
             </div>
@@ -1200,7 +1303,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="relative rounded-[24px] border border-white/10 bg-[#040B14] px-10 py-8 flex flex-col items-center gap-6 shadow-[0_0_80px_rgba(0,0,0,0.8)]">
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] bg-gradient-to-r from-transparent via-[#1D9E75] to-transparent opacity-70" />
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80">Connect Phone</p>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80">{t('fuel_connectPhone')}</p>
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://app.lonaralabs.com/capture?token=${qrToken}`)}&bgcolor=040B14&color=3DD4A0`}
               alt="QR Code"

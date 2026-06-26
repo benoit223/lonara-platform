@@ -128,6 +128,7 @@ interface Supplement {
 
 interface OptimizeSectionProps {
   lastAssessment: any
+  onGoToFuel?: () => void
 }
 
 const PERIOD_ICONS: Record<string, any> = {
@@ -361,7 +362,7 @@ function ConditionsPanel({ userId }: { userId: string | null }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 overflow-y-auto max-h-[480px] pr-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+    <div className="flex flex-col gap-4 overflow-y-auto max-h-[420px] pr-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
 
 {/* CATÉGORIES — 2 colonnes */}
 <div className="grid grid-cols-2 gap-3">
@@ -487,7 +488,7 @@ function ConditionsPanel({ userId }: { userId: string | null }) {
   )
 }
 
-export default function OptimizeSection({ lastAssessment }: OptimizeSectionProps) {
+export default function OptimizeSection({ lastAssessment, onGoToFuel }: OptimizeSectionProps) {
   const t = useTranslations('myspace')
 
   const TIMING_OPTIONS = [
@@ -599,7 +600,7 @@ export default function OptimizeSection({ lastAssessment }: OptimizeSectionProps
             className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] transition border ${
               tab === id
                 ? 'border-[#035AA8]/60 bg-[#035AA8]/30 text-white/80'
-                : 'border-white/10 text-white/30 hover:text-white/60'
+                : 'border-white/35 text-white/70 hover:text-white/90'
             }`}>
             {icon}
             {label}

@@ -219,8 +219,7 @@ if (allAssessments) {
       setMemberTier('guest')
       setFullName('')
       setEmail('')
-
-
+setHasFuelSprint(false)
       setStep('hero')
      
       
@@ -597,7 +596,7 @@ onClick={() => {
   setMemberTier('guest')
   setFullName('')
   setEmail('')
-
+setHasFuelSprint(false)
   localStorage.removeItem('lonara-auth-token')
   sessionStorage.clear()
 

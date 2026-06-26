@@ -23,6 +23,18 @@ const locale   = formData.get('locale') as string || 'en'
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Résoudre le sprint actif si non fourni
+    let resolvedSprintId = sprintId || null
+    if (!resolvedSprintId) {
+      const { data: activeSprint } = await supabase
+        .from('fuel_sprints')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .maybeSingle()
+      resolvedSprintId = activeSprint?.id ?? null
+    }
+
     // ── Charger le contexte Lonara du membre ──────────────────────────────
     const { data: profile } = await supabase
       .from('profiles')
@@ -191,7 +203,7 @@ Respond in this language: ${locale}`
       .from('fuel_logs')
       .insert({
         user_id:         userId,
-        sprint_id:       sprintId || null,
+        sprint_id:       resolvedSprintId,
         meal_time:       mealTime,
         time_of_day:     timeOfDay,
         image_url:       imageUrl,
@@ -208,6 +220,33 @@ Respond in this language: ${locale}`
     if (logError) {
       console.error('fuel_logs insert error:', logError)
       return NextResponse.json({ error: 'Failed to save log' }, { status: 500 })
+    }
+
+    // ── Plate of the Month ────────────────────────────────────────────────
+    if (parsed.fuel_score && imageUrl) {
+      const currentMonth = new Date().toISOString().slice(0, 7)
+
+      const { data: existing } = await supabase
+        .from('fuel_best_meals')
+        .select('fuel_score')
+        .eq('user_id', userId)
+        .eq('meal_time', mealTime)
+        .eq('month', currentMonth)
+        .maybeSingle()
+
+      if (!existing || parsed.fuel_score > existing.fuel_score) {
+        await supabase
+          .from('fuel_best_meals')
+          .upsert({
+            user_id:    userId,
+            meal_time:  mealTime,
+            fuel_score: parsed.fuel_score,
+            image_url:  imageUrl,
+            log_id:     log.id,
+            month:      currentMonth,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id,meal_time,month' })
+      }
     }
 
     return NextResponse.json({ log, analysis: parsed })

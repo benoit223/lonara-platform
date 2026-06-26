@@ -99,7 +99,7 @@ export default function CapturePage() {
       formData.append('image', file)
       formData.append('mealTime', getMealTime())
       formData.append('note', '')
-      formData.append('sprintId', sprintId ?? '')
+      formData.append('sprintId', '')
       formData.append('userId', userId)
       formData.append('locale', navigator.language.split('-')[0])
       const response = await fetch('/api/fuel-analyze', { method: 'POST', body: formData })
@@ -143,8 +143,10 @@ export default function CapturePage() {
                 <div className="flex items-center gap-4">
                   {/* Icône partage iOS */}
                   <div className="w-8 h-8 rounded-[7px] bg-white/10 flex items-center justify-center shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 3v13M6 8l6-6 6 6"/><path d="M3 18h18v3H3z" strokeWidth="1.5"/>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 15V3"/>
+                      <path d="M8 7l4-4 4 4"/>
+                      <path d="M4 13v6a1 1 0 001 1h14a1 1 0 001-1v-6"/>
                     </svg>
                   </div>
                   <p className="text-[13px] text-white/80 text-left">Appuyez sur ce bouton dans Safari</p>

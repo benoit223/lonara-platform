@@ -5,9 +5,11 @@
     "reports": "REPORTS",
     "science": "SCIENCE",
     "labs": "LABS",
-    "myspace": "MY SPACE"
+    "myspace": "MY SPACE",
+    "myfuel": "My Fuel"
   },
 "myspace": {
+"fuel_plateOfMonth": "Plate of the Month",
   "fuel_connectPhoneClose": "Close",
   "fuel_connectPhoneDesc": "Scan with your phone camera — expires in 10 minutes",
   "fuel_connectPhone": "Connect Phone",
