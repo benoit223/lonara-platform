@@ -1202,7 +1202,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] bg-gradient-to-r from-transparent via-[#1D9E75] to-transparent opacity-70" />
             <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80">Connect Phone</p>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`http://192.168.0.13:3000/fr/capture?token=${qrToken}`)}&bgcolor=040B14&color=3DD4A0`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://app.lonaralabs.com/capture?token=${qrToken}`)}&bgcolor=040B14&color=3DD4A0`}
               alt="QR Code"
               className="w-[200px] h-[200px] rounded-[12px]"
             />
