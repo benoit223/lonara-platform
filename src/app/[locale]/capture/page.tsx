@@ -48,6 +48,8 @@ export default function CapturePage() {
         // Si pas encore installé comme PWA — afficher écran installation
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches
         if (!isInstalled) {
+          // Mettre le userId dans l'URL pour que la PWA puisse le lire
+          window.history.replaceState({}, '', `/fr/capture?uid=${data.userId}&sid=${data.sprintId ?? ''}`)
           setStatus('install')
           return
         }
@@ -56,9 +58,9 @@ export default function CapturePage() {
         return
       }
 
-      // Pas de token — lire localStorage
-      const uid = localStorage.getItem(LS_UID)
-      const sid = localStorage.getItem(LS_SID)
+      // Lire uid depuis URL (PWA installée avec cette URL)
+      const uid = searchParams.get('uid') || localStorage.getItem(LS_UID)
+      const sid = searchParams.get('sid') || localStorage.getItem(LS_SID)
 
       if (uid) {
         setUserId(uid)
@@ -207,7 +209,7 @@ export default function CapturePage() {
               </div>
               <div className="animate-bounce text-[#3DD4A0] text-2xl">↑</div>
               <button
-                onClick={() => setStatus('auth')}
+                onClick={() => setStatus('idle')}
                 className="text-[11px] uppercase tracking-[0.18em] text-white/30 mt-2">
                 Déjà installé
               </button>
