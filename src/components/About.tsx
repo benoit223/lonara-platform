@@ -188,6 +188,41 @@ export default function About({ onClose }: AboutProps) {
             <p>{t('section7.p2')}</p>
           </section>
 
+          {/* SECTION MY FUEL */}
+          <section className="space-y-3 md:space-y-4 pt-6 md:pt-8">
+            <p className="text-[1.1rem] md:text-[1.4rem] tracking-[0.04em] text-[#C7AC60]/80 mb-3 md:mb-5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {t('myfuelTitle')}
+            </p>
+            <p>{t('myfuelP1')}</p>
+            <p>{t('myfuelP2')}</p>
+            <div className="rounded-[1.2rem] md:rounded-[1.5rem] border border-[#C7AC60]/10 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[#C7AC60] uppercase tracking-[0.18em] text-[10px] md:text-[11px] mb-3 md:mb-4">{t('myfuelLabel')}</p>
+              <ul className="space-y-2 md:space-y-3 list-disc pl-5 text-white/70">
+                {(t.raw('myfuelFeatures') as string[]).map((item: string, i: number) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <p>{t('myfuelP3')}</p>
+          </section>
+
+          {/* SECTION BIOMARKERS ACTIFS */}
+          <section className="space-y-3 md:space-y-4 pt-6 md:pt-8">
+            <p className="text-[1.1rem] md:text-[1.4rem] tracking-[0.04em] text-[#C7AC60]/80 mb-3 md:mb-5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {t('biomarkersActiveTitle')}
+            </p>
+            <p>{t('biomarkersActiveP1')}</p>
+            <div className="rounded-[1.2rem] md:rounded-[1.5rem] border border-[#C7AC60]/10 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[#C7AC60] uppercase tracking-[0.18em] text-[10px] md:text-[11px] mb-3 md:mb-4">{t('biomarkersActiveLabel')}</p>
+              <ul className="space-y-2 md:space-y-3 list-disc pl-5 text-white/70">
+                {(t.raw('biomarkersActivePanels') as string[]).map((item: string, i: number) => (
+                  <li key={i}><strong>{item.split(' — ')[0]}</strong>{item.includes(' — ') ? ` — ${item.split(' — ')[1]}` : ''}</li>
+                ))}
+              </ul>
+            </div>
+            <p>{t('biomarkersActiveP2')}</p>
+          </section>
+
           {/* SECTION 08 */}
           <section className="space-y-3 md:space-y-4 pt-6 md:pt-8">
             <p className="text-[1.5rem] md:text-[2.0rem] tracking-[0.04em] text-[#C7AC60] mb-3 md:mb-5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>

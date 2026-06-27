@@ -16,7 +16,7 @@ interface FuelSpaceProps {
 
 // ── TYPES ─────────────────────────────────────────────────────────────────────
 type SprintMode = 'pulse' | 'rhythm' | 'protocol'
-type ActiveSection = 'today' | 'evolve' | 'feed' | 'scan' | 'setup' | null
+type ActiveSection = 'today' | 'evolve' | 'feed' | 'report' | 'scan' | 'setup' | null
 
 interface MacroTargets {
   protein_g: { min: number; max: number }
@@ -455,7 +455,164 @@ function BestMealCards({ userId }: { userId: string }) {
   )
 }
 
+function ReportSection({ userId, allLogs, onSendGlobal, onSendDetail, sendingGlobal, sendingDetail, sentGlobal, sentDetail, period, setPeriod }: {
+  userId: string | null
+  allLogs: FuelLog[]
+  onSendGlobal: () => void
+  onSendDetail: () => void
+  sendingGlobal: boolean
+  sendingDetail: boolean
+  sentGlobal: boolean
+  sentDetail: boolean
+  period: '30' | '90' | '180'
+  setPeriod: (p: '30' | '90' | '180') => void
+}) {
+  const t = useTranslations('myspace')
 
+  const since = new Date()
+  since.setDate(since.getDate() - parseInt(period))
+
+  const filteredLogs = allLogs.filter(l => new Date(l.created_at) >= since && l.fuel_score != null)
+
+  const avgScore = filteredLogs.length
+    ? Math.round(filteredLogs.reduce((s, l) => s + (l.fuel_score ?? 0), 0) / filteredLogs.length)
+    : null
+
+  const byMeal = ['breakfast', 'lunch', 'dinner', 'snack'].map(meal => {
+    const ml = filteredLogs.filter(l => l.meal_time === meal)
+    return {
+      meal,
+      count: ml.length,
+      avg: ml.length ? Math.round(ml.reduce((s, l) => s + (l.fuel_score ?? 0), 0) / ml.length) : null,
+    }
+  })
+
+  const mealKeys: Record<string, string> = {
+    breakfast: 'fuel_breakfast',
+    lunch: 'fuel_lunch',
+    dinner: 'fuel_dinner',
+    snack: 'fuel_snack',
+  }
+
+  const avgProtein = filteredLogs.filter(l => l.macros).length
+    ? Math.round(filteredLogs.filter(l => l.macros).reduce((s, l) => s + (l.macros?.protein ?? 0), 0) / filteredLogs.filter(l => l.macros).length)
+    : null
+
+  const avgCarbs = filteredLogs.filter(l => l.macros).length
+    ? Math.round(filteredLogs.filter(l => l.macros).reduce((s, l) => s + (l.macros?.carbs ?? 0), 0) / filteredLogs.filter(l => l.macros).length)
+    : null
+
+  const avgFat = filteredLogs.filter(l => l.macros).length
+    ? Math.round(filteredLogs.filter(l => l.macros).reduce((s, l) => s + (l.macros?.fat ?? 0), 0) / filteredLogs.filter(l => l.macros).length)
+    : null
+
+  const avgKcal = filteredLogs.filter(l => l.macros).length
+    ? Math.round(filteredLogs.filter(l => l.macros).reduce((s, l) => s + (l.macros?.kcal ?? 0), 0) / filteredLogs.filter(l => l.macros).length)
+    : null
+
+  return (
+    <div>
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-3">{t('fuel_menuReport')}</p>
+      <h2 className="text-[3rem] lg:text-[3.6rem] font-light leading-none text-[#EAE4D5] mb-6"
+        style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+        {t('fuel_reportTitle')}
+      </h2>
+
+      {/* Sélecteur période + boutons PDF */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        {([['30', t('fuel_report30')], ['90', t('fuel_report90')], ['180', t('fuel_report180')]] as [string, string][]).map(([val, label]) => (
+          <button key={val} onClick={() => setPeriod(val as any)}
+            className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-all ${
+              period === val ? 'border-[#1D9E75]/70 bg-[#1D9E75]/15 text-[#3DD4A0]' : 'border-white/10 text-white/55 hover:border-white/25'
+            }`}>
+            {label}
+          </button>
+        ))}
+        <div className="ml-auto flex gap-2">
+          <button onClick={onSendGlobal} disabled={sendingGlobal || filteredLogs.length === 0}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/55 transition hover:border-[#1D9E75]/45 hover:text-[#3DD4A0] disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {sendingGlobal ? t('fuel_reportSending') : sentGlobal ? t('fuel_reportSent') : t('fuel_reportGlobal')}
+          </button>
+          <button onClick={onSendDetail} disabled={sendingDetail || filteredLogs.length === 0}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/55 transition hover:border-[#1D9E75]/45 hover:text-[#3DD4A0] disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {sendingDetail ? t('fuel_reportSending') : sentDetail ? t('fuel_reportSent') : t('fuel_reportDetail')}
+          </button>
+        </div>
+      </div>
+
+      {filteredLogs.length === 0 ? (
+        <p className="text-[14px] italic text-white/55" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+          {t('fuel_reportEmpty')}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4">
+
+          {/* Score global */}
+          <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-1">{t('fuel_reportAvgScore')}</p>
+                <p className="text-[3rem] font-light leading-none"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: avgScore ? scoreColor(avgScore) : '#EAE4D5' }}>
+                  {avgScore ?? '—'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-1">{t('fuel_reportTotal')}</p>
+                <p className="text-[3rem] font-light leading-none text-[#EAE4D5]/70"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                  {filteredLogs.length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Score par repas */}
+          <div className="grid grid-cols-4 gap-2">
+            {byMeal.map(({ meal, count, avg }) => (
+              <div key={meal} className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+                <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t(mealKeys[meal] as any)}</p>
+                <p className="text-[1.4rem] font-light leading-none mb-1"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: avg ? scoreColor(avg) : '#ffffff30' }}>
+                  {avg ?? '—'}
+                </p>
+                <p className="text-[9px] text-white/30">{count} {t('fuel_meals')}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Macros moyennes */}
+          <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-4">{t('fuel_reportAvgMacros')}</p>
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { label: t('fuel_protein'), val: avgProtein, unit: 'g', color: '#1D9E75' },
+                { label: t('fuel_carbs'),   val: avgCarbs,   unit: 'g', color: '#E7C980' },
+                { label: t('fuel_fat'),     val: avgFat,     unit: 'g', color: '#5C96D8' },
+                { label: t('fuel_kcal'),    val: avgKcal,    unit: '',  color: '#EAE4D5' },
+              ].map(m => (
+                <div key={m.label}>
+                  <p className="text-[9px] uppercase tracking-[0.14em] text-white/40 mb-1">{m.label}</p>
+                  <p className="text-[1.4rem] font-light leading-none"
+                    style={{ fontFamily: "'Cormorant Garamond', serif", color: m.color }}>
+                    {m.val ?? '—'}<span className="text-[11px] text-white/30">{m.unit}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  )
+}
 
 function ScanSection({ activeSprint, userId, limitReached, imageFile, setImageFile, imagePreview, setImagePreview, mealTime, setMealTime, note, setNote, isAnalyzing, handleAnalyze, fileInputRef, handleImageChange }: {
   activeSprint: FuelSprint | null
@@ -651,6 +808,11 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
   const [showQR,       setShowQR]       = useState(false)
   const [qrToken,      setQrToken]      = useState<string | null>(null)
   const [userId,       setUserId]       = useState<string | null>(null)
+  const [reportPeriod, setReportPeriod] = useState<'30' | '90' | '180'>('30')
+  const [sendingGlobal, setSendingGlobal] = useState(false)
+  const [sendingDetail, setSendingDetail] = useState(false)
+  const [sentGlobal, setSentGlobal] = useState(false)
+  const [sentDetail, setSentDetail] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const t = useTranslations('myspace')
@@ -789,6 +951,35 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
     } finally { setIsAnalyzing(false) }
   }
 
+  // ── REPORT SEND ─────────────────────────────────────────────────────────────
+  const handleSendReport = async (type: 'global' | 'detail') => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.email) return
+    const setSending = type === 'global' ? setSendingGlobal : setSendingDetail
+    const setSent    = type === 'global' ? setSentGlobal    : setSentDetail
+    setSending(true)
+    setSent(false)
+    try {
+      await fetch('/api/fuel-report-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          period: reportPeriod,
+          locale,
+          type,
+          email: user.email,
+          fullName,
+        }),
+      })
+      setSent(true)
+    } catch (e) {
+      console.error('fuel report send error:', e)
+    } finally {
+      setSending(false)
+    }
+  }
+
   // ── QR CONNECT PHONE ────────────────────────────────────────────────────────
   const generateQRToken = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -835,7 +1026,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
   return (
     <section className="fixed inset-0 overflow-hidden bg-cover bg-center"
       style={{ backgroundImage: `url('${currentBg}')` }}>
-      <div className="absolute inset-0 bg-[#02040A]/8" />
+      {/* */}
 
       {/* ── NAVBAR ── */}
       <div className="hidden md:block relative z-40 mx-auto mt-4 max-w-[1850px] px-4 md:px-6 lg:px-0">
@@ -977,6 +1168,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                   { id: 'today' as ActiveSection,  label: t('fuel_menuToday')    },
                   { id: 'evolve' as ActiveSection, label: t('fuel_menuEvolve')   },
                   { id: 'feed' as ActiveSection,   label: t('fuel_menuFeed')     },
+                  { id: 'report' as ActiveSection, label: t('fuel_menuReport')   },
                 ] as { id: ActiveSection; label: string }[]).map((item) => {
                   const isActive = activeSection === item.id
                   return (
@@ -996,9 +1188,6 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                   )
                 })}
 
-                <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
-
-                {/* Actions directes */}
                 <button onClick={() => setActiveSection(prev => prev === 'scan' ? null : 'scan')}
                   className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border transition-all duration-200 ${activeSection === 'scan' ? 'bg-black/8 border-black/10' : 'border-transparent hover:bg-black/[0.04]'}`}>
                   {activeSection === 'scan' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#1D9E75]" />}
@@ -1015,16 +1204,12 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                   </span>
                   {activeSection === 'setup' && <ChevronRight className="ml-auto h-3 w-3 text-white/50" />}
                 </button>
-
-                <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
-
                 <button onClick={generateQRToken}
                   className="group flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200">
                   <span className="text-[12px] uppercase tracking-[0.24em] text-white/65 group-hover:text-white/75">
                     {t('fuel_connectPhone')}
                   </span>
                 </button>
-                <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
                 <button onClick={onSignOut}
                   className="group flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200">
                   <span className="text-[12px] uppercase tracking-[0.24em] text-white/65 group-hover:text-white/75">
@@ -1044,6 +1229,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
+                {activeSection === 'report' && <ReportSection userId={userId} allLogs={allLogs} onSendGlobal={() => handleSendReport('global')} onSendDetail={() => handleSendReport('detail')} sendingGlobal={sendingGlobal} sendingDetail={sendingDetail} sentGlobal={sentGlobal} sentDetail={sentDetail} period={reportPeriod} setPeriod={setReportPeriod} />}
                 {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} limitReached={limitReached} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>
@@ -1236,8 +1422,14 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                     )
                   })}
 
-                  <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
-
+                  <button onClick={() => setActiveSection(prev => prev === 'report' ? null : 'report')}
+                    className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border transition-all ${activeSection === 'report' ? 'bg-black/8 border-black/10' : 'border-transparent'}`}>
+                    {activeSection === 'report' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#1D9E75]" />}
+                    <span className={`text-[11px] uppercase tracking-[0.24em] ${activeSection === 'report' ? 'text-[#3DD4A0] font-medium' : 'text-white/65'}`}>
+                      {t('fuel_menuReport')}
+                    </span>
+                    {activeSection === 'report' && <ChevronRight className="ml-auto h-3 w-3 text-white/50" />}
+                  </button>
                   <button onClick={() => setActiveSection(prev => prev === 'scan' ? null : 'scan')}
                     className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border transition-all ${activeSection === 'scan' ? 'bg-black/8 border-black/10' : 'border-transparent'}`}>
                     {activeSection === 'scan' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#1D9E75]" />}
@@ -1256,7 +1448,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                     {activeSection === 'setup' && <ChevronRight className="ml-auto h-3 w-3 text-white/50" />}
                   </button>
 
-                  <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
+                  
 
                   <button onClick={generateQRToken}
                     className="group flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all">
@@ -1264,7 +1456,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                       {t('fuel_connectPhone')}
                     </span>
                   </button>
-                  <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
+                  
                   <button onClick={onSignOut}
                     className="group flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all">
                     <span className="text-[11px] uppercase tracking-[0.24em] text-white/65">
@@ -1319,6 +1511,7 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
+                {activeSection === 'report' && <ReportSection userId={userId} allLogs={allLogs} onSendGlobal={() => handleSendReport('global')} onSendDetail={() => handleSendReport('detail')} sendingGlobal={sendingGlobal} sendingDetail={sendingDetail} sentGlobal={sentGlobal} sentDetail={sentDetail} period={reportPeriod} setPeriod={setReportPeriod} />}
                 {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} limitReached={limitReached} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>

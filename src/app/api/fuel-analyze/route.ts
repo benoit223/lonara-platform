@@ -230,17 +230,19 @@ Respond in this language: ${locale}`
     const { data: log, error: logError } = await supabase
       .from('fuel_logs')
       .insert({
-        user_id:         userId,
-        sprint_id:       resolvedSprintId,
-        meal_time:       mealTime,
-        time_of_day:     timeOfDay,
-        image_url:       imageUrl,
-        note:            note || null,
-        macros:          parsed.macros ?? null,
-        fuel_score:      parsed.fuel_score ?? null,
-        alerts:          parsed.alerts ?? null,
-        recommendations: parsed.recommendations ?? null,
-        ai_narrative:    parsed.ai_narrative ?? null,
+        user_id:          userId,
+        sprint_id:        resolvedSprintId,
+        meal_time:        mealTime,
+        time_of_day:      timeOfDay,
+        image_url:        imageUrl,
+        note:             note || null,
+        macros:           parsed.macros ?? null,
+        fuel_score:       parsed.fuel_score ?? null,
+        alerts:           parsed.alerts ?? null,
+        recommendations:  parsed.recommendations ?? null,
+        ai_narrative:     parsed.ai_narrative ?? null,
+        identified_foods: parsed.identified_foods ?? null,
+        score_rationale:  parsed.score_rationale ?? null,
       })
       .select()
       .single()

@@ -8,6 +8,20 @@
     "myfuel": "Mi Combustible"
   },
 "myspace": {
+ "fuel_reportGlobal": "Análisis global",
+"fuel_reportDetail": "Detalle de comidas",
+"fuel_reportSending": "Generando...",
+"fuel_reportSent": "Enviado ✓",
+"fuel_reportNoData": "Sin datos para este período.",
+"fuel_reportTitle": "Informe Nutricional",
+"fuel_report30": "30 días",
+"fuel_report90": "90 días",
+"fuel_report180": "6 meses",
+"fuel_reportAvgScore": "Puntuación media",
+"fuel_reportTotal": "Total scans",
+"fuel_reportAvgMacros": "Macros promedio por comida",
+"fuel_reportEmpty": "No hay suficientes datos para este período.",
+  "fuel_menuReport": "Informe",
   "signOut": "Cerrar sesión",
   "fuel_limitReached": "Límite de escaneos alcanzado para su plan. Actualice para continuar.",
 "fuel_plateOfMonth": "Plato del Mes",
@@ -316,73 +330,74 @@
     "privacyPolicy": "POLÍTICA DE PRIVACIDAD",
     "copyright": "© 2026 — Todos los derechos reservados — LONARA LABS"
   },
-  "about": {
-    "label": "ACERCA DE",
-    "title": "Lonara Labs",
-    "subtitle": "Descripción General de la Plataforma: Transformando la Longevidad en una Experiencia de Vida Premium",
-    "back": "Volver",
-    "section1": {
-      "title": "01 · Quiénes somos",
-      "p1": "Lonara Labs es un ecosistema de longevidad premium en la intersección de la ciencia, el estilo de vida y la experiencia humana. Transformamos la compleja ciencia de la optimización biológica en rituales diarios accesibles y emocionalmente resonantes — diseñados no solo para el rendimiento, sino para la calidad de una vida vivida con intención.",
-      "p2": "Fundado en una convicción profundamente personal — que la salud sostenible se construye a través de la consistencia, no del azar — Lonara fue creado por un padre que eligió vivir más tiempo. Ese origen está tejido en todo lo que construimos: nuestras formulaciones, nuestros entornos, nuestra plataforma de inteligencia digital y nuestra comunidad.",
-      "p3": "No somos una empresa de suplementos. Somos una plataforma de cultura de la longevidad.",
-      "missionLabel": "Nuestra Misión",
-      "mission": "Hacer la optimización de la longevidad más humana — más bella, más accesible y más significativa de lo que el bienestar clínico ha permitido.",
-      "visionLabel": "Nuestra Visión",
-      "vision": "Convertirnos en la plataforma de estilo de vida de longevidad premium más reconocida del mundo — uniendo ciencia, naturaleza, ritual, diseño y comunidad en una experiencia atemporal.",
-      "quote": "La precisión es el nuevo lujo. El cuerpo ya lo sabe. Simplemente restauramos las condiciones."
-    },
-    "section2": {
-      "title": "02 · Posicionamiento en el Mercado",
-      "p1": "La economía mundial del bienestar y la longevidad alcanzó los 6,8 billones de dólares en 2024 y continúa expandiéndose rápidamente. Los consumidores ya no buscan solo productos — buscan experiencias, identidad, rituales y pertenencia.",
-      "p2": "Simultáneamente, la hospitalidad de lujo, el turismo de bienestar y el comercio experiencial están redefiniendo las expectativas de los consumidores. Persiste una brecha entre la ciencia clínica de la longevidad y el branding de estilo de vida aspiracional.",
-      "whiteSpaceLabel": "EL ESPACIO QUE OCUPAMOS",
-      "whiteSpace1": "La ciencia de la longevidad entrando en la cultura mainstream",
-      "whiteSpace2": "El comercio experiencial premium redefiniendo las expectativas globales",
-      "whiteSpace3": "Una nueva generación que busca marcas que representen filosofías, no solo productos",
-      "whiteSpaceConclusion": "Estamos aguas abajo de la ciencia — traduciéndola en cultura.",
-      "differenceLabel": "Nuestra Diferencia Competitiva",
-      "difference": "Donde algunas empresas representan la optimización extrema basada en datos, y donde las instituciones científicas representan la investigación — Lonara representa la experiencia, la atmósfera, la accesibilidad y la cultura emocional de vivir en longevidad."
-    },
-    "section3": {
-      "title": "03 · El Marco",
-      "p1": "Todo el ecosistema Lonara está estructurado en torno a cuatro dimensiones universales del bienestar a largo plazo. Estos pilares forman la arquitectura de nuestra gama de productos, nuestra plataforma de evaluación biológica, nuestros entornos minoristas y nuestra filosofía de contenido.",
-      "activateLabel": "ACTIVAR",
-      "activate": "Energía, cognición y activación metabólica. La fuerza detrás de la vitalidad diaria, la claridad y el rendimiento.",
-      "balanceLabel": "EQUILIBRAR",
-      "balance": "Estabilidad autonómica y regulación del estrés. Equilibrio emocional y armonía hormonal a lo largo del día.",
-      "protectLabel": "PROTEGER",
-      "protect": "Gestión de la inflamación y defensa oxidativa. Resiliencia celular a largo plazo e integridad inmunológica.",
-      "restoreLabel": "RESTAURAR",
-      "restore": "Profundidad de recuperación y capacidad regenerativa. Calidad del sueño, reparación tisular y renovación biológica.",
-      "p2": "Cada pilar corresponde a una línea de productos específica, un conjunto de marcadores biológicos rastreados en nuestra plataforma de evaluación y un conjunto de recomendaciones de protocolos personalizados.",
-      "p3": "La arquitectura de cuatro pilares también impulsa nuestra experiencia minorista: cada quiosco boutique, unidad móvil y expositor de socios está organizado en torno a estos pilares."
-    },
+ "about": {
+  "label": "ACERCA DE",
+  "title": "Lonara Labs",
+  "subtitle": "Descripción General de la Plataforma: Transformando la Longevidad en una Experiencia de Vida Premium",
+  "back": "Volver",
+  "section1": {
+    "title": "01 · Quiénes somos",
+    "p1": "Lonara Labs es un ecosistema de longevidad premium en la intersección de la ciencia, el estilo de vida y la experiencia humana. Transformamos la compleja ciencia de la optimización biológica en rituales diarios accesibles y emocionalmente resonantes — diseñados no solo para el rendimiento, sino para la calidad de una vida vivida con intención.",
+    "p2": "Fundado en una convicción profundamente personal — que la salud sostenible se construye a través de la consistencia, no del azar — Lonara fue creado por un padre que eligió vivir más tiempo. Ese origen está tejido en todo lo que construimos: nuestras formulaciones, nuestros entornos, nuestra plataforma de inteligencia digital y nuestra comunidad.",
+    "p3": "No somos una empresa de suplementos. Somos una plataforma de cultura de la longevidad.",
+    "missionLabel": "Nuestra Misión",
+    "mission": "Hacer la optimización de la longevidad más humana — más bella, más accesible y más significativa de lo que el bienestar clínico ha permitido.",
+    "visionLabel": "Nuestra Visión",
+    "vision": "Convertirnos en la plataforma de estilo de vida de longevidad premium más reconocida del mundo — uniendo ciencia, naturaleza, ritual, diseño y comunidad en una experiencia atemporal.",
+    "quote": "La precisión es el nuevo lujo. El cuerpo ya lo sabe. Simplemente restauramos las condiciones."
+  },
+  "section2": {
+    "title": "02 · Posicionamiento en el Mercado",
+    "p1": "La economía mundial del bienestar y la longevidad alcanzó los 6,8 billones de dólares en 2024 y continúa expandiéndose rápidamente. Los consumidores ya no buscan solo productos — buscan experiencias, identidad, rituales y pertenencia.",
+    "p2": "Simultáneamente, la hospitalidad de lujo, el turismo de bienestar y el comercio experiencial están redefiniendo las expectativas de los consumidores. Persiste una brecha entre la ciencia clínica de la longevidad y el branding de estilo de vida aspiracional.",
+    "whiteSpaceLabel": "EL ESPACIO QUE OCUPAMOS",
+    "whiteSpace1": "La ciencia de la longevidad entrando en la cultura mainstream",
+    "whiteSpace2": "El comercio experiencial premium redefiniendo las expectativas globales",
+    "whiteSpace3": "Una nueva generación que busca marcas que representen filosofías, no solo productos",
+    "whiteSpaceConclusion": "Estamos aguas abajo de la ciencia — traduciéndola en cultura.",
+    "differenceLabel": "Nuestra Diferencia Competitiva",
+    "difference": "Donde algunas empresas representan la optimización extrema basada en datos, y donde las instituciones científicas representan la investigación — Lonara representa la experiencia, la atmósfera, la accesibilidad y la cultura emocional de vivir en longevidad."
+  },
+  "section3": {
+    "title": "03 · El Marco",
+    "p1": "Todo el ecosistema Lonara está estructurado en torno a cuatro dimensiones universales del bienestar a largo plazo. Estos pilares forman la arquitectura de nuestra gama de productos, nuestra plataforma de evaluación biológica, nuestros entornos minoristas y nuestra filosofía de contenido.",
+    "activateLabel": "ACTIVAR",
+    "activate": "Energía, cognición y activación metabólica. La fuerza detrás de la vitalidad diaria, la claridad y el rendimiento.",
+    "balanceLabel": "EQUILIBRAR",
+    "balance": "Estabilidad autonómica y regulación del estrés. Equilibrio emocional y armonía hormonal a lo largo del día.",
+    "protectLabel": "PROTEGER",
+    "protect": "Gestión de la inflamación y defensa oxidativa. Resiliencia celular a largo plazo e integridad inmunológica.",
+    "restoreLabel": "RESTAURAR",
+    "restore": "Profundidad de recuperación y capacidad regenerativa. Calidad del sueño, reparación tisular y renovación biológica.",
+    "p2": "Cada pilar corresponde a una línea de productos específica, un conjunto de marcadores biológicos rastreados en nuestra plataforma de evaluación y un conjunto de recomendaciones de protocolos personalizados.",
+    "p3": "La arquitectura de cuatro pilares también impulsa nuestra experiencia minorista: cada quiosco boutique, unidad móvil y expositor de socios está organizado en torno a estos pilares."
+  },
   "section4": {
     "title": "04 · La Plataforma Digital",
     "p1": "La aplicación Lonara Labs es una plataforma de inteligencia de longevidad diseñada para ayudar a las personas a comprender y optimizar mejor su resiliencia biológica, capacidad de recuperación y potencial de bienestar a largo plazo. Disponible en app.lonaralabs.com, representa el núcleo tecnológico del ecosistema Lonara.",
-    "p2": "La plataforma combina evaluación conductual estructurada, puntuación biológica multidimensional e interpretación impulsada por IA para generar perfiles de longevidad profundamente personalizados. Transforma datos biológicos complejos en estrategias de optimización claras y accionables — entregadas a través de una interfaz moderna, altamente visual y emocionalmente considerada.",
+    "p2": "La plataforma combina evaluación conductual estructurada, puntuación biológica multidimensional e interpretación impulsada por IA para generar perfiles de longevidad profundamente personalizados.",
     "deliversLabel": "Lo que Ofrece la Plataforma",
     "delivers": [
       "Una evaluación biológica completa de más de 155 preguntas que abarca 32 dominios de salud",
       "Puntuación biológica personalizada en energía, estrés, sueño, recuperación, intestino, inflamación, cognición, equilibrio hormonal, metabolismo, salud cardiovascular, resiliencia inmune y más",
-      "Una Puntuación de Coherencia Biológica en vivo — un índice compuesto de resiliencia sistémica actualizado en tiempo real a medida que se completan las evaluaciones",
+      "Una Puntuación de Coherencia Biológica en vivo — un índice compuesto de resiliencia sistémica actualizado en tiempo real",
       "Estimación de Edad Biológica vs. Edad Cronológica, basada en patrones de respuesta ponderados",
       "Una Puntuación de Longevidad completa con clasificación por percentil de población",
       "Informes PDF premium descargables con análisis visuales, mapas de calor de recuperación, estimación de edad biológica y recomendaciones de protocolo personalizadas",
       "Interpretación de resultados impulsada por IA — insights en lenguaje claro que traducen puntuaciones en orientación significativa y accionable",
       "Experiencia de Membresía Premium (Disponible en Planes Avanzados)",
-      "Un Panel Lonara privado que proporciona seguimiento longitudinal del rendimiento biológico y trayectoria de salud a lo largo del tiempo",
+      "Un Panel My Space privado que proporciona seguimiento longitudinal del rendimiento biológico y trayectoria de salud",
       "Almacenamiento del historial de informes y análisis de tendencias en todas las evaluaciones completadas",
-      "Integración avanzada de biomarcadores, permitiendo un análisis más profundo de indicadores metabólicos, hormonales, inflamatorios, cardiovasculares, cognitivos y relacionados con la longevidad",
+      "Integración avanzada de 36 biomarcadores científicos en paneles metabólicos, hormonales, inflamatorios, epigenéticos, cardiovasculares, neurológicos y de longevidad",
+      "My Fuel — módulo de inteligencia nutricional IA: fotografíe cualquier comida para recibir instantáneamente un Fuel Score, desglose de macros, alertas de longevidad y narrativa IA personalizada",
       "Monitoreo dinámico del progreso con mapeo visual de tendencias y seguimiento de la evolución de la edad biológica",
       "Vías de optimización personalizadas que se adaptan a medida que se agregan nuevas evaluaciones y datos de biomarcadores",
       "Recomendaciones mejoradas impulsadas por IA basadas en datos longitudinales, patrones conductuales y tendencias de respuesta biológica",
       "Acceso a protocolos de longevidad avanzados, estrategias de intervención dirigidas e insights de salud de precisión",
-      "Acceso opcional a programas de optimización de longevidad de nivel concierge, combinando analítica avanzada, orientación de IA, inteligencia de biomarcadores y apoyo directo de un equipo multidisciplinario de expertos"
+      "Acceso opcional a programas de optimización de longevidad de nivel concierge"
     ],
     "scalableLabel": "Infraestructura Escalable",
-    "scalable": "La plataforma está construida sobre una arquitectura SaaS escalable que soporta la expansión futura hacia suscripciones recurrentes, integraciones de dispositivos wearables, seguimiento longitudinal en el tiempo y paneles de analítica de salud avanzados. La infraestructura de datos está diseñada desde cero para soportar Lonara Executive™ y las extensiones de nivel clínico descritas en la Sección 7."
+    "scalable": "La plataforma está construida sobre una arquitectura SaaS escalable que soporta la expansión futura hacia suscripciones recurrentes, integraciones de dispositivos wearables, seguimiento longitudinal en el tiempo y paneles de analítica de salud avanzados."
   },
   "section5": {
     "title": "05 · Evaluación Biológica",
@@ -422,12 +437,12 @@
       "Longevidad Avanzada — Optimización preventiva & compromiso de longevidad",
       "Bienestar Global — Salud biológica general & visión general de la vitalidad"
     ],
-    "p2": "Las preguntas están agrupadas en 32 secciones secuenciales, cada una con escalas de respuesta de múltiples puntos calibradas (que van desde escalas de frecuencia y severidad hasta escalas de capacidad e importancia). Cada pregunta lleva un peso individual, asegurando que los factores clínicamente significativos ejerzan una influencia proporcionalmente mayor en las puntuaciones finales.",
-    "p3": "El motor de puntuación calcula las puntuaciones de categorías ponderadas en tiempo real, alimentando un modelo de coherencia biológica compuesto que aparece como un porcentaje en vivo en pantalla. Los usuarios ven su perfil evolucionar a medida que responden — reforzando simultáneamente el compromiso y la credibilidad científica."
+    "p2": "Las preguntas están agrupadas en 32 secciones secuenciales, cada una con escalas de respuesta de múltiples puntos calibradas. Cada pregunta lleva un peso individual, asegurando que los factores clínicamente significativos ejerzan una influencia proporcionalmente mayor en las puntuaciones finales.",
+    "p3": "El motor de puntuación calcula las puntuaciones de categorías ponderadas en tiempo real, alimentando un modelo de coherencia biológica compuesto que aparece como un porcentaje en vivo en pantalla."
   },
   "section6": {
     "title": "06 · Puntuación & Análisis IA",
-    "p1": "La plataforma Lonara no simplemente presenta puntuaciones brutas. Las interpreta — transformando salidas numéricas en insights narrativos enmarcados clínicamente, recomendaciones prioritarias y protocolos de acción personalizados. Esta capa de traducción es lo que separa a Lonara de una herramienta de encuesta y la posiciona como una verdadera plataforma de inteligencia de longevidad.",
+    "p1": "La plataforma Lonara no simplemente presenta puntuaciones brutas. Las interpreta — transformando salidas numéricas en insights narrativos enmarcados clínicamente, recomendaciones prioritarias y protocolos de acción personalizados.",
     "architectureLabel": "La Arquitectura de Puntuación",
     "architecture": [
       "Cada una de las 32 puntuaciones de dominio se calcula utilizando respuestas a preguntas ponderadas, normalizadas a una escala de 0-100",
@@ -445,7 +460,7 @@
       "Una Firma Biológica — un arquetipo nombrado que caracteriza el perfil de salud actual del usuario",
       "Asignaciones de protocolo de cuatro pilares (Activar / Equilibrar / Proteger / Restaurar) basadas en la combinación específica de dominios de baja puntuación"
     ],
-    "p2": "Cada evaluación completada genera un protocolo de optimización estructurado — una hoja de ruta personalizada que mapea las debilidades de dominio hacia recomendaciones de productos específicos, ajustes de estilo de vida y prioridades de suplementación dentro del ecosistema Lonara. Los protocolos son específicos, accionables y se actualizan dinámicamente a medida que los usuarios completan reevaluaciones a lo largo del tiempo."
+    "p2": "Cada evaluación completada genera un protocolo de optimización estructurado — una hoja de ruta personalizada que mapea las debilidades de dominio hacia recomendaciones de productos específicos, ajustes de estilo de vida y prioridades de suplementación dentro del ecosistema Lonara."
   },
   "section7": {
     "title": "07 · Lonara Executive™",
@@ -462,8 +477,39 @@
       "Inteligencia Cardiovascular Avanzada — NT-proBNP, Lp(a), puntuación CAC, GDF-15 y marcadores de riesgo cardiovascular emergentes.",
       "Monitoreo Continuo de la Salud — Wearables, VFC, arquitectura del sueño, métricas de recuperación y monitoreo continuo de glucosa."
     ],
-    "p2": "A través de Lonara Executive™, las respuestas a cuestionarios, la inteligencia de biomarcadores, los datos de wearables, las evaluaciones históricas y el análisis impulsado por IA convergen en un modelo biológico en continua evolución. El resultado es un sistema operativo de longevidad dinámico capaz de rastrear trayectorias de salud, identificar riesgos emergentes, guiar intervenciones personalizadas y apoyar la optimización a largo plazo a través de recomendaciones cada vez más precisas."
+    "p2": "A través de Lonara Executive™, las respuestas a cuestionarios, la inteligencia de biomarcadores, los datos de wearables, las evaluaciones históricas y el análisis impulsado por IA convergen en un modelo biológico en continua evolución."
   },
+  "myfuelTitle": "My Fuel — Inteligencia Nutricional",
+  "myfuelP1": "My Fuel es el módulo de seguimiento nutricional con IA de Lonara, integrado directamente en el panel de control My Space. Transforma el acto de comer en un flujo continuo de inteligencia biológica — una fotografía a la vez.",
+  "myfuelP2": "Cada escaneo de comida genera un Fuel Score (0–100) calibrado según el perfil biológico del miembro, su objetivo de sprint y la hora del día. El motor de IA identifica los alimentos, estima los macronutrientes, señala alertas de longevidad y entrega una narrativa personalizada que explica cómo la comida apoya o desafía la trayectoria de optimización.",
+  "myfuelLabel": "MY FUEL — CARACTERÍSTICAS CLAVE",
+  "myfuelFeatures": [
+    "Análisis instantáneo de comidas por foto — funciona en escritorio y como PWA en móvil",
+    "Fuel Score calibrado según perfil biológico, condiciones de salud y objetivo de sprint",
+    "Desglose de macros: proteínas, carbohidratos, grasas y calorías por comida",
+    "Alertas de longevidad — señala ingredientes proinflamatorios, picos glucémicos o carencias nutricionales",
+    "Narrativa IA por comida en el idioma del miembro (EN / FR / ES)",
+    "Sistema de sprint — Pulse (3 scans/semana), Rhythm (24 scans/semana), Protocol (ilimitado diario)",
+    "Objetivos de macros diarios generados por IA según el modo de sprint y el objetivo de longevidad",
+    "Plate of the Month — mejor comida puntuada por tipo archivada automáticamente",
+    "Informe de Inteligencia Nutricional PDF — análisis global con insights GPT durante 30, 90 o 180 días",
+    "Informe Detallado de Comidas — registro completo de todas las comidas escaneadas con macros, puntuaciones y análisis IA"
+  ],
+  "myfuelP3": "My Fuel no reemplaza el asesoramiento dietético. Proporciona una conciencia nutricional continua alineada con la ciencia de la longevidad — convirtiendo cada comida en un punto de datos en el arco biológico del miembro.",
+  "biomarkersActiveTitle": "36 Biomarcadores Científicos Activos",
+  "biomarkersActiveP1": "El panel de biomarcadores Lonara Executive™ integra 36 marcadores científicos en 8 categorías clínicas, cada uno calibrado contra rangos óptimos clínicos y cruzado con el perfil de evaluación del miembro.",
+  "biomarkersActiveLabel": "8 PANELES DE BIOMARCADORES",
+  "biomarkersActivePanels": [
+    "Panel Metabólico & Glucémico — glucosa, HbA1c, insulina, triglicéridos, ApoB",
+    "Panel Hormonal & Endocrino — testosterona, DHEA-S, tiroides (TSH/T3/T4), IGF-1",
+    "Panel Inflamación & Inmunidad — hs-CRP, IL-6, TNF-alpha, ferritina",
+    "Relojes Epigenéticos — Horvath, PhenoAge, GrimAge, DunedinPACE",
+    "Biología de los Telómeros — longitud de telómeros (qPCR & FISH), actividad telomerasa",
+    "Multi-Ómicas — proteómica, metabolómica, diversidad del microbioma, GWAS/SNP",
+    "Marcadores Neurodegenerativos — GFAP, NfL, Amyloid Beta 42/40, pTau-217",
+    "Cardiovascular Avanzado — NT-proBNP, Lp(a), puntuación CAC, GDF-15"
+  ],
+  "biomarkersActiveP2": "Los valores marcados activan umbrales de puntuación ajustados a las condiciones en toda la evaluación biológica, actualizando en tiempo real las proyecciones de riesgo, las prioridades de protocolo y la narrativa IA.",
   "section8": {
     "title": "08 · Tecnología & Inteligencia",
     "p1": "Lonara Labs combina diseño de marca premium con verdadera profundidad técnica. Nuestra plataforma no es un cuestionario estático — es un sistema de inteligencia en continua evolución construido para escalar.",
@@ -479,7 +525,7 @@
       "Infraestructura SaaS full-stack diseñada para escalar — soportando evaluaciones simultáneas ilimitadas, gestión multi-usuario y despliegue empresarial",
       "Gestión segura de datos de usuario via Supabase — respuestas de evaluación, puntuaciones, protocolos y seguimiento longitudinal almacenados con integridad completa de datos",
       "Generación de informes PDF premium — Dossiers Ejecutivos de Longevidad de múltiples páginas producidos programáticamente con análisis visuales, mapas de calor y presentación de marca",
-      "Motor de evaluación modular — bancos de preguntas, pesos de puntuación y configuraciones de escala completamente configurables sin cambios de código, permitiendo actualizaciones rápidas de protocolos"
+      "Motor de evaluación modular — bancos de preguntas, pesos de puntuación y configuraciones de escala completamente configurables sin cambios de código"
     ],
     "designLabel": "Diseño & Experiencia",
     "design": [
@@ -491,9 +537,9 @@
   },
   "section9": {
     "title": "09 · El Ecosistema de Experiencia",
-    "p1": "Lonara está diseñado como un ecosistema premium multicanal — conectando sin problemas la inteligencia digital con la experiencia minorista física, la comunidad y el contenido lifestyle. Ningún punto de contacto por sí solo cuenta toda la historia; juntos forman un mundo de marca coherente y profundamente inmersivo.",
+    "p1": "Lonara está diseñado como un ecosistema premium multicanal — conectando sin problemas la inteligencia digital con la experiencia minorista física, la comunidad y el contenido lifestyle.",
     "ecosystemLabel": "El Ecosistema Lonara",
-    "ecosystem": "El destino central que conecta cada dimensión de la experiencia Lonara. Más allá de la evaluación biológica y la inteligencia de longevidad, el ecosistema reúne formulaciones premium, ingredientes seleccionados científicamente, rituales de bienestar diarios, contenido educativo, lanzamientos de productos, eventos exclusivos, insights de expertos, iniciativas comunitarias y futuras experiencias de membresía. Diseñado como una plataforma viva donde ciencia, lifestyle, cultura y longevidad convergen en un solo viaje evolutivo.",
+    "ecosystem": "El destino central que conecta cada dimensión de la experiencia Lonara. Más allá de la evaluación biológica y la inteligencia de longevidad, el ecosistema reúne formulaciones premium, ingredientes seleccionados científicamente, rituales de bienestar diarios, contenido educativo, lanzamientos de productos, eventos exclusivos, insights de expertos, iniciativas comunitarias y futuras experiencias de membresía.",
     "platformLabel": "Plataforma de Inteligencia de Longevidad",
     "platform": "La aplicación Lonara Labs — evaluación, puntuación biológica, informes impulsados por IA, protocolos personalizados, inteligencia de biomarcadores y el ecosistema privado Lonara Executive™. Disponible en app.lonaralabs.com & www.lonaralabs.com.",
     "kioskLabel": "Kioscos Boutique",
@@ -509,23 +555,24 @@
   },
   "section10": {
     "title": "10 · El Camino a Seguir",
-    "p1": "Estamos construyendo en el momento preciso en que la longevidad pasa de un nicho científico a un movimiento cultural mainstream. La infraestructura — credibilidad científica, apetito del consumidor, capacidad tecnológica y sofisticación del comercio experiencial — está en su lugar. Lo que ha faltado es una marca con la inteligencia emocional, el lenguaje de diseño y la profundidad del ecosistema para liderar esta transición.",
+    "p1": "Estamos construyendo en el momento preciso en que la longevidad pasa de un nicho científico a un movimiento cultural mainstream. La infraestructura — credibilidad científica, apetito del consumidor, capacidad tecnológica y sofisticación del comercio experiencial — está en su lugar.",
     "p2": "Lonara llena ese papel.",
     "apartLabel": "Lo que Nos Distingue",
     "apart": [
       "La única plataforma que combina evaluación biológica de grado clínico con branding lifestyle premium",
       "Personalización impulsada por IA que escala a miles de usuarios sin perder profundidad individual",
       "Un ecosistema minorista físico modular desplegable en geografías a bajo costo operativo",
-      "Una filosofía de formulación centrada en ingredientes excepcionales. Lonara se abastece de compuestos científicamente validados de productores globales de confianza, seleccionando solo aquellos que cumplen con estándares rigurosos de pureza, potencia, biodisponibilidad y relevancia clínica. Desde extractos botánicos avanzados hasta compuestos de longevidad especializados, cada ingrediente se elige para entregar un impacto biológico significativo mientras preserva la integridad de la naturaleza. La calidad nunca es una consideración secundaria — es la base de toda la experiencia Lonara.",
+      "Una filosofía de formulación centrada en ingredientes excepcionales. Lonara se abastece de compuestos científicamente validados de productores globales de confianza, seleccionando solo aquellos que cumplen con estándares rigurosos de pureza, potencia, biodisponibilidad y relevancia clínica. La calidad nunca es una consideración secundaria — es la base de toda la experiencia Lonara.",
       "Un modelo de crecimiento centrado en la comunidad que transforma clientes en embajadores y evaluaciones en relaciones a largo plazo",
       "Una infraestructura SaaS escalable posicionada para la expansión clínica de Lonara Executive™, integraciones de wearables y asociaciones empresariales"
     ],
     "quote": "Creado por un padre que eligió vivir más tiempo."
   },
-    "footer": {
-      "tagline": "LONARA LABS · EL ARTE DE LA LONGEVIDAD",
-      "copyright": "© 2026 Lonara Labs · Todos los derechos reservados"
-    }
+  "footer": {
+    "tagline": "LONARA LABS · EL ARTE DE LA LONGEVIDAD",
+    "copyright": "© 2026 Lonara Labs · Todos los derechos reservados"
+  }
+
   },
   "privacy": {
     "label": "DATOS Y CONFIDENCIALIDAD",
@@ -753,6 +800,9 @@
     "footerCopyright": "© 2026 Lonara Labs · Todos los derechos reservados"
   },
 "assessment": {
+  "planMemberF5": "My Fuel — 3 días/semana · 3 scans/día",
+"planPremiumF6": "My Fuel — 24 scans/semana",
+"planExecutiveF6": "My Fuel — Scans ilimitados",
 "viewPlans": "Ver planes de membresía",
 "viewPlansSubtitle": "Comparar funciones y precios",
 "plansLabel": "Lonara Labs",
@@ -799,7 +849,7 @@
 "planExecutiveF2": "Panel completo — historial y evolución",
 "planExecutiveF3": "40 biomarcadores científicos completos",
 "planExecutiveF4": "Análisis de longevidad por IA",
-"planExecutiveF5": "2h/mes consulta con especialista",
+"planExecutiveF5": "1h/mes consulta con especialista",
 "planExecutiveCTA": "Suscribirse — 499€/mes",
 
   "accessMode": "MODO DE ACCESO",
@@ -1489,6 +1539,10 @@
   "executiveBadge": "Premium & Executive™"
 },
   "terms": {
+    "executiveF5": "My Fuel — Scans ilimitados",
+    "memberF5": "My Fuel — 3 días/semana · 3 scans/día",
+"premiumF5": "My Fuel — 24 scans/semana",
+
     "label": "Condiciones & Precios",
     "title": "Condiciones, Reembolsos y Precios",
     "description": "Este documento rige el uso de la plataforma Lonara Labs, nuestra política de reembolso y los detalles de nuestros planes de membresía. Al utilizar nuestros servicios, acepta estos términos.",
@@ -1548,7 +1602,7 @@
     "executiveF1": "Todo lo del plan Premium",
     "executiveF2": "Panel completo de biomarcadores (36 marcadores)",
     "executiveF3": "Paneles epigenéticos y multi-ómicos",
-    "executiveF4": "2h consulta con especialista/mes",
+    "executiveF4": "1h consulta con especialista/mes",
 
     "s3p1": "Todos los precios están en euros e incluyen los impuestos aplicables cuando lo exija la ley. Las suscripciones se facturan mensualmente. Lonara Labs se reserva el derecho de modificar los precios con 30 días de preaviso.",
     "s3p2": "El pago es procesado de forma segura por Paddle, nuestro Comerciante de Referencia. Paddle gestiona toda la facturación, los recibos y la recaudación de impuestos aplicables en nombre de Lonara Labs.",

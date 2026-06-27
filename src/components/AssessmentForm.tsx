@@ -680,6 +680,7 @@ onStart(
                     <div className="text-[11px] text-white/50">✓ {t('planMemberF2')}</div>
                     <div className="text-[11px] text-white/50">✓ {t('planMemberF3')}</div>
                     <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planMemberF4')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planMemberF5')}</div>
                   </div>
                   <button
                     type="button"
@@ -708,7 +709,7 @@ onStart(
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF2')}</div>
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF3')}</div>
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF4')}</div>
-                    <div className="text-[11px] text-[#C7AC60]/40">✗ {t('planPremiumF5')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF6')}</div>
                   </div>
                   <button
                     type="button"
@@ -743,6 +744,7 @@ onStart(
                     <div className="text-[11px] text-white/60">✓ {t('planExecutiveF3')}</div>
                     <div className="text-[11px] text-white/60">✓ {t('planExecutiveF4')}</div>
                     <div className="text-[11px] text-[#C7AC60]">✓ {t('planExecutiveF5')}</div>
+                    <div className="text-[11px] text-[#C7AC60]">✓ {t('planExecutiveF6')}</div>
                   </div>
                   <button
                     type="button"

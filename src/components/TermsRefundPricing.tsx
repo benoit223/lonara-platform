@@ -200,6 +200,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                   <p className="text-[11px] text-white/45">✓ {t('terms.memberF2')}</p>
                   <p className="text-[11px] text-white/45">✓ {t('terms.memberF3')}</p>
                   <p className="text-[11px] text-white/20">✗ {t('terms.memberF4')}</p>
+                  <p className="text-[11px] text-white/45">✓ {t('terms.memberF5')}</p>
                 </div>
               </div>
 
@@ -213,6 +214,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF2')}</p>
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF3')}</p>
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF4')}</p>
+                  <p className="text-[11px] text-white/45">✓ {t('terms.premiumF5')}</p>
                 </div>
               </div>
 
@@ -226,6 +228,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                   <p className="text-[11px] text-white/55">✓ {t('terms.executiveF2')}</p>
                   <p className="text-[11px] text-white/55">✓ {t('terms.executiveF3')}</p>
                   <p className="text-[11px] text-[#C7AC60]">✓ {t('terms.executiveF4')}</p>
+                  <p className="text-[11px] text-[#C7AC60]">✓ {t('terms.executiveF5')}</p>
                 </div>
               </div>
 
