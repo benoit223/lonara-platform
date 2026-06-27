@@ -72,8 +72,17 @@ useEffect(() => {
 const [showSessionGuard, setShowSessionGuard] = useState(false)
 
 const handleMySpaceBack = () => {
-  console.trace('MYSPACE BACK CALLED')
+  setStep('hero')
+}
 
+const handleSignOut = async () => {
+  await supabase.auth.signOut()
+  setMemberTier('guest')
+  setFullName('')
+  setEmail('')
+  setHasFuelSprint(false)
+  localStorage.removeItem('lonara-auth-token')
+  sessionStorage.clear()
   setStep('hero')
 }
 
@@ -523,15 +532,16 @@ onWeightChange={async (w) => {
     initialBgCharacter={cachedBgCharacter}
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
     onBgCharacterChange={(bg: any) => setCachedBgCharacter(bg)}
+    onSignOut={handleSignOut}
   />
 )}
 
-{/* ── FUEL ── */}
 {step === 'fuel' && (
   <FuelSpace
     memberTier={memberTier}
     fullName={fullName}
     onBack={() => setStep('hero')}
+    onSignOut={handleSignOut}
   />
 )}
 

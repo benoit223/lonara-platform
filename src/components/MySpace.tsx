@@ -20,6 +20,7 @@ interface MySpaceProps {
   initialBgCharacter?: 'lona' | 'enginea' | 'gummy'
   onAssessmentLoaded?: (assessment: any) => void
   onBgCharacterChange?: (bg: 'lona' | 'enginea' | 'gummy') => void
+  onSignOut?: () => void
 }
 
 type MenuItem = 'state' | 'understand' | 'optimize' | 'evolve' | 'connect'
@@ -340,6 +341,7 @@ export default function MySpace({
   initialBgCharacter,
   onAssessmentLoaded,
   onBgCharacterChange,
+  onSignOut,
 }: MySpaceProps) {
 
 
@@ -623,7 +625,7 @@ const getDotColor = (num: number | null, idx: number) => {
         <div className="relative flex w-full max-w-[760px] flex-col justify-center px-8 lg:pl-0 lg:pr-16 items-start pointer-events-auto">
           <div className="absolute left-[-200px] top-[180px] h-[480px] w-[480px] rounded-full bg-cyan-400/[0.018] blur-[120px]" />
           <div className="absolute left-[240px] bottom-[120px] h-[320px] w-[320px] rounded-full bg-cyan-300/[0.015] blur-[90px]" />
-          <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-70 rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[484px] lg:h-[524px]">
+          <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-70 rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[524px] lg:h-[564px]">
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
             <p className={`mb-6 text-[13px] uppercase tracking-[0.28em] ${isNight ? 'text-[#C7AC60]/70' : 'text-black/70'}`}
               style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -671,6 +673,15 @@ const getDotColor = (num: number | null, idx: number) => {
                 )
               })}
             </nav>
+            <button
+              onClick={onSignOut}
+              className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 mt-2 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200`}>
+              <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
+                isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
+              }`}>
+                {t('signOut')}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -798,6 +809,15 @@ const getDotColor = (num: number | null, idx: number) => {
                   )
                 })}
               </nav>
+              <button
+                onClick={onSignOut}
+                className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 mt-1 text-left border border-transparent transition-all`}>
+                <span className={`text-[11px] uppercase tracking-[0.24em] ${
+                  isNight ? 'text-white/40' : 'text-black/40'
+                }`}>
+                  {t('signOut')}
+                </span>
+              </button>
             </div>
 
             {/* 4 métriques — 2x2 compact */}

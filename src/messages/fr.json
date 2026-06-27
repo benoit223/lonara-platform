@@ -8,6 +8,8 @@
     "myfuel": "Mon Carburant"
   },
 "myspace": {
+  "signOut": "Fin de session",
+  "fuel_limitReached": "Limite de scans atteinte pour votre forfait. Passez à un forfait supérieur.",
   "fuel_plateOfMonth": "Plat du Mois",
   "fuel_connectPhoneClose": "Fermer",
   "fuel_connectPhoneDesc": "Scannez avec l'appareil photo de votre téléphone — expire dans 10 minutes",

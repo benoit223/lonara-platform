@@ -15,6 +15,7 @@ export default function CapturePage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [sprintId, setSprintId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string>('')
+  const [limitReached, setLimitReached] = useState<boolean>(false)
 
   useEffect(() => {
     const init = async () => {
@@ -100,6 +101,11 @@ export default function CapturePage() {
       formData.append('userId', userId)
       formData.append('locale', navigator.language.split('-')[0])
       const response = await fetch('/api/fuel-analyze', { method: 'POST', body: formData })
+      if (response.status === 429) {
+        setLimitReached(true)
+        setStatus('idle')
+        return
+      }
       if (!response.ok) throw new Error('Erreur upload')
       setStatus('done')
       setTimeout(() => setStatus('idle'), 2000)
@@ -198,11 +204,19 @@ export default function CapturePage() {
                     {(status === 'loading' || status === 'auth') && (
                       <div className="w-8 h-8 rounded-full border-2 border-[#3DD4A0] border-t-transparent animate-spin" />
                     )}
-                    {status === 'idle' && (
+                    {status === 'idle' && !limitReached && (
                       <svg width="86" height="86" viewBox="0 0 24 24" fill="none"
                         stroke="#69FFE4" strokeWidth="0.7" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                         <circle cx="12" cy="13" r="4"/>
+                      </svg>
+                    )}
+                    {status === 'idle' && limitReached && (
+                      <svg width="86" height="86" viewBox="0 0 24 24" fill="none" stroke="#E7C980" strokeWidth="0.7">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="9" cy="10" r="1" fill="#E7C980" stroke="none"/>
+                        <circle cx="15" cy="10" r="1" fill="#E7C980" stroke="none"/>
+                        <path d="M8.5 15.5 Q12 13 15.5 15.5" strokeLinecap="round"/>
                       </svg>
                     )}
                     {status === 'uploading' && (
@@ -218,11 +232,17 @@ export default function CapturePage() {
                 {(status === 'loading' || status === 'auth') && (
                   <p className="text-[13px] text-white/35 font-light">Initialisation...</p>
                 )}
-                {status === 'idle' && (
+                {status === 'idle' && !limitReached && (
                   <>
                     <p className="text-[14px] text-white/45 font-light">Tap to capture your meal</p>
                     <div className="mt-4 w-1.5 h-1.5 rounded-full bg-[#4EF3C0]/85" />
                   </>
+                )}
+                {status === 'idle' && limitReached && (
+                  <div className="rounded-full border border-[#E7C980]/20 bg-white/5 backdrop-blur-xl px-6 py-3 text-center">
+                    <p className="text-[#E7C980] text-[13px]">Limite atteinte</p>
+                    <p className="text-white/35 text-[11px] mt-1">Passez à un forfait supérieur</p>
+                  </div>
                 )}
                 {status === 'uploading' && (
                   <div className="flex items-center gap-3 rounded-full border border-[#4EF3C0]/20 bg-white/5 backdrop-blur-xl px-5 py-3">

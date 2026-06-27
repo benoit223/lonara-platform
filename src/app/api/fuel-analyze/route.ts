@@ -35,12 +35,49 @@ const locale   = formData.get('locale') as string || 'en'
       resolvedSprintId = activeSprint?.id ?? null
     }
 
-    // ── Charger le contexte Lonara du membre ──────────────────────────────
+    // ── Vérification des limites par tier ─────────────────────────────────
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, member_tier')
       .eq('id', userId)
       .single()
+
+    const tier = profile?.member_tier ?? 'member'
+
+    if (tier !== 'executive') {
+      const since = new Date()
+      since.setDate(since.getDate() - 7)
+
+      const { data: recentLogs } = await supabase
+        .from('fuel_logs')
+        .select('created_at')
+        .eq('user_id', userId)
+        .gte('created_at', since.toISOString())
+        .order('created_at', { ascending: true })
+
+      if (recentLogs) {
+        if (tier === 'premium') {
+          if (recentLogs.length >= 24) {
+            return NextResponse.json({ error: 'LIMIT_REACHED', tier }, { status: 429 })
+          }
+        }
+
+        if (tier === 'member') {
+          const today = new Date().toISOString().split('T')[0]
+          const todayLogs = recentLogs.filter(l => l.created_at.startsWith(today))
+          if (todayLogs.length >= 3) {
+            return NextResponse.json({ error: 'LIMIT_REACHED', tier }, { status: 429 })
+          }
+          const activeDays = new Set(recentLogs.map(l => l.created_at.split('T')[0]))
+          const todayIsNewDay = !activeDays.has(today)
+          if (todayIsNewDay && activeDays.size >= 3) {
+            return NextResponse.json({ error: 'LIMIT_REACHED', tier }, { status: 429 })
+          }
+        }
+      }
+    }
+
+    // ── Charger le contexte Lonara du membre ──────────────────────────────
 
     const { data: assessment } = await supabase
       .from('assessments')
@@ -104,17 +141,8 @@ const { data: upload, error: uploadError } = await supabase.storage
     upsert: false,
   })
 
-console.log('==============================')
-console.log('STORAGE UPLOAD')
-console.log('File:', fileName)
-console.log('Upload Data:', upload)
-console.log('Upload Error:', uploadError)
-console.log('==============================')
-
 if (upload) {
   imageUrl = fileName
-
-  console.log('Image Path:', imageUrl)
 }
     }
 

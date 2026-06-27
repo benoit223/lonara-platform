@@ -11,6 +11,7 @@ interface FuelSpaceProps {
   memberTier: 'guest' | 'member' | 'premium' | 'executive'
   fullName: string
   onBack: () => void
+  onSignOut?: () => void
 }
 
 // ── TYPES ─────────────────────────────────────────────────────────────────────
@@ -456,9 +457,10 @@ function BestMealCards({ userId }: { userId: string }) {
 
 
 
-function ScanSection({ activeSprint, userId, imageFile, setImageFile, imagePreview, setImagePreview, mealTime, setMealTime, note, setNote, isAnalyzing, handleAnalyze, fileInputRef, handleImageChange }: {
+function ScanSection({ activeSprint, userId, limitReached, imageFile, setImageFile, imagePreview, setImagePreview, mealTime, setMealTime, note, setNote, isAnalyzing, handleAnalyze, fileInputRef, handleImageChange }: {
   activeSprint: FuelSprint | null
   userId: string | null
+  limitReached: boolean
   imageFile: File | null
   setImageFile: (f: File | null) => void
   imagePreview: string | null
@@ -479,6 +481,11 @@ function ScanSection({ activeSprint, userId, imageFile, setImageFile, imagePrevi
       <h2 className="text-[3rem] lg:text-[3.6rem] font-light leading-none text-[#EAE4D5] mb-6"
         style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t('fuel_scanTitle')}</h2>
 
+      {limitReached && (
+        <div className="mb-4 rounded-[1rem] border border-[#E7C980]/30 bg-[#E7C980]/5 px-5 py-4 text-center">
+          <p className="text-[13px] text-[#E7C980]/90">{t('fuel_limitReached')}</p>
+        </div>
+      )}
       <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-8 py-6">
       <div className="grid grid-cols-2 gap-8">
         <div>
@@ -620,7 +627,7 @@ function SetupSection({ memberTier, selectedMode, setSelectedMode, selectedDurat
 
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
-export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpaceProps) {
+export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: FuelSpaceProps) {
   const [isLoading, setIsLoading]         = useState(true)
   const [currentBg, setCurrentBg]         = useState('')
   const [activeSprint, setActiveSprint]   = useState<FuelSprint | null>(null)
@@ -640,6 +647,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
   const [mealTime,     setMealTime]     = useState('lunch')
   const [note,         setNote]         = useState('')
   const [isAnalyzing,  setIsAnalyzing]  = useState(false)
+  const [limitReached, setLimitReached] = useState(false)
   const [showQR,       setShowQR]       = useState(false)
   const [qrToken,      setQrToken]      = useState<string | null>(null)
   const [userId,       setUserId]       = useState<string | null>(null)
@@ -764,6 +772,12 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
       formData.append('userId', user.id)
       formData.append('locale', locale)
       const response = await fetch('/api/fuel-analyze', { method: 'POST', body: formData })
+      
+      if (response.status === 429) {
+        setLimitReached(true)
+        return
+      }
+
       const result = await response.json()
       const newLog = result.log as FuelLog
       setLogs(prev => [newLog, ...prev])
@@ -996,7 +1010,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 <button onClick={() => setActiveSection(prev => prev === 'setup' ? null : 'setup')}
                   className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border transition-all duration-200 ${activeSection === 'setup' ? 'bg-black/8 border-black/10' : 'border-transparent hover:bg-black/[0.04]'}`}>
                   {activeSection === 'setup' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#1D9E75]" />}
-                  <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${activeSection === 'setup' ? 'text-[#3DD4A0] font-medium' : 'text-white/55 group-hover:text-white/80'}`}>
+                  <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${activeSection === 'setup' ? 'text-[#3DD4A0] font-medium' : 'text-white/65 group-hover:text-white/75'}`}>
                     {t('fuel_menuNewSprint')}
                   </span>
                   {activeSection === 'setup' && <ChevronRight className="ml-auto h-3 w-3 text-white/50" />}
@@ -1008,6 +1022,13 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                   className="group flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200">
                   <span className="text-[12px] uppercase tracking-[0.24em] text-white/65 group-hover:text-white/75">
                     {t('fuel_connectPhone')}
+                  </span>
+                </button>
+                <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
+                <button onClick={onSignOut}
+                  className="group flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200">
+                  <span className="text-[12px] uppercase tracking-[0.24em] text-white/65 group-hover:text-white/75">
+                    {t('signOut')}
                   </span>
                 </button>
               </nav>
@@ -1023,7 +1044,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
-                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
+                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} limitReached={limitReached} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>
             </div>
@@ -1229,7 +1250,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                   <button onClick={() => setActiveSection(prev => prev === 'setup' ? null : 'setup')}
                     className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border transition-all ${activeSection === 'setup' ? 'bg-black/8 border-black/10' : 'border-transparent'}`}>
                     {activeSection === 'setup' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#1D9E75]" />}
-                    <span className={`text-[11px] uppercase tracking-[0.24em] ${activeSection === 'setup' ? 'text-[#3DD4A0] font-medium' : 'text-white/55'}`}>
+                    <span className={`text-[11px] uppercase tracking-[0.24em] ${activeSection === 'setup' ? 'text-[#3DD4A0] font-medium' : 'text-white/65'}`}>
                       {t('fuel_menuNewSprint')}
                     </span>
                     {activeSection === 'setup' && <ChevronRight className="ml-auto h-3 w-3 text-white/50" />}
@@ -1241,6 +1262,13 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                     className="group flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all">
                     <span className="text-[11px] uppercase tracking-[0.24em] text-white/65">
                       {t('fuel_connectPhone')}
+                    </span>
+                  </button>
+                  <div className="mt-1 h-px bg-gradient-to-r from-black/15 to-transparent mb-1" />
+                  <button onClick={onSignOut}
+                    className="group flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all">
+                    <span className="text-[11px] uppercase tracking-[0.24em] text-white/65">
+                      {t('signOut')}
                     </span>
                   </button>
                 </nav>
@@ -1291,7 +1319,7 @@ export default function FuelSpace({ memberTier, fullName, onBack }: FuelSpacePro
                 {activeSection === 'today'  && <TodaySection  activeSprint={activeSprint} logs={logs} />}
                 {activeSection === 'evolve' && <EvolveSection logs={allLogs} />}
                 {activeSection === 'feed'   && <FeedSection   logs={logs} />}
-                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
+                {activeSection === 'scan'   && <ScanSection   activeSprint={activeSprint} userId={userId} limitReached={limitReached} imageFile={imageFile} setImageFile={setImageFile} imagePreview={imagePreview} setImagePreview={setImagePreview} mealTime={mealTime} setMealTime={setMealTime} note={note} setNote={setNote} isAnalyzing={isAnalyzing} handleAnalyze={handleAnalyze} fileInputRef={fileInputRef} handleImageChange={handleImageChange} />}
                 {activeSection === 'setup'  && <SetupSection  memberTier={memberTier} selectedMode={selectedMode} setSelectedMode={setSelectedMode} selectedDuration={selectedDuration} setSelectedDuration={setSelectedDuration} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} handleStartSprint={handleStartSprint} />}
               </div>
             </div>

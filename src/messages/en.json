@@ -9,6 +9,8 @@
     "myfuel": "My Fuel"
   },
 "myspace": {
+  "signOut": "End Session",
+  "fuel_limitReached": "Scan limit reached for your plan. Upgrade to continue.",
 "fuel_plateOfMonth": "Plate of the Month",
   "fuel_connectPhoneClose": "Close",
   "fuel_connectPhoneDesc": "Scan with your phone camera — expires in 10 minutes",

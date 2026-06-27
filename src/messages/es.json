@@ -8,6 +8,8 @@
     "myfuel": "Mi Combustible"
   },
 "myspace": {
+  "signOut": "Cerrar sesión",
+  "fuel_limitReached": "Límite de escaneos alcanzado para su plan. Actualice para continuar.",
 "fuel_plateOfMonth": "Plato del Mes",
   "fuel_connectPhoneClose": "Cerrar",
   "fuel_connectPhoneDesc": "Escanea con la cámara de tu teléfono — expira en 10 minutos",
