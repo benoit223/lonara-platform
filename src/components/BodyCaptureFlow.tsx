@@ -131,9 +131,16 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const video = videoRef.current
       if (!video) return
 
-      
+
 const result = detect(video, performance.now())
       setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} | ${result.debugRaw ?? 'no landmarks'}`)
+
+      // ── DEBUG TEMPORAIRE — annonce vocale toutes les 2s pour tester sans regarder l'écran ──
+      const nowDebug = performance.now()
+      if (nowDebug - lastGuidanceCheckRef.current > 2000) {
+        lastGuidanceCheckRef.current = nowDebug
+        speak(result.detected ? 'détecté' : 'non détecté', { force: true, lang: speechLang })
+      }
       const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPoseId.target
 
       if (withinTarget) {
