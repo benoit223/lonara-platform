@@ -20,7 +20,7 @@ const POSE_IDS: { id: BodyPose; instructionKey: string; labelKey: string; target
   { id: 'right', instructionKey: 'visual_body_right', labelKey: 'visual_body_pose_right', target: 'right' },
 ]
 
-const STABLE_FRAMES_REQUIRED = 24 // légèrement plus long que le visage — repositionnement corporel plus lent
+const STABLE_FRAMES_REQUIRED = 24
 
 interface BodyCaptureFlowProps {
   onComplete: (shots: CapturedShot[]) => void
@@ -50,9 +50,9 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const lastGuidanceCheckRef = useRef(0)
   const [debugInfo, setDebugInfo] = useState('init')
 
-  const currentPoseId = POSE_IDS[poseIndex] // référence stable — placé après poseIndex
+  const currentPoseId = POSE_IDS[poseIndex]
 
-  // ── Démarrage caméra — grand angle, caméra arrière préférée pour poser le téléphone à distance ──
+  // ── Démarrage caméra (frontale) ──────────────────────────────────────────
   useEffect(() => {
     const startCamera = async () => {
       try {
@@ -92,9 +92,9 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     }
   }, [])
 
-// ── Délai d'armement + annonce vocale au début de chaque pose ──────────────
+  // ── Délai d'armement — ne démarre QUE lorsque le modèle est prêt ──────────
   useEffect(() => {
-    if (status !== 'detecting') return
+    if (status !== 'detecting' || !isReady) return
     armedRef.current = false
     setArmDelay(8)
     speak(`${t('visual_voice_getReady')}. ${t(currentPoseId.instructionKey)}`, { force: true, lang: speechLang })
@@ -111,7 +111,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [status, poseIndex])
+  }, [status, isReady, poseIndex])
 
   const captureFrame = useCallback((): string => {
     const video = videoRef.current!
@@ -123,7 +123,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     return canvas.toDataURL('image/jpeg', 0.92)
   }, [])
 
-  // ── Boucle de détection ───────────────────────────────────────────────────
+  // ── Boucle de détection — validation par cadrage uniquement, pas orientation ──
   useEffect(() => {
     if (status !== 'detecting' || !isReady) return
 
@@ -131,11 +131,10 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const video = videoRef.current
       if (!video) return
 
-
-const result = detect(video, performance.now())
+      const result = detect(video, performance.now())
       setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} | ${result.debugRaw ?? 'no landmarks'}`)
 
-      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPoseId.target
+      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame
 
       if (withinTarget) {
         stableCountRef.current += 1
@@ -148,13 +147,11 @@ const result = detect(video, performance.now())
       const canvas = canvasRef.current
       if (canvas) drawOverlay(canvas, result, currentProgress)
 
-      // ── Guidage vocal — évalué au maximum 1x/seconde, pour éviter les coupures ──
+      // ── Guidage vocal — cadrage/distance/centrage uniquement (pas d'orientation) ──
       const nowMs = performance.now()
       if (armedRef.current && result.detected && nowMs - lastGuidanceCheckRef.current > 1200) {
         lastGuidanceCheckRef.current = nowMs
-        if (result.orientation !== currentPoseId.target) {
-          speak(t('visual_voice_wrongOrientation'), { lang: speechLang })
-        } else if (result.distanceHint === 'too_far') {
+        if (result.distanceHint === 'too_far') {
           speak(t('visual_voice_moveCloser'), { lang: speechLang })
         } else if (result.distanceHint === 'too_close') {
           speak(t('visual_voice_moveBack'), { lang: speechLang })
@@ -212,10 +209,9 @@ const result = detect(video, performance.now())
     onComplete(shots)
   }
 
- return (
+  return (
     <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center">
 
-      {/* Vidéo et canvas TOUJOURS montés — visibilité gérée par CSS */}
       <div className={`relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10 ${
         status === 'detecting' || status === 'captured-flash' ? 'block' : 'hidden'
       }`}>
@@ -260,8 +256,10 @@ const result = detect(video, performance.now())
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {t(currentPoseId.instructionKey)}
             </p>
-            
-            {armDelay > 0 && (
+            {!isReady && (
+              <p className="text-[11px] text-white/40">{t('visual_capture_preparingCamera')}</p>
+            )}
+            {isReady && armDelay > 0 && (
               <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {armDelay}
               </p>
@@ -330,7 +328,6 @@ function drawOverlay(
   const top = height * 0.08
   const bottom = height * 0.94
 
-  // Silhouette guide simplifiée (rectangle arrondi vertical)
   ctx.strokeStyle = result.detected && result.fullBodyInFrame ? 'rgba(143,193,232,0.55)' : 'rgba(255,255,255,0.22)'
   ctx.lineWidth = 2
   ctx.setLineDash([6, 6])
@@ -339,7 +336,6 @@ function drawOverlay(
   ctx.stroke()
   ctx.setLineDash([])
 
-  // Anneau de progression circulaire en haut du cadre
   if (progress > 0) {
     const ringCx = cx
     const ringCy = top - 20

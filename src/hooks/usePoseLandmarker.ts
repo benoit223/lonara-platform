@@ -87,21 +87,24 @@ export function usePoseLandmarker() {
     // Fallback supplémentaire — si aucun repère de tête fiable, utiliser la présence des épaules comme proxy
     const shouldersVisible = (lm[LEFT_SHOULDER]?.visibility ?? 0) > 0.4 && (lm[RIGHT_SHOULDER]?.visibility ?? 0) > 0.4
     const headVisible = noseVisible || leftEarVisible || rightEarVisible || shouldersVisible
-    const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.2 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.2
-    const fullBodyInFrame = headVisible && anklesVisible
+    const hipsVisible = (lm[LEFT_HIP]?.visibility ?? 0) > 0.3 && (lm[RIGHT_HIP]?.visibility ?? 0) > 0.3
+    const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.15 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.15
+    // Cadrage minimal acceptable = tête + hanches visibles (suffisant pour l'analyse posturale)
+    const fullBodyInFrame = headVisible && hipsVisible
 
     // Référence verticale du haut du corps — nez si visible, sinon estimation via épaules
     const topRefY = noseVisible ? lm[NOSE].y : (lm[LEFT_SHOULDER].y + lm[RIGHT_SHOULDER].y) / 2 - 0.05
 
     // Diagnostic de distance — hauteur verticale occupée par le corps à l'écran
-    const bodyHeight = Math.abs(topRefY - Math.max(lm[LEFT_ANKLE]?.y ?? 0, lm[RIGHT_ANKLE]?.y ?? 0))
+    const bottomRefY = anklesVisible
+      ? Math.max(lm[LEFT_ANKLE]?.y ?? 0, lm[RIGHT_ANKLE]?.y ?? 0)
+      : (lm[LEFT_HIP].y + lm[RIGHT_HIP].y) / 2
+    const bodyHeight = Math.abs(topRefY - bottomRefY)
     let distanceHint: 'ok' | 'too_close' | 'too_far' | 'unknown' = 'unknown'
-    if (headVisible && anklesVisible) {
-      if (bodyHeight > 0.95) distanceHint = 'too_close'
-      else if (bodyHeight < 0.55) distanceHint = 'too_far'
+    if (headVisible && hipsVisible) {
+      if (bodyHeight > 0.70) distanceHint = 'too_close'
+      else if (bodyHeight < 0.25) distanceHint = 'too_far'
       else distanceHint = 'ok'
-    } else if (headVisible && !anklesVisible) {
-      distanceHint = 'too_close' // pieds hors cadre = trop proche ou mal cadré vers le bas
     }
 
     // Centrage horizontal
