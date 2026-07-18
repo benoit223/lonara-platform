@@ -10,10 +10,13 @@ export function speak(text: string, opts?: { force?: boolean; lang?: string }) {
   const now = Date.now()
   const isSameMessage = text === lastSpokenText
   const tooSoon = now - lastSpokenAt < MIN_INTERVAL_MS
+  const stillSpeaking = window.speechSynthesis.speaking
 
+  // Ne jamais interrompre une phrase en cours, sauf si forcé (ex. "photo prise")
+  if (!opts?.force && stillSpeaking) return
   if (!opts?.force && isSameMessage && tooSoon) return
 
-  window.speechSynthesis.cancel() // interrompt toute phrase en cours pour éviter l'empilement
+  window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = opts?.lang ?? 'fr-FR'
   utterance.rate = 1.0

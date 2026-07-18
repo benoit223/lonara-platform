@@ -46,8 +46,9 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const [progress, setProgress] = useState(0)
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
-  const [armDelay, setArmDelay] = useState(3)
+  const [armDelay, setArmDelay] = useState(8)
   const armedRef = useRef(false)
+  const lastGuidanceCheckRef = useRef(0)
   const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPose = POSES[poseIndex]
@@ -146,8 +147,10 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const canvas = canvasRef.current
       if (canvas) drawOverlay(canvas, result, currentProgress)
 
-      // ── Guidage vocal — uniquement une fois le délai d'armement passé ──────
-      if (armedRef.current && result.detected) {
+      // ── Guidage vocal — évalué au maximum 1x/seconde, pour éviter les coupures ──
+      const nowMs = performance.now()
+      if (armedRef.current && result.detected && nowMs - lastGuidanceCheckRef.current > 1200) {
+        lastGuidanceCheckRef.current = nowMs
         if (result.distanceHint === 'too_far') {
           speak(t('visual_voice_moveCloser'), { lang: speechLang })
         } else if (result.distanceHint === 'too_close') {
