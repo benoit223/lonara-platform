@@ -6,7 +6,7 @@ import { usePoseLandmarker, type BodyOrientation } from '../hooks/usePoseLandmar
 import { speak } from '../lib/speech'
 
 type BodyPose = 'front' | 'back' | 'left' | 'right'
-type FlowStatus = 'requesting' | 'detecting' | 'captured-flash' | 'review' | 'error'
+type FlowStatus = 'requesting' | 'positioning' | 'countdown' | 'captured-flash' | 'review' | 'error'
 
 interface CapturedShot {
   pose: BodyPose
@@ -20,7 +20,9 @@ const POSE_IDS: { id: BodyPose; instructionKey: string; labelKey: string; target
   { id: 'right', instructionKey: 'visual_body_right', labelKey: 'visual_body_pose_right', target: 'right' },
 ]
 
-const STABLE_FRAMES_REQUIRED = 24
+const STABLE_FRAMES_TO_START_COUNTDOWN = 20 // ~0.6-0.7s de cadrage correct avant de lancer le compte à rebours
+const COUNTDOWN_SECONDS_FIRST = 3  // pose 1 (face) — déjà bien positionné, confirmation courte
+const COUNTDOWN_SECONDS_PIVOT = 5  // poses 2-4 — laisse le temps physique de pivoter
 
 interface BodyCaptureFlowProps {
   onComplete: (shots: CapturedShot[]) => void
@@ -37,20 +39,21 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const rafRef = useRef<number | null>(null)
   const stableCountRef = useRef(0)
   const streamRef = useRef<MediaStream | null>(null)
+  const lastGuidanceCheckRef = useRef(0)
+  const capturingRef = useRef(false)
 
   const { isReady, loadError, detect } = usePoseLandmarker()
 
   const [status, setStatus] = useState<FlowStatus>('requesting')
   const [poseIndex, setPoseIndex] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [countdownVal, setCountdownVal] = useState(COUNTDOWN_SECONDS_FIRST)
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
-  const [armDelay, setArmDelay] = useState(8)
-  const armedRef = useRef(false)
-  const lastGuidanceCheckRef = useRef(0)
   const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPoseId = POSE_IDS[poseIndex]
+  const isFirstPose = poseIndex === 0
 
   // ── Démarrage caméra (frontale) ──────────────────────────────────────────
   useEffect(() => {
@@ -77,7 +80,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
             setDebugInfo(prev => prev + ` | play() FAIL: ${playErr?.message ?? playErr}`)
           }
         }
-        setStatus('detecting')
       } catch (e: any) {
         console.error('Camera error:', e)
         setDebugInfo(`getUserMedia FAIL: ${e?.name ?? ''} ${e?.message ?? e}`)
@@ -92,26 +94,19 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     }
   }, [])
 
-  // ── Délai d'armement — ne démarre QUE lorsque le modèle est prêt ──────────
+  // ── Passage en phase "positioning" dès que le modèle est prêt ────────────
   useEffect(() => {
-    if (status !== 'detecting' || !isReady) return
-    armedRef.current = false
-    setArmDelay(8)
-    speak(`${t('visual_voice_getReady')}. ${t(currentPoseId.instructionKey)}`, { force: true, lang: speechLang })
+    if (!isReady || status !== 'requesting') return
+    setStatus('positioning')
+    speak(t(currentPoseId.instructionKey), { force: true, lang: speechLang })
+  }, [isReady])
 
-    const interval = setInterval(() => {
-      setArmDelay(prev => {
-        if (prev <= 1) {
-          clearInterval(interval)
-          armedRef.current = true
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [status, isReady, poseIndex])
+  // ── Annonce vocale au changement de pose ─────────────────────────────────
+  useEffect(() => {
+    if (status !== 'positioning') return
+    stableCountRef.current = 0
+    speak(t(currentPoseId.instructionKey), { force: true, lang: speechLang })
+  }, [poseIndex])
 
   const captureFrame = useCallback((): string => {
     const video = videoRef.current!
@@ -123,33 +118,47 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     return canvas.toDataURL('image/jpeg', 0.92)
   }, [])
 
-  // ── Boucle de détection — validation par cadrage uniquement, pas orientation ──
+  const doCapture = useCallback(() => {
+    if (capturingRef.current) return
+    capturingRef.current = true
+    const dataUrl = captureFrame()
+    setShots(prev => [...prev, { pose: currentPoseId.id, dataUrl }])
+    speak(t('visual_voice_captured'), { force: true, lang: speechLang })
+    setStatus('captured-flash')
+  }, [captureFrame, currentPoseId, t, speechLang])
+
+  // ── Boucle de détection — phase positionnement ────────────────────────────
   useEffect(() => {
-    if (status !== 'detecting' || !isReady) return
+    if (status !== 'positioning' || !isReady) return
 
     const loop = () => {
       const video = videoRef.current
       if (!video) return
 
       const result = detect(video, performance.now())
-      setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} | ${result.debugRaw ?? 'no landmarks'}`)
+      setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} dist=${result.distanceHint} horiz=${result.horizontalHint} frame=${result.fullBodyInFrame}`)
 
-      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame
+      const canvas = canvasRef.current
 
-      if (withinTarget) {
+      // ── Pose 1 : validation stricte (cadrage + distance + centrage) ───────
+      // ── Poses 2-4 : validation allégée (présence + cadrage suffisent) ─────
+      const framingOk = isFirstPose
+        ? result.detected && result.fullBodyInFrame && result.distanceHint === 'ok' && result.horizontalHint === 'ok'
+        : result.detected && result.fullBodyInFrame
+
+      if (framingOk) {
         stableCountRef.current += 1
       } else {
         stableCountRef.current = 0
       }
-      const currentProgress = Math.min(1, stableCountRef.current / STABLE_FRAMES_REQUIRED)
-      setProgress(currentProgress)
 
-      const canvas = canvasRef.current
+      const currentProgress = Math.min(1, stableCountRef.current / STABLE_FRAMES_TO_START_COUNTDOWN)
+      setProgress(currentProgress)
       if (canvas) drawOverlay(canvas, result, currentProgress)
 
-      // ── Guidage vocal — cadrage/distance/centrage uniquement (pas d'orientation) ──
+      // ── Guidage vocal pendant le positionnement — surtout utile pour la pose 1 ──
       const nowMs = performance.now()
-      if (armedRef.current && result.detected && nowMs - lastGuidanceCheckRef.current > 1200) {
+      if (isFirstPose && result.detected && nowMs - lastGuidanceCheckRef.current > 3500) {
         lastGuidanceCheckRef.current = nowMs
         if (result.distanceHint === 'too_far') {
           speak(t('visual_voice_moveCloser'), { lang: speechLang })
@@ -159,17 +168,12 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           speak(t('visual_voice_moveLeft'), { lang: speechLang })
         } else if (result.horizontalHint === 'move_right') {
           speak(t('visual_voice_moveRight'), { lang: speechLang })
-        } else if (withinTarget && currentProgress > 0.3) {
-          speak(t('visual_voice_holdStill'), { lang: speechLang })
         }
       }
 
-      if (stableCountRef.current >= STABLE_FRAMES_REQUIRED) {
+      if (stableCountRef.current >= STABLE_FRAMES_TO_START_COUNTDOWN) {
         stableCountRef.current = 0
-        const dataUrl = captureFrame()
-        setShots(prev => [...prev, { pose: currentPoseId.id, dataUrl }])
-        speak(t('visual_voice_captured'), { force: true, lang: speechLang })
-        setStatus('captured-flash')
+        setStatus('countdown')
         return
       }
 
@@ -180,16 +184,71 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [status, isReady, currentPoseId, detect, captureFrame])
+  }, [status, isReady, currentPoseId, isFirstPose, detect])
+
+  // ── Boucle de détection — phase compte à rebours (re-vérifie en continu) ──
+  useEffect(() => {
+    if (status !== 'countdown') return
+
+    const countdownDuration = isFirstPose ? COUNTDOWN_SECONDS_FIRST : COUNTDOWN_SECONDS_PIVOT
+    setCountdownVal(countdownDuration)
+    speak(
+      isFirstPose ? t('visual_voice_holdStill') : `${t(currentPoseId.instructionKey)}. ${t('visual_voice_holdStill')}`,
+      { force: true, lang: speechLang }
+    )
+
+    let cancelled = false
+    let secondsLeft = countdownDuration
+
+    const checkLoop = () => {
+      const video = videoRef.current
+      if (!video || cancelled) return
+
+      const result = detect(video, performance.now())
+      const framingOk = isFirstPose
+        ? result.detected && result.fullBodyInFrame && result.distanceHint === 'ok' && result.horizontalHint === 'ok'
+        : result.detected && result.fullBodyInFrame
+
+      const canvas = canvasRef.current
+      if (canvas) drawOverlay(canvas, result, 1)
+
+      if (!framingOk) {
+        // Perte de position pendant le compte à rebours — annule, repart au positionnement
+        cancelled = true
+        setStatus('positioning')
+        return
+      }
+
+      rafRef.current = requestAnimationFrame(checkLoop)
+    }
+    rafRef.current = requestAnimationFrame(checkLoop)
+
+    const tick = setInterval(() => {
+      if (cancelled) return
+      secondsLeft -= 1
+      setCountdownVal(secondsLeft)
+      if (secondsLeft <= 0) {
+        clearInterval(tick)
+        if (!cancelled) doCapture()
+      }
+    }, 1000)
+
+    return () => {
+      cancelled = true
+      clearInterval(tick)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [status])
 
   // ── Transition après capture d'une pose ──────────────────────────────────
   useEffect(() => {
     if (status !== 'captured-flash') return
     const timeout = setTimeout(() => {
+      capturingRef.current = false
       if (poseIndex < POSE_IDS.length - 1) {
         setPoseIndex(prev => prev + 1)
         setProgress(0)
-        setStatus('detecting')
+        setStatus('positioning')
       } else {
         setStatus('review')
       }
@@ -202,7 +261,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     const idx = POSE_IDS.findIndex(p => p.id === pose)
     setPoseIndex(idx)
     setProgress(0)
-    setStatus('detecting')
+    setStatus('positioning')
   }
 
   const handleConfirm = () => {
@@ -213,7 +272,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center">
 
       <div className={`relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10 ${
-        status === 'detecting' || status === 'captured-flash' ? 'block' : 'hidden'
+        status === 'positioning' || status === 'countdown' || status === 'captured-flash' ? 'block' : 'hidden'
       }`}>
         <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted autoPlay />
         <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
@@ -228,10 +287,10 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       </div>
 
       <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
-        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
+        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | status={status} | isReady={String(isReady)}</p>
       </div>
 
-      {(status === 'requesting' || (!isReady && status !== 'error')) && (
+      {status === 'requesting' && (
         <div className="flex flex-col items-center gap-4 mt-6">
           <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
           <p className="text-[13px] text-white/50">{t('visual_capture_preparingCamera')}</p>
@@ -247,7 +306,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
         </div>
       )}
 
-      {(status === 'detecting' || status === 'captured-flash') && !loadError && (
+      {(status === 'positioning' || status === 'countdown' || status === 'captured-flash') && !loadError && (
         <>
           <div className="mt-6 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
@@ -256,12 +315,14 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {t(currentPoseId.instructionKey)}
             </p>
-            {!isReady && (
-              <p className="text-[11px] text-white/40">{t('visual_capture_preparingCamera')}</p>
+            {status === 'positioning' && (
+              <p className="text-[12px] text-[#8FC1E8]/70 italic">
+                {t('visual_voice_getReady')}
+              </p>
             )}
-            {isReady && armDelay > 0 && (
+            {status === 'countdown' && (
               <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                {armDelay}
+                {countdownVal}
               </p>
             )}
             <div className="flex gap-1.5 mt-2">
@@ -313,7 +374,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   )
 }
 
-// ── Overlay canvas — silhouette guide + anneau de progression ──────────────
 function drawOverlay(
   canvas: HTMLCanvasElement,
   result: { detected: boolean; fullBodyInFrame: boolean },
