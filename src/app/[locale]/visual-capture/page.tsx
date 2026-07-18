@@ -176,7 +176,14 @@ export default function VisualCapturePage() {
               </button>
 
               <button
-                onClick={() => setCaptureMode('body')}
+                onClick={() => {
+                  // Débloque la synthèse vocale iOS via un geste utilisateur explicite
+                  if (typeof window !== 'undefined' && window.speechSynthesis) {
+                    const unlock = new SpeechSynthesisUtterance('')
+                    window.speechSynthesis.speak(unlock)
+                  }
+                  setCaptureMode('body')
+                }}
                 className="relative w-full rounded-[20px] border border-[#8FC1E8]/30 bg-black/30 backdrop-blur-xl px-6 py-6 flex items-center gap-5 active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(143,193,232,0.08)]">
                 <div className="w-14 h-14 rounded-full border border-[#8FC1E8]/30 flex items-center justify-center shrink-0">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8FC1E8" strokeWidth="1.4">
