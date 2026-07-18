@@ -79,19 +79,25 @@ export function usePoseLandmarker() {
 
     const lm = result.landmarks[0]
 
-    // Cadrage complet : nez + chevilles visibles avec bonne confiance de visibilité
+    // Cadrage complet : tête (nez OU oreille) + chevilles visibles — fonctionne peu importe l'orientation
     const noseVisible = (lm[NOSE]?.visibility ?? 0) > 0.5
+    const leftEarVisible = (lm[LEFT_EAR]?.visibility ?? 0) > 0.4
+    const rightEarVisible = (lm[RIGHT_EAR]?.visibility ?? 0) > 0.4
+    const headVisible = noseVisible || leftEarVisible || rightEarVisible
     const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.3 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.3
-    const fullBodyInFrame = noseVisible && anklesVisible
+    const fullBodyInFrame = headVisible && anklesVisible
+
+    // Référence verticale du haut du corps — nez si visible, sinon estimation via épaules
+    const topRefY = noseVisible ? lm[NOSE].y : (lm[LEFT_SHOULDER].y + lm[RIGHT_SHOULDER].y) / 2 - 0.05
 
     // Diagnostic de distance — hauteur verticale occupée par le corps à l'écran
-    const bodyHeight = Math.abs(lm[NOSE].y - Math.max(lm[LEFT_ANKLE]?.y ?? 0, lm[RIGHT_ANKLE]?.y ?? 0))
+    const bodyHeight = Math.abs(topRefY - Math.max(lm[LEFT_ANKLE]?.y ?? 0, lm[RIGHT_ANKLE]?.y ?? 0))
     let distanceHint: 'ok' | 'too_close' | 'too_far' | 'unknown' = 'unknown'
-    if (noseVisible && anklesVisible) {
+    if (headVisible && anklesVisible) {
       if (bodyHeight > 0.95) distanceHint = 'too_close'
       else if (bodyHeight < 0.55) distanceHint = 'too_far'
       else distanceHint = 'ok'
-    } else if (noseVisible && !anklesVisible) {
+    } else if (headVisible && !anklesVisible) {
       distanceHint = 'too_close' // pieds hors cadre = trop proche ou mal cadré vers le bas
     }
 

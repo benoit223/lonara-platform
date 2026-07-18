@@ -150,7 +150,9 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const nowMs = performance.now()
       if (armedRef.current && result.detected && nowMs - lastGuidanceCheckRef.current > 1200) {
         lastGuidanceCheckRef.current = nowMs
-        if (result.distanceHint === 'too_far') {
+        if (result.orientation !== currentPoseId.target) {
+          speak(t('visual_voice_wrongOrientation'), { lang: speechLang })
+        } else if (result.distanceHint === 'too_far') {
           speak(t('visual_voice_moveCloser'), { lang: speechLang })
         } else if (result.distanceHint === 'too_close') {
           speak(t('visual_voice_moveBack'), { lang: speechLang })
@@ -158,8 +160,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           speak(t('visual_voice_moveLeft'), { lang: speechLang })
         } else if (result.horizontalHint === 'move_right') {
           speak(t('visual_voice_moveRight'), { lang: speechLang })
-        } else if (result.orientation !== currentPoseId.target) {
-          speak(t('visual_voice_wrongOrientation'), { lang: speechLang })
         } else if (withinTarget && currentProgress > 0.3) {
           speak(t('visual_voice_holdStill'), { lang: speechLang })
         }
