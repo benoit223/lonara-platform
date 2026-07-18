@@ -78,14 +78,10 @@ function Navbar({
   onReports,
   onMySpace,
   onMySpaceClick,
-  onFuel,
-  onFuelClick,
   memberTier,
-  hasFuelSprint,
-}: HeroProps & {
+}: Omit<HeroProps, 'onFuel' | 'hasFuelSprint'> & {
   onScience: () => void
   onMySpaceClick: () => void
-  onFuelClick: () => void
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const t = useTranslations()
@@ -133,18 +129,7 @@ function Navbar({
             {t('nav.labs')}
           </a>
 
-<button
-  onClick={onFuelClick}
-  className="relative group flex items-center gap-2 rounded-full border border-[#1D9E75]/25 bg-[#1D9E75]/5 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#1D9E75]/80 backdrop-blur-xl transition-all hover:border-[#1D9E75]/45 hover:bg-[#1D9E75]/10 hover:text-[#5DCAA5]"
->
-  <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#5DCAA5]/60 to-transparent pointer-events-none" />
-<span className={`h-1.5 w-1.5 rounded-full transition-colors ${
-    hasFuelSprint
-      ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
-      : 'bg-[#1D9E75]/30'
-  }`} />
-  {t('nav.myfuel')}
-</button>
+
 
           {/* ── MY SPACE ── */}
           <button
@@ -214,21 +199,6 @@ function Navbar({
             {t('nav.labs')}
           </a>
 
-          {/* ── FUEL mobile ── */}
-          <button
-            onClick={() => {
-              onFuelClick()
-              setMobileMenuOpen(false)
-            }}
-            className="flex items-center gap-2 rounded-full border border-[#1D9E75]/25 bg-[#1D9E75]/5 px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] text-[#1D9E75]/80 transition-all hover:border-[#1D9E75]/45 hover:text-[#5DCAA5]"
-          >
-         <span className={`h-1.5 w-1.5 rounded-full transition-colors ${
-    hasFuelSprint
-      ? 'bg-[#5DCAA5] animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_8px_3px_rgba(93,202,165,0.7)]'
-      : 'bg-[#1D9E75]/30'
-  }`} />
-  {t('nav.myfuel')}
-</button>
 
           {/* ── MY SPACE mobile ── */}
           <button
@@ -352,13 +322,8 @@ export default function Hero({ onStart, onReports, onAbout, onMySpace, onFuel, m
   onReports={onReports}
   onScience={() => setShowScience(true)}
   onMySpace={onMySpace}
-  onFuel={onFuel}
   onMySpaceClick={handleMySpaceClick}
-  onFuelClick={() => {
-  if (memberTier !== 'guest') onFuel()
-}}
   memberTier={memberTier}
-  hasFuelSprint={hasFuelSprint}
 />
 
       {/* Desktop CTA */}

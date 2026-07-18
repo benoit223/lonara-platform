@@ -21,6 +21,9 @@ interface MySpaceProps {
   onAssessmentLoaded?: (assessment: any) => void
   onBgCharacterChange?: (bg: 'lona' | 'enginea' | 'gummy') => void
   onSignOut?: () => void
+  onFuel: () => void
+  hasFuelSprint?: boolean
+  onVisual: () => void
 }
 
 type MenuItem = 'state' | 'understand' | 'optimize' | 'evolve' | 'connect'
@@ -342,6 +345,9 @@ export default function MySpace({
   onAssessmentLoaded,
   onBgCharacterChange,
   onSignOut,
+  onFuel,
+  hasFuelSprint = false,
+  onVisual,
 }: MySpaceProps) {
 
 
@@ -370,6 +376,7 @@ const [chatMessages, setChatMessages] = useState<{ role: string; content: string
 
  const t = useTranslations('myspace')
 const tLegal = useTranslations()
+const tRoot = useTranslations()
 const locale = useLocale()
 
   const MENU_ITEMS: { id: MenuItem; label: string }[] = [
@@ -596,9 +603,26 @@ const getDotColor = (num: number | null, idx: number) => {
                 </button>
               ))}
             </div>
-            <span className="text-[11px] md:text-[13px] uppercase tracking-[0.18em] text-white/52">
-              {t('dashboard')} — {localFullName ? localFullName.split(' ')[0] : fullName ? fullName.split(' ')[0] : 'My Space'}
-            </span>
+
+          {/* ── MY FUEL ── */}
+            <button
+              onClick={onFuel}
+              className="relative group flex items-center gap-2 rounded-full border border-[#1D9E75]/40 bg-black/20 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#3DD4A0] backdrop-blur-xl transition-all hover:border-[#1D9E75]/60 hover:bg-black/30 hover:text-[#5DCAA5]"
+            >
+              <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#5DCAA5]/60 to-transparent pointer-events-none" />
+              {tRoot('myfuel')}
+            </button>
+
+           {/* ── MY VISUAL ── */}
+            <button
+              onClick={onVisual}
+              className="relative group flex items-center gap-2 rounded-full border border-[#4A90C2]/40 bg-black/20 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#8FC1E8] backdrop-blur-xl transition-all hover:border-[#4A90C2]/60 hover:bg-black/30 hover:text-[#B5DBF5]"
+            >
+              <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#8FC1E8]/60 to-transparent pointer-events-none" />
+              {tRoot('myvisual')}
+            </button>
+
+
             <button onClick={onBack}
               className="flex items-center gap-2 text-white/35 hover:text-white/70 transition-all text-[11px] md:text-[13px] uppercase tracking-[0.18em]">
               <ArrowLeft className="h-3.5 w-3.5" />

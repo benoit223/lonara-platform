@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useParams } from 'next/navigation'
 
 type Status = 'loading' | 'auth' | 'idle' | 'uploading' | 'done' | 'error' | 'install'
 
@@ -11,6 +11,8 @@ const LS_SID = 'lonara_capture_sid'
 export default function CapturePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const searchParams = useSearchParams()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'en'
   const [status, setStatus] = useState<Status>('loading')
   const [userId, setUserId] = useState<string | null>(null)
   const [sprintId, setSprintId] = useState<string | null>(null)
@@ -49,7 +51,7 @@ export default function CapturePage() {
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches
         if (!isInstalled) {
           // Mettre le userId dans l'URL pour que la PWA puisse le lire
-          window.history.replaceState({}, '', `/fr/capture?uid=${data.userId}&sid=${data.sprintId ?? ''}`)
+          window.history.replaceState({}, '', `/${locale}/capture?uid=${data.userId}&sid=${data.sprintId ?? ''}`)
           setStatus('install')
           return
         }

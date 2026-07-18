@@ -12,10 +12,11 @@ import MySpace from '@/components/MySpace'
 import { useLocale } from 'next-intl'
 import { calculateAge } from '@/lib/utils'
 import FuelSpace from '@/components/FuelSpace'
+import VisualSpace from '@/components/VisualSpace'
 
 export default function Home() {
 
-  const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace' | 'fuel'>('hero')
+  const [step, setStep] = useState<'hero' | 'assessment' | 'prequiz' | 'quiz' | 'myspace' | 'fuel' | 'visual'>('hero')
 useEffect(() => {
  
 }, [step])
@@ -324,7 +325,10 @@ setMemberTier(tier as 'guest' | 'member' | 'premium' | 'executive')
   onAbout={() => setShowAbout(true)}
   onReports={() => setShowReport(true)}
   onMySpace={() => handleGoToMySpace()}
-  onFuel={() => setStep('fuel')}
+  onFuel={() => {
+    setPreviousStep('hero')
+    setStep('fuel')
+  }}
   memberTier={memberTier}
   hasFuelSprint={hasFuelSprint}
 />
@@ -533,6 +537,15 @@ onWeightChange={async (w) => {
     onAssessmentLoaded={(a: any) => setCachedAssessment(a)}
     onBgCharacterChange={(bg: any) => setCachedBgCharacter(bg)}
     onSignOut={handleSignOut}
+    onFuel={() => {
+      setPreviousStep('myspace')
+      setStep('fuel')
+    }}
+    hasFuelSprint={hasFuelSprint}
+    onVisual={() => {
+      setPreviousStep('myspace')
+      setStep('visual')
+    }}
   />
 )}
 
@@ -540,7 +553,31 @@ onWeightChange={async (w) => {
   <FuelSpace
     memberTier={memberTier}
     fullName={fullName}
-    onBack={() => setStep('hero')}
+    onBack={() => {
+      if (previousStep === 'myspace') {
+        setMySpaceKey(k => k + 1)
+        setStep('myspace')
+      } else {
+        setStep('hero')
+      }
+    }}
+    onSignOut={handleSignOut}
+  />
+)}
+
+{step === 'visual' && (
+  <VisualSpace
+    memberTier={memberTier}
+    fullName={fullName}
+    sex={sex}
+    onBack={() => {
+      if (previousStep === 'myspace') {
+        setMySpaceKey(k => k + 1)
+        setStep('myspace')
+      } else {
+        setStep('hero')
+      }
+    }}
     onSignOut={handleSignOut}
   />
 )}

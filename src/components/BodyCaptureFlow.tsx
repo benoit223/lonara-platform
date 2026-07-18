@@ -1,0 +1,280 @@
+'use client'
+
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { usePoseLandmarker, type BodyOrientation } from '../hooks/usePoseLandmarker'
+
+type BodyPose = 'front' | 'back' | 'left' | 'right'
+type FlowStatus = 'requesting' | 'detecting' | 'captured-flash' | 'review' | 'error'
+
+interface CapturedShot {
+  pose: BodyPose
+  dataUrl: string
+}
+
+const POSES: { id: BodyPose; instruction: string; labelKey: string; target: BodyOrientation }[] = [
+  { id: 'front', instruction: 'Placez-vous face à la caméra, à environ 2 mètres', labelKey: 'Face', target: 'front' },
+  { id: 'back', instruction: 'Tournez-vous dos à la caméra', labelKey: 'Dos', target: 'back' },
+  { id: 'left', instruction: 'Tournez-vous de profil, côté gauche visible', labelKey: 'Profil gauche', target: 'left' },
+  { id: 'right', instruction: 'Tournez-vous de profil, côté droit visible', labelKey: 'Profil droit', target: 'right' },
+]
+
+const STABLE_FRAMES_REQUIRED = 24 // légèrement plus long que le visage — repositionnement corporel plus lent
+
+interface BodyCaptureFlowProps {
+  onComplete: (shots: CapturedShot[]) => void
+  onCancel: () => void
+}
+
+export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlowProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef<number | null>(null)
+  const stableCountRef = useRef(0)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  const { isReady, loadError, detect } = usePoseLandmarker()
+
+  const [status, setStatus] = useState<FlowStatus>('requesting')
+  const [poseIndex, setPoseIndex] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [shots, setShots] = useState<CapturedShot[]>([])
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const currentPose = POSES[poseIndex]
+
+  // ── Démarrage caméra — grand angle, caméra arrière préférée pour poser le téléphone à distance ──
+  useEffect(() => {
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 1707 } },
+          audio: false,
+        })
+        streamRef.current = stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+          await videoRef.current.play()
+        }
+        setStatus('detecting')
+      } catch (e) {
+        console.error('Camera error:', e)
+        setErrorMsg("Impossible d'accéder à la caméra. Vérifiez les autorisations.")
+        setStatus('error')
+      }
+    }
+    startCamera()
+    return () => {
+      streamRef.current?.getTracks().forEach(t => t.stop())
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
+
+  const captureFrame = useCallback((): string => {
+    const video = videoRef.current!
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(video, 0, 0)
+    return canvas.toDataURL('image/jpeg', 0.92)
+  }, [])
+
+  // ── Boucle de détection ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (status !== 'detecting' || !isReady) return
+
+    const loop = () => {
+      const video = videoRef.current
+      if (!video) return
+
+      const result = detect(video, performance.now())
+
+      const withinTarget = result.detected && result.fullBodyInFrame && result.orientation === currentPose.target
+
+      if (withinTarget) {
+        stableCountRef.current += 1
+      } else {
+        stableCountRef.current = 0
+      }
+      const currentProgress = Math.min(1, stableCountRef.current / STABLE_FRAMES_REQUIRED)
+      setProgress(currentProgress)
+
+      const canvas = canvasRef.current
+      if (canvas) drawOverlay(canvas, result, currentProgress)
+
+      if (stableCountRef.current >= STABLE_FRAMES_REQUIRED) {
+        stableCountRef.current = 0
+        const dataUrl = captureFrame()
+        setShots(prev => [...prev, { pose: currentPose.id, dataUrl }])
+        setStatus('captured-flash')
+        return
+      }
+
+      rafRef.current = requestAnimationFrame(loop)
+    }
+
+    rafRef.current = requestAnimationFrame(loop)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [status, isReady, currentPose, detect, captureFrame])
+
+  // ── Transition après capture d'une pose ──────────────────────────────────
+  useEffect(() => {
+    if (status !== 'captured-flash') return
+    const timeout = setTimeout(() => {
+      if (poseIndex < POSES.length - 1) {
+        setPoseIndex(prev => prev + 1)
+        setProgress(0)
+        setStatus('detecting')
+      } else {
+        setStatus('review')
+      }
+    }, 800)
+    return () => clearTimeout(timeout)
+  }, [status, poseIndex])
+
+  const handleRetake = (pose: BodyPose) => {
+    setShots(prev => prev.filter(s => s.pose !== pose))
+    const idx = POSES.findIndex(p => p.id === pose)
+    setPoseIndex(idx)
+    setProgress(0)
+    setStatus('detecting')
+  }
+
+  const handleConfirm = () => {
+    onComplete(shots)
+  }
+
+  return (
+    <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center">
+      {(status === 'requesting' || (!isReady && status !== 'error')) && (
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
+          <p className="text-[13px] text-white/50">Préparation de la caméra…</p>
+        </div>
+      )}
+
+      {(status === 'error' || loadError) && (
+        <div className="flex flex-col items-center gap-4 px-8 text-center">
+          <p className="text-[14px] text-red-400">{errorMsg || loadError}</p>
+          <button onClick={onCancel} className="text-[12px] uppercase tracking-[0.18em] text-white/40">
+            Retour
+          </button>
+        </div>
+      )}
+
+      {(status === 'detecting' || status === 'captured-flash') && isReady && !loadError && (
+        <div className="relative w-full h-full flex flex-col items-center">
+          <div className="relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10">
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
+            <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
+            {status === 'captured-flash' && (
+              <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
+            )}
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-3 px-6 text-center">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
+              Étape {poseIndex + 1} / {POSES.length}
+            </p>
+            <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {currentPose.instruction}
+            </p>
+            <p className="text-[11px] text-white/40">Placez le téléphone à ~2m, poussez-le contre un support</p>
+            <div className="flex gap-1.5 mt-2">
+              {POSES.map((p, i) => (
+                <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${
+                  i < poseIndex ? 'bg-[#8FC1E8]' : i === poseIndex ? 'bg-[#8FC1E8]/50' : 'bg-white/15'
+                }`} />
+              ))}
+            </div>
+          </div>
+
+          <button onClick={onCancel} className="mt-5 text-[11px] uppercase tracking-[0.18em] text-white/30">
+            Annuler
+          </button>
+        </div>
+      )}
+
+      {status === 'review' && (
+        <div className="flex flex-col items-center gap-6 px-6 w-full max-w-md">
+          <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            Vérifiez vos photos
+          </p>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            {POSES.map((p) => {
+              const shot = shots.find(s => s.pose === p.id)
+              return (
+                <div key={p.id} className="flex flex-col items-center gap-1.5">
+                  <div className="relative w-full aspect-[3/4] rounded-[10px] overflow-hidden border border-white/10">
+                    {shot && <img src={shot.dataUrl} alt={p.labelKey} className="w-full h-full object-cover" />}
+                  </div>
+                  <p className="text-[8px] uppercase tracking-[0.1em] text-white/50 text-center">{p.labelKey}</p>
+                  <button onClick={() => handleRetake(p.id)} className="text-[9px] text-[#8FC1E8]/70 underline">
+                    Reprendre
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+          <button onClick={handleConfirm}
+            className="relative w-full rounded-full border border-[#4A90C2]/65 bg-[#4A90C2]/15 py-4 text-[12px] uppercase tracking-[0.22em] text-[#8FC1E8] transition hover:bg-[#4A90C2]/25">
+            Confirmer et continuer
+          </button>
+          <button onClick={onCancel} className="text-[11px] uppercase tracking-[0.18em] text-white/30">
+            Annuler la session
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Overlay canvas — silhouette guide + anneau de progression ──────────────
+function drawOverlay(
+  canvas: HTMLCanvasElement,
+  result: { detected: boolean; fullBodyInFrame: boolean },
+  progress: number
+) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const { width, height } = canvas
+  ctx.clearRect(0, 0, width, height)
+
+  const cx = width / 2
+  const top = height * 0.08
+  const bottom = height * 0.94
+
+  // Silhouette guide simplifiée (rectangle arrondi vertical)
+  ctx.strokeStyle = result.detected && result.fullBodyInFrame ? 'rgba(143,193,232,0.55)' : 'rgba(255,255,255,0.22)'
+  ctx.lineWidth = 2
+  ctx.setLineDash([6, 6])
+  const guideWidth = width * 0.32
+  roundRect(ctx, cx - guideWidth / 2, top, guideWidth, bottom - top, 40)
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  // Anneau de progression circulaire en haut du cadre
+  if (progress > 0) {
+    const ringCx = cx
+    const ringCy = top - 20
+    const ringR = 16
+    ctx.strokeStyle = '#8FC1E8'
+    ctx.lineWidth = 4
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.arc(ringCx, Math.max(ringCy, 20), ringR, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2)
+    ctx.stroke()
+  }
+}
+
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.arcTo(x + w, y, x + w, y + h, r)
+  ctx.arcTo(x + w, y + h, x, y + h, r)
+  ctx.arcTo(x, y + h, x, y, r)
+  ctx.arcTo(x, y, x + w, y, r)
+  ctx.closePath()
+}
