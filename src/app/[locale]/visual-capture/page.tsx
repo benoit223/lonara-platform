@@ -203,12 +203,27 @@ export default function VisualCapturePage() {
         </div>
       </div>
 
-      {captureMode === 'face' && (
+      {captureMode === 'face' && userId && (
         <FaceCaptureFlow
-          onComplete={(shots) => {
-            console.log('Photos visage capturées:', shots)
-            // Upload vers Supabase à connecter à l'étape suivante
+          onComplete={async (shots) => {
+            const sessionId = crypto.randomUUID()
+            for (const shot of shots) {
+              const blob = await (await fetch(shot.dataUrl)).blob()
+              const formData = new FormData()
+              formData.append('userId', userId)
+              formData.append('captureType', 'face')
+              formData.append('pose', shot.pose)
+              formData.append('sessionId', sessionId)
+              formData.append('image', blob, `${shot.pose}.jpg`)
+              await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
+            }
+            await fetch('/api/visual-analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, sessionId, captureType: 'face' }),
+            })
             setCaptureMode(null)
+            setStatus('choice')
           }}
           onCancel={() => setCaptureMode(null)}
         />
@@ -217,15 +232,22 @@ export default function VisualCapturePage() {
       {captureMode === 'body' && userId && (
         <BodyCaptureFlow
           onComplete={async (shots) => {
+            const sessionId = crypto.randomUUID()
             for (const shot of shots) {
               const blob = await (await fetch(shot.dataUrl)).blob()
               const formData = new FormData()
               formData.append('userId', userId)
               formData.append('captureType', 'body')
               formData.append('pose', shot.pose)
+              formData.append('sessionId', sessionId)
               formData.append('image', blob, `${shot.pose}.jpg`)
               await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
             }
+            await fetch('/api/visual-analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, sessionId, captureType: 'body' }),
+            })
             setCaptureMode(null)
             setStatus('choice')
           }}

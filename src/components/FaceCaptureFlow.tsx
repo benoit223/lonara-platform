@@ -45,7 +45,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   const [errorMsg, setErrorMsg] = useState('')
   const [armDelay, setArmDelay] = useState(5) // décompte avant que la détection ne s'active
   const armedRef = useRef(false)
-  const [debugInfo, setDebugInfo] = useState('init')
+  
 
   const currentPoseId = POSE_IDS[poseIndex] // référence stable — POSE_IDS est une constante de module
 
@@ -53,31 +53,23 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   useEffect(() => {
     const startCamera = async () => {
       try {
-        setDebugInfo('demande permission…')
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
           audio: false,
         })
         streamRef.current = stream
-        const tracks = stream.getVideoTracks()
-        setDebugInfo(`stream ok, tracks=${tracks.length}, state=${tracks[0]?.readyState}`)
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          videoRef.current.onloadedmetadata = () => {
-            setDebugInfo(prev => prev + ` | metadata: ${videoRef.current?.videoWidth}x${videoRef.current?.videoHeight}`)
-          }
           try {
             await videoRef.current.play()
-            setDebugInfo(prev => prev + ' | play() ok')
-          } catch (playErr: any) {
-            setDebugInfo(prev => prev + ` | play() FAIL: ${playErr?.message ?? playErr}`)
+          } catch (playErr) {
+            console.error('Video play error:', playErr)
           }
         }
         setStatus('detecting')
       } catch (e: any) {
         console.error('Camera error:', e)
-        setDebugInfo(`getUserMedia FAIL: ${e?.name ?? ''} ${e?.message ?? e}`)
         setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
@@ -215,9 +207,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
         )}
       </div>
 
-      <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
-        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
-      </div>
+      
 
       {(status === 'requesting' || (!isReady && status !== 'error')) && (
         <div className="flex flex-col items-center gap-4 mt-6">

@@ -50,7 +50,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const [countdownVal, setCountdownVal] = useState(COUNTDOWN_SECONDS_FIRST)
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
-  const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPoseId = POSE_IDS[poseIndex]
   const isFirstPose = poseIndex === 0
@@ -59,30 +58,22 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   useEffect(() => {
     const startCamera = async () => {
       try {
-        setDebugInfo('demande permission…')
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 1707 } },
           audio: false,
         })
         streamRef.current = stream
-        const tracks = stream.getVideoTracks()
-        setDebugInfo(`stream ok, tracks=${tracks.length}, state=${tracks[0]?.readyState}`)
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          videoRef.current.onloadedmetadata = () => {
-            setDebugInfo(prev => prev + ` | metadata: ${videoRef.current?.videoWidth}x${videoRef.current?.videoHeight}`)
-          }
           try {
             await videoRef.current.play()
-            setDebugInfo(prev => prev + ' | play() ok')
-          } catch (playErr: any) {
-            setDebugInfo(prev => prev + ` | play() FAIL: ${playErr?.message ?? playErr}`)
+          } catch (playErr) {
+            console.error('Video play error:', playErr)
           }
         }
       } catch (e: any) {
         console.error('Camera error:', e)
-        setDebugInfo(`getUserMedia FAIL: ${e?.name ?? ''} ${e?.message ?? e}`)
         setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
@@ -136,7 +127,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       if (!video) return
 
       const result = detect(video, performance.now())
-      setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} dist=${result.distanceHint} horiz=${result.horizontalHint} frame=${result.fullBodyInFrame}`)
 
       const canvas = canvasRef.current
 
@@ -285,10 +275,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
             <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
           </div>
         )}
-      </div>
-
-      <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
-        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | status={status} | isReady={String(isReady)}</p>
       </div>
 
       {status === 'requesting' && (
