@@ -29,7 +29,7 @@ export default function VisualCapturePage() {
         const res = await fetch('/api/visual-capture-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ token, locale }),
         })
 
         if (!res.ok) {

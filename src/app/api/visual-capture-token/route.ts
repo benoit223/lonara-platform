@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
-  const { token } = await req.json()
+  const { token, locale } = await req.json()
 
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 })
 
@@ -31,6 +31,15 @@ export async function POST(req: NextRequest) {
     secure: true,
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 30, // 30 jours
+    path: '/',
+  })
+
+  // Locale au moment du scan — permet de rediriger vers la bonne langue quand la PWA relance sans préfixe
+  response.cookies.set('lonara_visual_locale', locale ?? 'en', {
+    httpOnly: false,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 30,
     path: '/',
   })
 
