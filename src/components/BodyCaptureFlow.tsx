@@ -22,7 +22,7 @@ const POSE_IDS: { id: BodyPose; instructionKey: string; labelKey: string; target
 
 const STABLE_FRAMES_TO_START_COUNTDOWN = 20 // ~0.6-0.7s de cadrage correct avant de lancer le compte à rebours
 const COUNTDOWN_SECONDS_FIRST = 3  // pose 1 (face) — déjà bien positionné, confirmation courte
-const COUNTDOWN_SECONDS_PIVOT = 5  // poses 2-4 — laisse le temps physique de pivoter
+const COUNTDOWN_SECONDS_PIVOT = 8  // poses 2-4 — laisse le temps physique de pivoter
 
 interface BodyCaptureFlowProps {
   onComplete: (shots: CapturedShot[]) => void
