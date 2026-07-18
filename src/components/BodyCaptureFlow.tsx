@@ -205,6 +205,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       if (!video || cancelled) return
 
       const result = detect(video, performance.now())
+
       const framingOk = isFirstPose
         ? result.detected && result.fullBodyInFrame && result.distanceHint === 'ok' && result.horizontalHint === 'ok'
         : result.detected && result.fullBodyInFrame
