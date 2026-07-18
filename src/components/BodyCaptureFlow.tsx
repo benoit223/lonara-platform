@@ -58,7 +58,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       try {
         setDebugInfo('demande permission…')
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 1707 } },
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 1707 } },
           audio: false,
         })
         streamRef.current = stream
@@ -135,12 +135,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
 const result = detect(video, performance.now())
       setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} | ${result.debugRaw ?? 'no landmarks'}`)
 
-      // ── DEBUG TEMPORAIRE — annonce vocale toutes les 2s pour tester sans regarder l'écran ──
-      const nowDebug = performance.now()
-      if (nowDebug - lastGuidanceCheckRef.current > 2000) {
-        lastGuidanceCheckRef.current = nowDebug
-        speak(result.detected ? 'détecté' : 'non détecté', { force: true, lang: speechLang })
-      }
       const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPoseId.target
 
       if (withinTarget) {
@@ -225,7 +219,7 @@ const result = detect(video, performance.now())
       <div className={`relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10 ${
         status === 'detecting' || status === 'captured-flash' ? 'block' : 'hidden'
       }`}>
-        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted autoPlay />
         <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
         {status === 'captured-flash' && (
           <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
@@ -266,7 +260,7 @@ const result = detect(video, performance.now())
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {t(currentPoseId.instructionKey)}
             </p>
-            <p className="text-[11px] text-white/40">{t('visual_capture_bodyDistanceHint')}</p>
+            
             {armDelay > 0 && (
               <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {armDelay}
