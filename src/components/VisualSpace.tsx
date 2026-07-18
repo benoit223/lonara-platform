@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '../lib/supabase'
 
 interface CaptureShot {
@@ -257,6 +257,7 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
 
   const t = useTranslations('myspace')
   const tGlobal = useTranslations()
+  const locale = useLocale()
   const firstName = fullName.split(' ')[0] || fullName
   const currentBg = getVisualBg(sex)
 
@@ -618,7 +619,7 @@ const generateQRToken = async () => {
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] bg-gradient-to-r from-transparent via-[#4A90C2] to-transparent opacity-70" />
             <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80">{t('visual_connectPhone')}</p>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://app.lonaralabs.com/fr/visual-capture?token=${qrToken}`)}&bgcolor=040B14&color=8FC1E8`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://app.lonaralabs.com/${locale}/visual-capture?token=${qrToken}`)}&bgcolor=040B14&color=8FC1E8`}
               alt="QR Code"
               className="w-[200px] h-[200px] rounded-[12px]"
             />

@@ -44,6 +44,8 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   const [progress, setProgress] = useState(0) // 0-1 pour l'anneau de progression
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
+  const [armDelay, setArmDelay] = useState(3) // décompte avant que la détection ne s'active
+  const armedRef = useRef(false)
   const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPose = POSES[poseIndex]
@@ -88,6 +90,26 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
     }
   }, [])
 
+// ── Délai d'armement avant chaque pose — laisse le temps de se positionner ──
+  useEffect(() => {
+    if (status !== 'detecting') return
+    armedRef.current = false
+    setArmDelay(3)
+
+    const interval = setInterval(() => {
+      setArmDelay(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          armedRef.current = true
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [status, poseIndex])
+
   const captureFrame = useCallback((): string => {
     const video = videoRef.current!
     const canvas = document.createElement('canvas')
@@ -109,7 +131,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
       const result = detect(video, performance.now())
 
       let withinTarget = false
-      if (result.detected && result.faceBoxOk) {
+      if (armedRef.current && result.detected && result.faceBoxOk) {
         if (currentPose.id === 'center') {
           withinTarget = Math.abs(result.yaw) < YAW_CENTER_THRESHOLD
         } else if (currentPose.id === 'left') {
@@ -223,6 +245,11 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {currentPose.instruction}
             </p>
+            {armDelay > 0 && (
+              <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {armDelay}
+              </p>
+            )}
             <div className="flex gap-1.5 mt-2">
               {POSES.map((p, i) => (
                 <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${

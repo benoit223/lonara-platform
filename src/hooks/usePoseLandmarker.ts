@@ -5,10 +5,15 @@ import { PoseLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
 export type BodyOrientation = 'front' | 'back' | 'left' | 'right' | 'unknown'
 
+export type DistanceHint = 'ok' | 'too_close' | 'too_far' | 'unknown'
+export type HorizontalHint = 'ok' | 'move_left' | 'move_right'
+
 export interface PoseDetectionResult {
   detected: boolean
   orientation: BodyOrientation
   fullBodyInFrame: boolean // tête + pieds visibles dans le cadre
+  distanceHint: DistanceHint
+  horizontalHint: HorizontalHint
 }
 
 // Indices des repères MediaPipe Pose pertinents
@@ -63,13 +68,13 @@ export function usePoseLandmarker() {
 
   const detect = useCallback((video: HTMLVideoElement, timestampMs: number): PoseDetectionResult => {
     if (!landmarkerRef.current || video.readyState < 2) {
-      return { detected: false, orientation: 'unknown', fullBodyInFrame: false }
+      return { detected: false, orientation: 'unknown', fullBodyInFrame: false, distanceHint: 'unknown', horizontalHint: 'ok' }
     }
 
     const result = landmarkerRef.current.detectForVideo(video, timestampMs)
 
     if (!result.landmarks || result.landmarks.length === 0) {
-      return { detected: false, orientation: 'unknown', fullBodyInFrame: false }
+      return { detected: false, orientation: 'unknown', fullBodyInFrame: false, distanceHint: 'unknown', horizontalHint: 'ok' }
     }
 
     const lm = result.landmarks[0]
@@ -78,6 +83,23 @@ export function usePoseLandmarker() {
     const noseVisible = (lm[NOSE]?.visibility ?? 0) > 0.5
     const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.3 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.3
     const fullBodyInFrame = noseVisible && anklesVisible
+
+    // Diagnostic de distance — hauteur verticale occupée par le corps à l'écran
+    const bodyHeight = Math.abs(lm[NOSE].y - Math.max(lm[LEFT_ANKLE]?.y ?? 0, lm[RIGHT_ANKLE]?.y ?? 0))
+    let distanceHint: 'ok' | 'too_close' | 'too_far' | 'unknown' = 'unknown'
+    if (noseVisible && anklesVisible) {
+      if (bodyHeight > 0.95) distanceHint = 'too_close'
+      else if (bodyHeight < 0.55) distanceHint = 'too_far'
+      else distanceHint = 'ok'
+    } else if (noseVisible && !anklesVisible) {
+      distanceHint = 'too_close' // pieds hors cadre = trop proche ou mal cadré vers le bas
+    }
+
+    // Centrage horizontal
+    const centerX = (lm[LEFT_SHOULDER].x + lm[RIGHT_SHOULDER].x) / 2
+    let horizontalHint: 'ok' | 'move_left' | 'move_right' = 'ok'
+    if (centerX < 0.35) horizontalHint = 'move_right' // sujet à gauche de l'image → doit se décaler à droite
+    else if (centerX > 0.65) horizontalHint = 'move_left'
 
     // Orientation déduite de la largeur apparente épaules/hanches et visibilité du nez/oreilles
     const shoulderWidth = Math.abs(lm[LEFT_SHOULDER].x - lm[RIGHT_SHOULDER].x)
@@ -100,7 +122,7 @@ export function usePoseLandmarker() {
       orientation = leftEarVis > rightEarVis ? 'left' : 'right'
     }
 
-    return { detected: true, orientation, fullBodyInFrame }
+    return { detected: true, orientation, fullBodyInFrame, distanceHint, horizontalHint }
   }, [])
 
   return { isReady, loadError, detect }

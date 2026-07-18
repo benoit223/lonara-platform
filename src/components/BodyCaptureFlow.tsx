@@ -1,8 +1,9 @@
 'use client'
 
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { usePoseLandmarker, type BodyOrientation } from '../hooks/usePoseLandmarker'
+import { speak } from '../lib/speech'
 
 type BodyPose = 'front' | 'back' | 'left' | 'right'
 type FlowStatus = 'requesting' | 'detecting' | 'captured-flash' | 'review' | 'error'
@@ -28,6 +29,8 @@ interface BodyCaptureFlowProps {
 
 export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlowProps) {
   const t = useTranslations('myspace')
+  const locale = useLocale()
+  const speechLang = locale === 'fr' ? 'fr-FR' : locale === 'es' ? 'es-ES' : 'en-US'
   const POSES = POSE_IDS.map(p => ({ id: p.id, instruction: t(p.instructionKey), labelKey: t(p.labelKey), target: p.target }))
 
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -43,6 +46,8 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const [progress, setProgress] = useState(0)
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
+  const [armDelay, setArmDelay] = useState(3)
+  const armedRef = useRef(false)
   const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPose = POSES[poseIndex]
@@ -87,6 +92,27 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     }
   }, [])
 
+// ── Délai d'armement + annonce vocale au début de chaque pose ──────────────
+  useEffect(() => {
+    if (status !== 'detecting') return
+    armedRef.current = false
+    setArmDelay(3)
+    speak(`${t('visual_voice_getReady')}. ${currentPose.instruction}`, { force: true, lang: speechLang })
+
+    const interval = setInterval(() => {
+      setArmDelay(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          armedRef.current = true
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [status, poseIndex])
+
   const captureFrame = useCallback((): string => {
     const video = videoRef.current!
     const canvas = document.createElement('canvas')
@@ -107,7 +133,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
 
       const result = detect(video, performance.now())
 
-      const withinTarget = result.detected && result.fullBodyInFrame && result.orientation === currentPose.target
+      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPose.target
 
       if (withinTarget) {
         stableCountRef.current += 1
@@ -120,10 +146,28 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const canvas = canvasRef.current
       if (canvas) drawOverlay(canvas, result, currentProgress)
 
+      // ── Guidage vocal — uniquement une fois le délai d'armement passé ──────
+      if (armedRef.current && result.detected) {
+        if (result.distanceHint === 'too_far') {
+          speak(t('visual_voice_moveCloser'), { lang: speechLang })
+        } else if (result.distanceHint === 'too_close') {
+          speak(t('visual_voice_moveBack'), { lang: speechLang })
+        } else if (result.horizontalHint === 'move_left') {
+          speak(t('visual_voice_moveLeft'), { lang: speechLang })
+        } else if (result.horizontalHint === 'move_right') {
+          speak(t('visual_voice_moveRight'), { lang: speechLang })
+        } else if (result.orientation !== currentPose.target) {
+          speak(t('visual_voice_wrongOrientation'), { lang: speechLang })
+        } else if (withinTarget && currentProgress > 0.3) {
+          speak(t('visual_voice_holdStill'), { lang: speechLang })
+        }
+      }
+
       if (stableCountRef.current >= STABLE_FRAMES_REQUIRED) {
         stableCountRef.current = 0
         const dataUrl = captureFrame()
         setShots(prev => [...prev, { pose: currentPose.id, dataUrl }])
+        speak(t('visual_voice_captured'), { force: true, lang: speechLang })
         setStatus('captured-flash')
         return
       }
@@ -213,6 +257,11 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
               {currentPose.instruction}
             </p>
             <p className="text-[11px] text-white/40">{t('visual_capture_bodyDistanceHint')}</p>
+            {armDelay > 0 && (
+              <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {armDelay}
+              </p>
+            )}
             <div className="flex gap-1.5 mt-2">
               {POSES.map((p, i) => (
                 <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${
