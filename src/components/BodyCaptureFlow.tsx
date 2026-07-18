@@ -31,7 +31,6 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const t = useTranslations('myspace')
   const locale = useLocale()
   const speechLang = locale === 'fr' ? 'fr-FR' : locale === 'es' ? 'es-ES' : 'en-US'
-  const POSES = POSE_IDS.map(p => ({ id: p.id, instruction: t(p.instructionKey), labelKey: t(p.labelKey), target: p.target }))
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -51,7 +50,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const lastGuidanceCheckRef = useRef(0)
   const [debugInfo, setDebugInfo] = useState('init')
 
-  const currentPose = POSES[poseIndex]
+  const currentPoseId = POSE_IDS[poseIndex] // référence stable — placé après poseIndex
 
   // ── Démarrage caméra — grand angle, caméra arrière préférée pour poser le téléphone à distance ──
   useEffect(() => {
@@ -97,8 +96,8 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   useEffect(() => {
     if (status !== 'detecting') return
     armedRef.current = false
-    setArmDelay(3)
-    speak(`${t('visual_voice_getReady')}. ${currentPose.instruction}`, { force: true, lang: speechLang })
+    setArmDelay(8)
+    speak(`${t('visual_voice_getReady')}. ${t(currentPoseId.instructionKey)}`, { force: true, lang: speechLang })
 
     const interval = setInterval(() => {
       setArmDelay(prev => {
@@ -134,7 +133,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
 
       const result = detect(video, performance.now())
 
-      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPose.target
+      const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPoseId.target
 
       if (withinTarget) {
         stableCountRef.current += 1
@@ -159,7 +158,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           speak(t('visual_voice_moveLeft'), { lang: speechLang })
         } else if (result.horizontalHint === 'move_right') {
           speak(t('visual_voice_moveRight'), { lang: speechLang })
-        } else if (result.orientation !== currentPose.target) {
+        } else if (result.orientation !== currentPoseId.target) {
           speak(t('visual_voice_wrongOrientation'), { lang: speechLang })
         } else if (withinTarget && currentProgress > 0.3) {
           speak(t('visual_voice_holdStill'), { lang: speechLang })
@@ -169,7 +168,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       if (stableCountRef.current >= STABLE_FRAMES_REQUIRED) {
         stableCountRef.current = 0
         const dataUrl = captureFrame()
-        setShots(prev => [...prev, { pose: currentPose.id, dataUrl }])
+        setShots(prev => [...prev, { pose: currentPoseId.id, dataUrl }])
         speak(t('visual_voice_captured'), { force: true, lang: speechLang })
         setStatus('captured-flash')
         return
@@ -182,13 +181,13 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [status, isReady, currentPose, detect, captureFrame])
+  }, [status, isReady, currentPoseId, detect, captureFrame])
 
   // ── Transition après capture d'une pose ──────────────────────────────────
   useEffect(() => {
     if (status !== 'captured-flash') return
     const timeout = setTimeout(() => {
-      if (poseIndex < POSES.length - 1) {
+      if (poseIndex < POSE_IDS.length - 1) {
         setPoseIndex(prev => prev + 1)
         setProgress(0)
         setStatus('detecting')
@@ -201,7 +200,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
 
   const handleRetake = (pose: BodyPose) => {
     setShots(prev => prev.filter(s => s.pose !== pose))
-    const idx = POSES.findIndex(p => p.id === pose)
+    const idx = POSE_IDS.findIndex(p => p.id === pose)
     setPoseIndex(idx)
     setProgress(0)
     setStatus('detecting')
@@ -254,10 +253,10 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
         <>
           <div className="mt-6 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
-              {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
+              {t('visual_capture_step')} {poseIndex + 1} / {POSE_IDS.length}
             </p>
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              {currentPose.instruction}
+              {t(currentPoseId.instructionKey)}
             </p>
             <p className="text-[11px] text-white/40">{t('visual_capture_bodyDistanceHint')}</p>
             {armDelay > 0 && (
@@ -266,7 +265,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
               </p>
             )}
             <div className="flex gap-1.5 mt-2">
-              {POSES.map((p, i) => (
+              {POSE_IDS.map((p, i) => (
                 <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${
                   i < poseIndex ? 'bg-[#8FC1E8]' : i === poseIndex ? 'bg-[#8FC1E8]/50' : 'bg-white/15'
                 }`} />
@@ -286,14 +285,14 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
             {t('visual_capture_review')}
           </p>
           <div className="grid grid-cols-4 gap-2 w-full">
-            {POSES.map((p) => {
+            {POSE_IDS.map((p) => {
               const shot = shots.find(s => s.pose === p.id)
               return (
                 <div key={p.id} className="flex flex-col items-center gap-1.5">
                   <div className="relative w-full aspect-[3/4] rounded-[10px] overflow-hidden border border-white/10">
-                    {shot && <img src={shot.dataUrl} alt={p.labelKey} className="w-full h-full object-cover" />}
+                    {shot && <img src={shot.dataUrl} alt={t(p.labelKey)} className="w-full h-full object-cover" />}
                   </div>
-                  <p className="text-[8px] uppercase tracking-[0.1em] text-white/50 text-center">{p.labelKey}</p>
+                  <p className="text-[8px] uppercase tracking-[0.1em] text-white/50 text-center">{t(p.labelKey)}</p>
                   <button onClick={() => handleRetake(p.id)} className="text-[9px] text-[#8FC1E8]/70 underline">
                     {t('visual_capture_retake')}
                   </button>

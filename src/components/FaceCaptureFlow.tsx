@@ -29,7 +29,6 @@ interface FaceCaptureFlowProps {
 
 export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlowProps) {
   const t = useTranslations('myspace')
-  const POSES = POSE_IDS.map(p => ({ id: p.id, instruction: t(p.instructionKey), labelKey: t(p.labelKey) }))
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,11 +43,11 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   const [progress, setProgress] = useState(0) // 0-1 pour l'anneau de progression
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
-  const [armDelay, setArmDelay] = useState(3) // décompte avant que la détection ne s'active
+  const [armDelay, setArmDelay] = useState(5) // décompte avant que la détection ne s'active
   const armedRef = useRef(false)
   const [debugInfo, setDebugInfo] = useState('init')
 
-  const currentPose = POSES[poseIndex]
+  const currentPoseId = POSE_IDS[poseIndex] // référence stable — POSE_IDS est une constante de module
 
   // ── Démarrage caméra ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -94,7 +93,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   useEffect(() => {
     if (status !== 'detecting') return
     armedRef.current = false
-    setArmDelay(3)
+    setArmDelay(5)
 
     const interval = setInterval(() => {
       setArmDelay(prev => {
@@ -132,9 +131,9 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
 
       let withinTarget = false
       if (armedRef.current && result.detected && result.faceBoxOk) {
-        if (currentPose.id === 'center') {
+        if (currentPoseId.id === 'center') {
           withinTarget = Math.abs(result.yaw) < YAW_CENTER_THRESHOLD
-        } else if (currentPose.id === 'left') {
+        } else if (currentPoseId.id === 'left') {
           withinTarget = result.yaw < -YAW_SIDE_THRESHOLD
         } else {
           withinTarget = result.yaw > YAW_SIDE_THRESHOLD
@@ -155,7 +154,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
       if (stableCountRef.current >= STABLE_FRAMES_REQUIRED) {
         stableCountRef.current = 0
         const dataUrl = captureFrame()
-        const newShot: CapturedShot = { pose: currentPose.id, dataUrl }
+        const newShot: CapturedShot = { pose: currentPoseId.id, dataUrl }
         setShots(prev => [...prev, newShot])
         setStatus('captured-flash')
         return // stoppe la boucle, reprise gérée par l'effet ci-dessous
@@ -168,13 +167,13 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [status, isReady, currentPose, detect, captureFrame])
+  }, [status, isReady, currentPoseId, detect, captureFrame])
 
   // ── Transition après capture d'une pose ──────────────────────────────────
   useEffect(() => {
     if (status !== 'captured-flash') return
     const timeout = setTimeout(() => {
-      if (poseIndex < POSES.length - 1) {
+      if (poseIndex < POSE_IDS.length - 1) {
         setPoseIndex(prev => prev + 1)
         setProgress(0)
         setStatus('detecting')
@@ -187,7 +186,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
 
   const handleRetake = (pose: Pose) => {
     setShots(prev => prev.filter(s => s.pose !== pose))
-    const idx = POSES.findIndex(p => p.id === pose)
+    const idx = POSE_IDS.findIndex(p => p.id === pose)
     setPoseIndex(idx)
     setProgress(0)
     setStatus('detecting')
@@ -240,10 +239,10 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
         <>
           <div className="mt-8 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
-              {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
+              {t('visual_capture_step')} {poseIndex + 1} / {POSE_IDS.length}
             </p>
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              {currentPose.instruction}
+              {t(currentPoseId.instructionKey)}
             </p>
             {armDelay > 0 && (
               <p className="text-[36px] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
@@ -251,7 +250,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
               </p>
             )}
             <div className="flex gap-1.5 mt-2">
-              {POSES.map((p, i) => (
+              {POSE_IDS.map((p, i) => (
                 <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${
                   i < poseIndex ? 'bg-[#8FC1E8]' : i === poseIndex ? 'bg-[#8FC1E8]/50' : 'bg-white/15'
                 }`} />
@@ -271,14 +270,14 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
             {t('visual_capture_review')}
           </p>
           <div className="grid grid-cols-3 gap-3 w-full">
-            {POSES.map((p) => {
+            {POSE_IDS.map((p) => {
               const shot = shots.find(s => s.pose === p.id)
               return (
                 <div key={p.id} className="flex flex-col items-center gap-2">
                   <div className="relative w-full aspect-[3/4] rounded-[12px] overflow-hidden border border-white/10">
-                    {shot && <img src={shot.dataUrl} alt={p.labelKey} className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />}
+                    {shot && <img src={shot.dataUrl} alt={t(p.labelKey)} className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />}
                   </div>
-                  <p className="text-[9px] uppercase tracking-[0.14em] text-white/50">{p.labelKey}</p>
+                  <p className="text-[9px] uppercase tracking-[0.14em] text-white/50">{t(p.labelKey)}</p>
                   <button onClick={() => handleRetake(p.id)} className="text-[10px] text-[#8FC1E8]/70 underline">
                     {t('visual_capture_retake')}
                   </button>
