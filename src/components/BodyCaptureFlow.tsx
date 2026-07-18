@@ -43,6 +43,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   const [progress, setProgress] = useState(0)
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
+  const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPose = POSES[poseIndex]
 
@@ -50,18 +51,31 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
   useEffect(() => {
     const startCamera = async () => {
       try {
+        setDebugInfo('demande permission…')
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 1707 } },
           audio: false,
         })
         streamRef.current = stream
+        const tracks = stream.getVideoTracks()
+        setDebugInfo(`stream ok, tracks=${tracks.length}, state=${tracks[0]?.readyState}`)
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          await videoRef.current.play()
+          videoRef.current.onloadedmetadata = () => {
+            setDebugInfo(prev => prev + ` | metadata: ${videoRef.current?.videoWidth}x${videoRef.current?.videoHeight}`)
+          }
+          try {
+            await videoRef.current.play()
+            setDebugInfo(prev => prev + ' | play() ok')
+          } catch (playErr: any) {
+            setDebugInfo(prev => prev + ` | play() FAIL: ${playErr?.message ?? playErr}`)
+          }
         }
         setStatus('detecting')
-      } catch (e) {
+      } catch (e: any) {
         console.error('Camera error:', e)
+        setDebugInfo(`getUserMedia FAIL: ${e?.name ?? ''} ${e?.message ?? e}`)
         setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
@@ -150,17 +164,38 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
     onComplete(shots)
   }
 
-  return (
+ return (
     <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center">
+
+      {/* Vidéo et canvas TOUJOURS montés — visibilité gérée par CSS */}
+      <div className={`relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10 ${
+        status === 'detecting' || status === 'captured-flash' ? 'block' : 'hidden'
+      }`}>
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
+        <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
+        {status === 'captured-flash' && (
+          <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
+        )}
+        {!isReady && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
+          </div>
+        )}
+      </div>
+
+      <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
+        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
+      </div>
+
       {(status === 'requesting' || (!isReady && status !== 'error')) && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 mt-6">
           <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
           <p className="text-[13px] text-white/50">{t('visual_capture_preparingCamera')}</p>
         </div>
       )}
 
       {(status === 'error' || loadError) && (
-        <div className="flex flex-col items-center gap-4 px-8 text-center">
+        <div className="flex flex-col items-center gap-4 px-8 text-center mt-6">
           <p className="text-[14px] text-red-400">{errorMsg || loadError}</p>
           <button onClick={onCancel} className="text-[12px] uppercase tracking-[0.18em] text-white/40">
             {t('visual_capture_back')}
@@ -169,20 +204,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       )}
 
       {(status === 'detecting' || status === 'captured-flash') && !loadError && (
-        <div className="relative w-full h-full flex flex-col items-center">
-          <div className="relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10">
-            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
-            <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
-            {status === 'captured-flash' && (
-              <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
-            )}
-            {!isReady && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
-              </div>
-            )}
-          </div>
-
+        <>
           <div className="mt-6 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
               {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
@@ -203,7 +225,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           <button onClick={onCancel} className="mt-5 text-[11px] uppercase tracking-[0.18em] text-white/30">
             {t('visual_capture_cancel')}
           </button>
-        </div>
+        </>
       )}
 
       {status === 'review' && (

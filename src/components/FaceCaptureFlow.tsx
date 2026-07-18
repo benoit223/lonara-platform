@@ -175,17 +175,38 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
     onComplete(shots)
   }
 
-  return (
+ return (
     <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center">
+
+      {/* La vidéo et le canvas sont TOUJOURS montés — visibilité gérée par CSS, pas par le rendu conditionnel */}
+      <div className={`relative w-full max-w-md aspect-[3/4] mt-[6vh] rounded-[24px] overflow-hidden border border-white/10 ${
+        status === 'detecting' || status === 'captured-flash' ? 'block' : 'hidden'
+      }`}>
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted autoPlay />
+        <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" style={{ transform: 'scaleX(-1)' }} />
+        {status === 'captured-flash' && (
+          <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
+        )}
+        {!isReady && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
+          </div>
+        )}
+      </div>
+
+      <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
+        <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
+      </div>
+
       {(status === 'requesting' || (!isReady && status !== 'error')) && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 mt-6">
           <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
           <p className="text-[13px] text-white/50">{t('visual_capture_preparingCamera')}</p>
         </div>
       )}
 
       {(status === 'error' || loadError) && (
-        <div className="flex flex-col items-center gap-4 px-8 text-center">
+        <div className="flex flex-col items-center gap-4 px-8 text-center mt-6">
           <p className="text-[14px] text-red-400">{errorMsg || loadError}</p>
           <button onClick={onCancel} className="text-[12px] uppercase tracking-[0.18em] text-white/40">
             {t('visual_capture_back')}
@@ -194,25 +215,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
       )}
 
       {(status === 'detecting' || status === 'captured-flash') && !loadError && (
-        <div className="relative w-full h-full flex flex-col items-center">
-          <div className="relative w-full max-w-md aspect-[3/4] mt-[6vh] rounded-[24px] overflow-hidden border border-white/10">
-            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted autoPlay />
-            <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" style={{ transform: 'scaleX(-1)' }} />
-            {status === 'captured-flash' && (
-              <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
-            )}
-            {!isReady && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
-              </div>
-            )}
-          </div>
-
-          <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
-            <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
-          </div>
-
-
+        <>
           <div className="mt-8 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
               {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
@@ -232,7 +235,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
           <button onClick={onCancel} className="mt-6 text-[11px] uppercase tracking-[0.18em] text-white/30">
             {t('visual_capture_cancel')}
           </button>
-        </div>
+        </>
       )}
 
       {status === 'review' && (
@@ -268,7 +271,6 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
     </div>
   )
 }
-
 // ── Overlay canvas — guide visuel + anneau de progression ──────────────────
 function drawOverlay(
   canvas: HTMLCanvasElement,
