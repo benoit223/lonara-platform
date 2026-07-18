@@ -389,8 +389,8 @@ function drawOverlay(
   const top = height * 0.08
   const bottom = height * 0.94
 
-  ctx.strokeStyle = result.detected && result.fullBodyInFrame ? 'rgba(143,193,232,0.55)' : 'rgba(255,255,255,0.22)'
-  ctx.lineWidth = 2
+  ctx.strokeStyle = result.detected && result.fullBodyInFrame ? 'rgba(143,193,232,0.95)' : 'rgba(255,255,255,0.55)'
+  ctx.lineWidth = 3
   ctx.setLineDash([6, 6])
   const guideWidth = width * 0.32
   roundRect(ctx, cx - guideWidth / 2, top, guideWidth, bottom - top, 40)

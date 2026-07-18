@@ -102,8 +102,8 @@ export function usePoseLandmarker() {
     const bodyHeight = Math.abs(topRefY - bottomRefY)
     let distanceHint: 'ok' | 'too_close' | 'too_far' | 'unknown' = 'unknown'
     if (headVisible && hipsVisible) {
-      if (bodyHeight > 0.70) distanceHint = 'too_close'
-      else if (bodyHeight < 0.30) distanceHint = 'too_far'
+      if (bodyHeight > 1.05) distanceHint = 'too_close'
+      else if (bodyHeight < 0.80) distanceHint = 'too_far'
       else distanceHint = 'ok'
     }
 
