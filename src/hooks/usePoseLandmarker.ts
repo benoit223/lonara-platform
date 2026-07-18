@@ -43,7 +43,7 @@ export function usePoseLandmarker() {
         const landmarker = await PoseLandmarker.createFromOptions(filesetResolver, {
           baseOptions: {
             modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
             delegate: 'GPU',
           },
           runningMode: 'VIDEO',
@@ -80,11 +80,13 @@ export function usePoseLandmarker() {
     const lm = result.landmarks[0]
 
     // Cadrage complet : tête (nez OU oreille) + chevilles visibles — fonctionne peu importe l'orientation
-    const noseVisible = (lm[NOSE]?.visibility ?? 0) > 0.5
-    const leftEarVisible = (lm[LEFT_EAR]?.visibility ?? 0) > 0.4
-    const rightEarVisible = (lm[RIGHT_EAR]?.visibility ?? 0) > 0.4
-    const headVisible = noseVisible || leftEarVisible || rightEarVisible
-    const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.3 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.3
+    const noseVisible = (lm[NOSE]?.visibility ?? 0) > 0.3
+    const leftEarVisible = (lm[LEFT_EAR]?.visibility ?? 0) > 0.25
+    const rightEarVisible = (lm[RIGHT_EAR]?.visibility ?? 0) > 0.25
+    // Fallback supplémentaire — si aucun repère de tête fiable, utiliser la présence des épaules comme proxy
+    const shouldersVisible = (lm[LEFT_SHOULDER]?.visibility ?? 0) > 0.4 && (lm[RIGHT_SHOULDER]?.visibility ?? 0) > 0.4
+    const headVisible = noseVisible || leftEarVisible || rightEarVisible || shouldersVisible
+    const anklesVisible = (lm[LEFT_ANKLE]?.visibility ?? 0) > 0.2 || (lm[RIGHT_ANKLE]?.visibility ?? 0) > 0.2
     const fullBodyInFrame = headVisible && anklesVisible
 
     // Référence verticale du haut du corps — nez si visible, sinon estimation via épaules
