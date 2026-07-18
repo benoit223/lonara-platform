@@ -8,7 +8,7 @@ import BodyCaptureFlow from '@/components/BodyCaptureFlow'
 type Status = 'loading' | 'auth' | 'choice' | 'error' | 'install'
 type CaptureMode = 'face' | 'body' | null
 
-const LS_UID = 'lonara_visual_uid'
+
 
 export default function VisualCapturePage() {
   const searchParams = useSearchParams()
@@ -37,12 +37,11 @@ export default function VisualCapturePage() {
         }
 
         const data = await res.json()
-        localStorage.setItem(LS_UID, data.userId)
         setUserId(data.userId)
 
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches
         if (!isInstalled) {
-          window.history.replaceState({}, '', `/${locale}/visual-capture?uid=${data.userId}`)
+          window.history.replaceState({}, '', `/${locale}/visual-capture`)
           setStatus('install')
           return
         }
@@ -51,11 +50,17 @@ export default function VisualCapturePage() {
         return
       }
 
-      const uid = searchParams.get('uid') || localStorage.getItem(LS_UID)
-      if (uid) {
-        setUserId(uid)
-        setStatus('auth')
-        return
+      // Pas de token dans l'URL — on tente de lire la session via cookie
+      try {
+        const sessionRes = await fetch('/api/visual-capture-session')
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json()
+          setUserId(sessionData.userId)
+          setStatus('auth')
+          return
+        }
+      } catch (e) {
+        console.error('Session check error:', e)
       }
 
       setErrorMsg('Scannez le QR code depuis My Visual → Connecter le téléphone')
@@ -72,6 +77,9 @@ export default function VisualCapturePage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black">
+      <img src="/qqq1.png" alt=""
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none" />
+
       <div className="relative min-h-screen flex items-center justify-center">
         <div className="relative z-10 w-full max-w-lg h-screen flex flex-col items-center justify-start px-6 pt-[8vh]">
 
@@ -142,15 +150,17 @@ export default function VisualCapturePage() {
 
           {/* Écran de choix — Visage / Corps */}
           {status === 'choice' && (
-            <div className="flex flex-col items-center gap-6 w-full">
-              <p className="text-[14px] text-white/55 text-center italic mb-2"
+            <div className="relative flex flex-col items-center gap-6 w-full">
+              <div className="absolute -inset-x-10 top-0 h-full bg-[#8FC1E8]/[0.04] blur-[60px] pointer-events-none" />
+
+              <p className="relative text-[14px] text-white/55 text-center italic mb-2"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 Choisissez votre session de capture
               </p>
 
               <button
                 onClick={() => setCaptureMode('face')}
-                className="relative w-full rounded-[20px] border border-[#8FC1E8]/25 bg-[#8FC1E8]/5 px-6 py-6 flex items-center gap-5 active:scale-[0.98] transition-all">
+                className="relative w-full rounded-[20px] border border-[#8FC1E8]/30 bg-black/30 backdrop-blur-xl px-6 py-6 flex items-center gap-5 active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(143,193,232,0.08)]">
                 <div className="w-14 h-14 rounded-full border border-[#8FC1E8]/30 flex items-center justify-center shrink-0">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8FC1E8" strokeWidth="1.4">
                     <circle cx="12" cy="8" r="4" />
@@ -165,7 +175,7 @@ export default function VisualCapturePage() {
 
               <button
                 onClick={() => setCaptureMode('body')}
-                className="relative w-full rounded-[20px] border border-[#8FC1E8]/25 bg-[#8FC1E8]/5 px-6 py-6 flex items-center gap-5 active:scale-[0.98] transition-all">
+                className="relative w-full rounded-[20px] border border-[#8FC1E8]/30 bg-black/30 backdrop-blur-xl px-6 py-6 flex items-center gap-5 active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(143,193,232,0.08)]">
                 <div className="w-14 h-14 rounded-full border border-[#8FC1E8]/30 flex items-center justify-center shrink-0">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8FC1E8" strokeWidth="1.4">
                     <circle cx="12" cy="5" r="2.5" />

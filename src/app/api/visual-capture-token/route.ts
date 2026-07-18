@@ -23,8 +23,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Expired token' }, { status: 410 })
   }
 
-  // Ne pas supprimer le token — réutilisé par la PWA au lancement
-  return NextResponse.json({
-    userId: data.user_id,
+  const response = NextResponse.json({ userId: data.user_id })
+
+  // Cookie persistant, partagé entre Safari et la PWA installée (contrairement à localStorage)
+  response.cookies.set('lonara_visual_uid', data.user_id, {
+    httpOnly: false,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 30, // 30 jours
+    path: '/',
   })
+
+  return response
 }
