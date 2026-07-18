@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { useFaceLandmarker } from '../hooks/useFaceLandmarker'
 
 type Pose = 'center' | 'left' | 'right'
@@ -11,10 +12,10 @@ interface CapturedShot {
   dataUrl: string
 }
 
-const POSES: { id: Pose; instruction: string; labelKey: string }[] = [
-  { id: 'center', instruction: 'Regardez droit devant vous', labelKey: 'Face' },
-  { id: 'left', instruction: 'Tournez doucement la tête vers la gauche', labelKey: 'Profil gauche' },
-  { id: 'right', instruction: 'Tournez doucement la tête vers la droite', labelKey: 'Profil droit' },
+const POSE_IDS: { id: Pose; instructionKey: string; labelKey: string }[] = [
+  { id: 'center', instructionKey: 'visual_face_center', labelKey: 'visual_face_pose_center' },
+  { id: 'left', instructionKey: 'visual_face_left', labelKey: 'visual_face_pose_left' },
+  { id: 'right', instructionKey: 'visual_face_right', labelKey: 'visual_face_pose_right' },
 ]
 
 const STABLE_FRAMES_REQUIRED = 18 // ~0.5-0.6s à 30fps
@@ -27,6 +28,9 @@ interface FaceCaptureFlowProps {
 }
 
 export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlowProps) {
+  const t = useTranslations('myspace')
+  const POSES = POSE_IDS.map(p => ({ id: p.id, instruction: t(p.instructionKey), labelKey: t(p.labelKey) }))
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
@@ -59,7 +63,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
         setStatus('detecting')
       } catch (e) {
         console.error('Camera error:', e)
-        setErrorMsg("Impossible d'accéder à la caméra. Vérifiez les autorisations.")
+        setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
     }
@@ -162,7 +166,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
       {(status === 'requesting' || (!isReady && status !== 'error')) && (
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
-          <p className="text-[13px] text-white/50">Préparation de la caméra…</p>
+          <p className="text-[13px] text-white/50">{t('visual_capture_preparingCamera')}</p>
         </div>
       )}
 
@@ -170,24 +174,29 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
         <div className="flex flex-col items-center gap-4 px-8 text-center">
           <p className="text-[14px] text-red-400">{errorMsg || loadError}</p>
           <button onClick={onCancel} className="text-[12px] uppercase tracking-[0.18em] text-white/40">
-            Retour
+            {t('visual_capture_back')}
           </button>
         </div>
       )}
 
-      {(status === 'detecting' || status === 'captured-flash') && isReady && !loadError && (
+      {(status === 'detecting' || status === 'captured-flash') && !loadError && (
         <div className="relative w-full h-full flex flex-col items-center">
           <div className="relative w-full max-w-md aspect-[3/4] mt-[6vh] rounded-[24px] overflow-hidden border border-white/10">
-            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted />
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} playsInline muted autoPlay />
             <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" style={{ transform: 'scaleX(-1)' }} />
             {status === 'captured-flash' && (
               <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
+            )}
+            {!isReady && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
+              </div>
             )}
           </div>
 
           <div className="mt-8 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
-              Étape {poseIndex + 1} / {POSES.length}
+              {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
             </p>
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {currentPose.instruction}
@@ -202,7 +211,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
           </div>
 
           <button onClick={onCancel} className="mt-6 text-[11px] uppercase tracking-[0.18em] text-white/30">
-            Annuler
+            {t('visual_capture_cancel')}
           </button>
         </div>
       )}
@@ -210,7 +219,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
       {status === 'review' && (
         <div className="flex flex-col items-center gap-6 px-6 w-full max-w-md">
           <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Vérifiez vos photos
+            {t('visual_capture_review')}
           </p>
           <div className="grid grid-cols-3 gap-3 w-full">
             {POSES.map((p) => {
@@ -222,7 +231,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
                   </div>
                   <p className="text-[9px] uppercase tracking-[0.14em] text-white/50">{p.labelKey}</p>
                   <button onClick={() => handleRetake(p.id)} className="text-[10px] text-[#8FC1E8]/70 underline">
-                    Reprendre
+                    {t('visual_capture_retake')}
                   </button>
                 </div>
               )
@@ -230,10 +239,10 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
           </div>
           <button onClick={handleConfirm}
             className="relative w-full rounded-full border border-[#4A90C2]/65 bg-[#4A90C2]/15 py-4 text-[12px] uppercase tracking-[0.22em] text-[#8FC1E8] transition hover:bg-[#4A90C2]/25">
-            Confirmer et continuer
+            {t('visual_capture_confirm')}
           </button>
           <button onClick={onCancel} className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-            Annuler la session
+            {t('visual_capture_cancelSession')}
           </button>
         </div>
       )}

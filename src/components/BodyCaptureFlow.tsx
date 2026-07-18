@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { usePoseLandmarker, type BodyOrientation } from '../hooks/usePoseLandmarker'
 
 type BodyPose = 'front' | 'back' | 'left' | 'right'
@@ -11,11 +12,11 @@ interface CapturedShot {
   dataUrl: string
 }
 
-const POSES: { id: BodyPose; instruction: string; labelKey: string; target: BodyOrientation }[] = [
-  { id: 'front', instruction: 'Placez-vous face à la caméra, à environ 2 mètres', labelKey: 'Face', target: 'front' },
-  { id: 'back', instruction: 'Tournez-vous dos à la caméra', labelKey: 'Dos', target: 'back' },
-  { id: 'left', instruction: 'Tournez-vous de profil, côté gauche visible', labelKey: 'Profil gauche', target: 'left' },
-  { id: 'right', instruction: 'Tournez-vous de profil, côté droit visible', labelKey: 'Profil droit', target: 'right' },
+const POSE_IDS: { id: BodyPose; instructionKey: string; labelKey: string; target: BodyOrientation }[] = [
+  { id: 'front', instructionKey: 'visual_body_front', labelKey: 'visual_body_pose_front', target: 'front' },
+  { id: 'back', instructionKey: 'visual_body_back', labelKey: 'visual_body_pose_back', target: 'back' },
+  { id: 'left', instructionKey: 'visual_body_left', labelKey: 'visual_body_pose_left', target: 'left' },
+  { id: 'right', instructionKey: 'visual_body_right', labelKey: 'visual_body_pose_right', target: 'right' },
 ]
 
 const STABLE_FRAMES_REQUIRED = 24 // légèrement plus long que le visage — repositionnement corporel plus lent
@@ -26,6 +27,9 @@ interface BodyCaptureFlowProps {
 }
 
 export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlowProps) {
+  const t = useTranslations('myspace')
+  const POSES = POSE_IDS.map(p => ({ id: p.id, instruction: t(p.instructionKey), labelKey: t(p.labelKey), target: p.target }))
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
@@ -58,7 +62,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
         setStatus('detecting')
       } catch (e) {
         console.error('Camera error:', e)
-        setErrorMsg("Impossible d'accéder à la caméra. Vérifiez les autorisations.")
+        setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
     }
@@ -151,7 +155,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       {(status === 'requesting' || (!isReady && status !== 'error')) && (
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
-          <p className="text-[13px] text-white/50">Préparation de la caméra…</p>
+          <p className="text-[13px] text-white/50">{t('visual_capture_preparingCamera')}</p>
         </div>
       )}
 
@@ -159,29 +163,34 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
         <div className="flex flex-col items-center gap-4 px-8 text-center">
           <p className="text-[14px] text-red-400">{errorMsg || loadError}</p>
           <button onClick={onCancel} className="text-[12px] uppercase tracking-[0.18em] text-white/40">
-            Retour
+            {t('visual_capture_back')}
           </button>
         </div>
       )}
 
-      {(status === 'detecting' || status === 'captured-flash') && isReady && !loadError && (
+      {(status === 'detecting' || status === 'captured-flash') && !loadError && (
         <div className="relative w-full h-full flex flex-col items-center">
           <div className="relative w-full max-w-sm aspect-[3/4] mt-[3vh] rounded-[24px] overflow-hidden border border-white/10">
-            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
             <canvas ref={canvasRef} width={640} height={853} className="absolute inset-0 w-full h-full" />
             {status === 'captured-flash' && (
               <div className="absolute inset-0 bg-white/80 animate-[pulse_0.4s_ease-out]" />
+            )}
+            {!isReady && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-2 border-[#8FC1E8] border-t-transparent animate-spin" />
+              </div>
             )}
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
-              Étape {poseIndex + 1} / {POSES.length}
+              {t('visual_capture_step')} {poseIndex + 1} / {POSES.length}
             </p>
             <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {currentPose.instruction}
             </p>
-            <p className="text-[11px] text-white/40">Placez le téléphone à ~2m, poussez-le contre un support</p>
+            <p className="text-[11px] text-white/40">{t('visual_capture_bodyDistanceHint')}</p>
             <div className="flex gap-1.5 mt-2">
               {POSES.map((p, i) => (
                 <div key={p.id} className={`h-1.5 w-8 rounded-full transition-all ${
@@ -192,7 +201,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           </div>
 
           <button onClick={onCancel} className="mt-5 text-[11px] uppercase tracking-[0.18em] text-white/30">
-            Annuler
+            {t('visual_capture_cancel')}
           </button>
         </div>
       )}
@@ -200,7 +209,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       {status === 'review' && (
         <div className="flex flex-col items-center gap-6 px-6 w-full max-w-md">
           <p className="text-[20px] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Vérifiez vos photos
+            {t('visual_capture_review')}
           </p>
           <div className="grid grid-cols-4 gap-2 w-full">
             {POSES.map((p) => {
@@ -212,7 +221,7 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
                   </div>
                   <p className="text-[8px] uppercase tracking-[0.1em] text-white/50 text-center">{p.labelKey}</p>
                   <button onClick={() => handleRetake(p.id)} className="text-[9px] text-[#8FC1E8]/70 underline">
-                    Reprendre
+                    {t('visual_capture_retake')}
                   </button>
                 </div>
               )
@@ -220,10 +229,10 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
           </div>
           <button onClick={handleConfirm}
             className="relative w-full rounded-full border border-[#4A90C2]/65 bg-[#4A90C2]/15 py-4 text-[12px] uppercase tracking-[0.22em] text-[#8FC1E8] transition hover:bg-[#4A90C2]/25">
-            Confirmer et continuer
+            {t('visual_capture_confirm')}
           </button>
           <button onClick={onCancel} className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-            Annuler la session
+            {t('visual_capture_cancelSession')}
           </button>
         </div>
       )}

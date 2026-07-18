@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { useSearchParams, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import FaceCaptureFlow from '@/components/FaceCaptureFlow'
 import BodyCaptureFlow from '@/components/BodyCaptureFlow'
 
@@ -14,6 +15,7 @@ export default function VisualCapturePage() {
   const searchParams = useSearchParams()
   const params = useParams()
   const locale = (params?.locale as string) || 'en'
+  const t = useTranslations('myspace')
   const [status, setStatus] = useState<Status>('loading')
   const [userId, setUserId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string>('')
@@ -31,7 +33,7 @@ export default function VisualCapturePage() {
         })
 
         if (!res.ok) {
-          setErrorMsg('QR code invalide ou expiré')
+          setErrorMsg(t('visual_capture_invalidToken'))
           setStatus('error')
           return
         }
@@ -63,7 +65,7 @@ export default function VisualCapturePage() {
         console.error('Session check error:', e)
       }
 
-      setErrorMsg('Scannez le QR code depuis My Visual → Connecter le téléphone')
+      setErrorMsg(t('visual_capture_scanPrompt'))
       setStatus('error')
     }
 
@@ -85,7 +87,7 @@ export default function VisualCapturePage() {
 
           <img src="/LOGOOFFICIELTRANSP.png" alt="Lonara" className="w-64 object-contain select-none" />
           <p className="mt-1 text-[18px] uppercase tracking-[0.28em] text-white/60"
-            style={{ fontFamily: 'Inter, sans-serif' }}>MY VISUAL</p>
+            style={{ fontFamily: 'Inter, sans-serif' }}>{t('visual_capture_title')}</p>
 
           <div className="h-[6vh]" />
 
@@ -94,9 +96,9 @@ export default function VisualCapturePage() {
             <div className="flex flex-col items-center gap-8 px-4 text-center">
               <div>
                 <p className="text-[24px] font-light text-[#EAE4D5] mb-2"
-                  style={{ fontFamily: "'Cormorant Garamond', serif" }}>Une dernière étape</p>
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t('visual_capture_installTitle')}</p>
                 <p className="text-[14px] text-white/70 leading-relaxed">
-                  Installez l'app pour un accès instantané à la caméra guidée
+                  {t('visual_capture_installDesc')}
                 </p>
               </div>
               <div className="rounded-[16px] border border-white/8 bg-white/[0.03] px-6 py-5 flex flex-col gap-4 w-full">
@@ -108,7 +110,7 @@ export default function VisualCapturePage() {
                       <path d="M4 13v6a1 1 0 001 1h14a1 1 0 001-1v-6"/>
                     </svg>
                   </div>
-                  <p className="text-[13px] text-white/80 text-left">Appuyez sur ce bouton dans Safari</p>
+                  <p className="text-[13px] text-white/80 text-left">{t('visual_capture_installTapShare')}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -116,7 +118,7 @@ export default function VisualCapturePage() {
                       <path d="M6 9l6 6 6-6"/>
                     </svg>
                   </div>
-                  <p className="text-[13px] text-white/80 text-left">Défilez et appuyez sur <span className="text-white">"En voir plus"</span></p>
+                  <p className="text-[13px] text-white/80 text-left">{t('visual_capture_installTapMore')} <span className="text-white">{t('visual_capture_installSeeMore')}</span></p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-[7px] bg-white/10 flex items-center justify-center shrink-0">
@@ -124,14 +126,14 @@ export default function VisualCapturePage() {
                       <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/>
                     </svg>
                   </div>
-                  <p className="text-[13px] text-white/80 text-left">Appuyez sur <span className="text-white">"Sur l'écran d'accueil"</span></p>
+                  <p className="text-[13px] text-white/80 text-left">{t('visual_capture_installTapHome')} <span className="text-white">{t('visual_capture_installAddHome')}</span></p>
                 </div>
               </div>
               <div className="animate-bounce text-[#8FC1E8] text-2xl">↑</div>
               <button
                 onClick={() => setStatus('choice')}
                 className="text-[11px] uppercase tracking-[0.18em] text-white/30 mt-2">
-                Déjà installé
+                {t('visual_capture_alreadyInstalled')}
               </button>
             </div>
           )}
@@ -155,7 +157,7 @@ export default function VisualCapturePage() {
 
               <p className="relative text-[14px] text-white/55 text-center italic mb-2"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                Choisissez votre session de capture
+                {t('visual_capture_chooseSession')}
               </p>
 
               <button
@@ -168,8 +170,8 @@ export default function VisualCapturePage() {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <p className="text-[15px] font-medium text-[#EAE4D5]">Capture Visage</p>
-                  <p className="text-[12px] text-white/50 mt-0.5">3 clichés guidés — face, profil gauche, profil droit</p>
+                  <p className="text-[15px] font-medium text-[#EAE4D5]">{t('visual_capture_faceTitle')}</p>
+                  <p className="text-[12px] text-white/50 mt-0.5">{t('visual_capture_faceDesc')}</p>
                 </div>
               </button>
 
@@ -183,8 +185,8 @@ export default function VisualCapturePage() {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <p className="text-[15px] font-medium text-[#EAE4D5]">Capture Corps</p>
-                  <p className="text-[12px] text-white/50 mt-0.5">4 clichés guidés — face, dos, profil gauche, profil droit</p>
+                  <p className="text-[15px] font-medium text-[#EAE4D5]">{t('visual_capture_bodyTitle')}</p>
+                  <p className="text-[12px] text-white/50 mt-0.5">{t('visual_capture_bodyDesc')}</p>
                 </div>
               </button>
 
