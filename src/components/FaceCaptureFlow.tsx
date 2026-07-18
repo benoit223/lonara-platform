@@ -44,6 +44,7 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   const [progress, setProgress] = useState(0) // 0-1 pour l'anneau de progression
   const [shots, setShots] = useState<CapturedShot[]>([])
   const [errorMsg, setErrorMsg] = useState('')
+  const [debugInfo, setDebugInfo] = useState('init')
 
   const currentPose = POSES[poseIndex]
 
@@ -51,18 +52,31 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
   useEffect(() => {
     const startCamera = async () => {
       try {
+        setDebugInfo('demande permission…')
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
           audio: false,
         })
         streamRef.current = stream
+        const tracks = stream.getVideoTracks()
+        setDebugInfo(`stream ok, tracks=${tracks.length}, state=${tracks[0]?.readyState}`)
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          await videoRef.current.play()
+          videoRef.current.onloadedmetadata = () => {
+            setDebugInfo(prev => prev + ` | metadata: ${videoRef.current?.videoWidth}x${videoRef.current?.videoHeight}`)
+          }
+          try {
+            await videoRef.current.play()
+            setDebugInfo(prev => prev + ' | play() ok')
+          } catch (playErr: any) {
+            setDebugInfo(prev => prev + ` | play() FAIL: ${playErr?.message ?? playErr}`)
+          }
         }
         setStatus('detecting')
-      } catch (e) {
+      } catch (e: any) {
         console.error('Camera error:', e)
+        setDebugInfo(`getUserMedia FAIL: ${e?.name ?? ''} ${e?.message ?? e}`)
         setErrorMsg(t('visual_capture_cameraError'))
         setStatus('error')
       }
@@ -193,6 +207,11 @@ export default function FaceCaptureFlow({ onComplete, onCancel }: FaceCaptureFlo
               </div>
             )}
           </div>
+
+          <div className="mt-2 px-4 py-2 bg-black/80 rounded-lg max-w-md">
+            <p className="text-[9px] text-yellow-300 break-all">DEBUG: {debugInfo} | isReady={String(isReady)} | loadError={String(loadError)}</p>
+          </div>
+
 
           <div className="mt-8 flex flex-col items-center gap-3 px-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80">
