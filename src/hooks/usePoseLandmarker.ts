@@ -11,9 +11,10 @@ export type HorizontalHint = 'ok' | 'move_left' | 'move_right'
 export interface PoseDetectionResult {
   detected: boolean
   orientation: BodyOrientation
-  fullBodyInFrame: boolean // tête + pieds visibles dans le cadre
+  fullBodyInFrame: boolean
   distanceHint: DistanceHint
   horizontalHint: HorizontalHint
+  debugRaw?: string // valeurs brutes pour calibration — à retirer une fois les seuils validés
 }
 
 // Indices des repères MediaPipe Pose pertinents
@@ -130,7 +131,9 @@ export function usePoseLandmarker() {
       orientation = leftEarVis > rightEarVis ? 'left' : 'right'
     }
 
-    return { detected: true, orientation, fullBodyInFrame, distanceHint, horizontalHint }
+    const debugRaw = `avgW=${avgWidth.toFixed(3)} bodyH=${bodyHeight.toFixed(3)} nose=${noseVis.toFixed(2)} lEar=${leftEarVis.toFixed(2)} rEar=${rightEarVis.toFixed(2)} head=${headVisible} ankles=${anklesVisible}`
+
+    return { detected: true, orientation, fullBodyInFrame, distanceHint, horizontalHint, debugRaw }
   }, [])
 
   return { isReady, loadError, detect }

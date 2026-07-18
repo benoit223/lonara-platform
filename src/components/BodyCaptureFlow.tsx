@@ -131,8 +131,9 @@ export default function BodyCaptureFlow({ onComplete, onCancel }: BodyCaptureFlo
       const video = videoRef.current
       if (!video) return
 
-      const result = detect(video, performance.now())
- setDebugInfo(`orient=${result.orientation} target=${currentPoseId.target} dist=${result.distanceHint} horiz=${result.horizontalHint}`)
+      
+const result = detect(video, performance.now())
+      setDebugInfo(`detected=${result.detected} orient=${result.orientation} target=${currentPoseId.target} | ${result.debugRaw ?? 'no landmarks'}`)
       const withinTarget = armedRef.current && result.detected && result.fullBodyInFrame && result.orientation === currentPoseId.target
 
       if (withinTarget) {
