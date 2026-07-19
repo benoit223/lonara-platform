@@ -4,6 +4,10 @@ export const metadata: Metadata = {
   title: 'Lonara — My Visual',
   description: 'Guided facial and body capture for visual vitality analysis',
   manifest: '/visual-capture/manifest.webmanifest',
+  icons: {
+    icon: '/logobleumyvisual.png',
+    apple: '/logobleumyvisual.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

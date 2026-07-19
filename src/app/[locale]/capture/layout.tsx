@@ -4,6 +4,10 @@ export const metadata: Metadata = {
   title: 'Lonara — My Fuel',
   description: 'Scan your meals for longevity tracking',
   manifest: '/capture/manifest.webmanifest',
+  icons: {
+    icon: '/logovertmyfuel.png',
+    apple: '/logovertmyfuel.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
