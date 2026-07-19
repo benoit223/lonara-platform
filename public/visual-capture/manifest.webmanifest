@@ -5,11 +5,11 @@
   "start_url": "/visual-capture",
   "display": "standalone",
   "background_color": "#02040A",
-  "theme_color": "#02040A",
+  "theme_color": "#4A90C2",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/LOGOOFFICIELTRANSP.png",
+      "src": "/logobleumyvisual.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

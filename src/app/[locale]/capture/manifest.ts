@@ -10,15 +10,15 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     orientation: 'portrait',
     background_color: '#000000',
-    theme_color: '#000000',
+    theme_color: '#1D9E75',
     icons: [
       {
-        src: '/android-chrome-192x192.png',
+        src: '/logovertmyfuel.png',
         sizes: '192x192',
         type: 'image/png',
       },
       {
-        src: '/android-chrome-512x512.png',
+        src: '/logovertmyfuel.png',
         sizes: '512x512',
         type: 'image/png',
       },

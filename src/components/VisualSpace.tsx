@@ -106,6 +106,112 @@ const ADIPOSITY_KEYS: Record<string, string> = {
 
 const SCALE_0_4_MAX = 4
 
+// ── Consentement biométrique — version + textes légaux ─────────────────────
+const VISUAL_CONSENT_VERSION = '2026-07-19'
+
+const CONSENT_TEXT: Record<string, {
+  title: string
+  intro: string
+  points: string[]
+  recTitle: string
+  lightTitle: string
+  lightPoints: string[]
+  attireTitle: string
+  attirePoints: string[]
+  faceTitle: string
+  facePoints: string[]
+  checkbox: string
+  cta: string
+}> = {
+  fr: {
+    title: 'Avant de commencer votre session',
+    intro: 'Les photos de votre visage et/ou de votre corps sont analysées par une intelligence artificielle afin de générer une estimation visuelle indicative liée au vieillissement phénotypique. Ces données sont considérées comme des données biométriques.',
+    points: [
+      'Ces analyses sont des estimations visuelles indicatives, non validées cliniquement, et ne constituent en aucun cas un diagnostic médical.',
+      'Vos photos sont transmises de manière sécurisée dans le seul but de générer votre rapport.',
+      'Vos données sont conservées pendant une durée maximale de 7 mois, après quoi elles sont automatiquement supprimées. Vous pouvez également demander leur suppression à tout moment.',
+      'Vous pouvez retirer ce consentement à tout moment, sans affecter votre accès aux autres fonctionnalités de la plateforme.',
+      'Conformément au RGPD, vous disposez d\'un droit d\'accès, de rectification et d\'effacement de vos données.',
+    ],
+    recTitle: 'Recommandations pour une analyse fiable :',
+    lightTitle: 'Éclairage',
+    lightPoints: [
+      'Privilégiez une lumière naturelle, diffuse et uniforme (près d\'une fenêtre en journée, sans soleil direct).',
+      'Évitez les éclairages colorés, les contre-jours et les zones d\'ombre marquées sur le visage ou le corps.',
+    ],
+    attireTitle: 'Tenue (session corps)',
+    attirePoints: [
+      'Portez une tenue ajustée et neutre (sous-vêtements, maillot de bain, ou vêtements de sport près du corps).',
+      'Évitez les vêtements amples qui masquent la silhouette, la posture ou le tonus musculaire.',
+    ],
+    faceTitle: 'Visage',
+    facePoints: [
+      'Visage démaquillé si possible, cheveux dégagés du front et des joues.',
+      'Retirez lunettes et accessoires couvrant le visage.',
+    ],
+    checkbox: 'Je comprends la nature de ce traitement, je consens explicitement à la capture et à l\'analyse de mes photos par intelligence artificielle, et j\'ai pris connaissance des recommandations ci-dessus.',
+    cta: 'J\'accepte et je continue',
+  },
+  en: {
+    title: 'Before starting your session',
+    intro: 'Photos of your face and/or body are analyzed by artificial intelligence to generate an indicative visual estimate related to phenotypic aging. This data is considered biometric data.',
+    points: [
+      'These analyses are indicative visual estimates, not clinically validated, and do not constitute a medical diagnosis in any way.',
+      'Your photos are transmitted securely for the sole purpose of generating your report.',
+      'Your data is retained for a maximum of 7 months, after which it is automatically deleted. You may also request its deletion at any time.',
+      'You may withdraw this consent at any time, without affecting your access to the platform\'s other features.',
+      'In accordance with GDPR, you have the right to access, rectify, and erase your data.',
+    ],
+    recTitle: 'Recommendations for a reliable analysis:',
+    lightTitle: 'Lighting',
+    lightPoints: [
+      'Prefer natural, diffuse, even light (near a window during the day, avoiding direct sunlight).',
+      'Avoid colored lighting, backlighting, and harsh shadows on the face or body.',
+    ],
+    attireTitle: 'Attire (body session)',
+    attirePoints: [
+      'Wear fitted, neutral clothing (underwear, swimwear, or fitted activewear).',
+      'Avoid loose clothing that hides your silhouette, posture, or muscle tone.',
+    ],
+    faceTitle: 'Face',
+    facePoints: [
+      'No makeup if possible, hair pulled back from the forehead and cheeks.',
+      'Remove glasses and accessories covering the face.',
+    ],
+    checkbox: 'I understand the nature of this processing, I explicitly consent to the capture and analysis of my photos by artificial intelligence, and I have read the recommendations above.',
+    cta: 'I accept and continue',
+  },
+  es: {
+    title: 'Antes de comenzar su sesión',
+    intro: 'Las fotos de su rostro y/o cuerpo son analizadas por inteligencia artificial para generar una estimación visual indicativa relacionada con el envejecimiento fenotípico. Estos datos se consideran datos biométricos.',
+    points: [
+      'Estos análisis son estimaciones visuales indicativas, no validadas clínicamente, y no constituyen en ningún caso un diagnóstico médico.',
+      'Sus fotos se transmiten de forma segura únicamente con el fin de generar su informe.',
+      'Sus datos se conservan durante un máximo de 7 meses, tras lo cual se eliminan automáticamente. También puede solicitar su eliminación en cualquier momento.',
+      'Puede retirar este consentimiento en cualquier momento, sin que ello afecte su acceso a las demás funciones de la plataforma.',
+      'De conformidad con el RGPD, tiene derecho de acceso, rectificación y supresión de sus datos.',
+    ],
+    recTitle: 'Recomendaciones para un análisis fiable:',
+    lightTitle: 'Iluminación',
+    lightPoints: [
+      'Prefiera una luz natural, difusa y uniforme (cerca de una ventana durante el día, evitando el sol directo).',
+      'Evite luces de colores, contraluces y sombras marcadas en el rostro o el cuerpo.',
+    ],
+    attireTitle: 'Vestimenta (sesión de cuerpo)',
+    attirePoints: [
+      'Use ropa ajustada y neutra (ropa interior, traje de baño o ropa deportiva ajustada).',
+      'Evite prendas holgadas que oculten la silueta, la postura o el tono muscular.',
+    ],
+    faceTitle: 'Rostro',
+    facePoints: [
+      'Sin maquillaje si es posible, cabello recogido de la frente y las mejillas.',
+      'Retire gafas y accesorios que cubran el rostro.',
+    ],
+    checkbox: 'Entiendo la naturaleza de este tratamiento, consiento explícitamente la captura y el análisis de mis fotos mediante inteligencia artificial, y he tomado nota de las recomendaciones anteriores.',
+    cta: 'Acepto y continúo',
+  },
+}
+
 // ── Interprétations — Glogau ──────────────────────────────────────────────
 const GLOGAU_INTERPRETATION_KEYS: Record<string, string> = {
   I: 'visual_glogauI', II: 'visual_glogauII', III: 'visual_glogauIII', IV: 'visual_glogauIV',
@@ -174,7 +280,7 @@ function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, load
       )}
 
       {!loading && hasAny && (
-        <div className="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-490px)]" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex flex-col gap-8 overflow-y-auto max-h-[70vh] md:max-h-[calc(100vh-490px)] [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
 
           {/* ══════════════ ANALYSE VISAGE ══════════════ */}
           {faceShots.length > 0 && (
@@ -530,21 +636,153 @@ function HistorySection({ sessions, loading }: { sessions: HistorySession[]; loa
   )
 }
 
-// ── SECTION — RAPPORT (placeholder) ──────────────────────────────────────────
-function ReportSection() {
+function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDetail, sendingGlobal, sendingDetail, sentGlobal, sentDetail, period, setPeriod }: {
+  allAnalyses: { capture_type: string; analysis: any; created_at: string }[]
+  chronologicalAge: number | null
+  onSendGlobal: () => void
+  onSendDetail: () => void
+  sendingGlobal: boolean
+  sendingDetail: boolean
+  sentGlobal: boolean
+  sentDetail: boolean
+  period: '30' | '90' | '180'
+  setPeriod: (p: '30' | '90' | '180') => void
+}) {
   const t = useTranslations('myspace')
+
+  const since = new Date()
+  since.setDate(since.getDate() - parseInt(period))
+
+  const filtered = allAnalyses.filter(a => new Date(a.created_at) >= since)
+  const faceAnalyses = filtered.filter(a => a.capture_type === 'face')
+  const bodyAnalyses = filtered.filter(a => a.capture_type === 'body')
+
+  const perceivedAgeMidpoints = faceAnalyses
+    .map(a => a.analysis?.perceived_age_range)
+    .filter((r: any) => Array.isArray(r) && r.length === 2)
+    .map((r: number[]) => (r[0] + r[1]) / 2)
+
+  const avgPerceivedAge = perceivedAgeMidpoints.length
+    ? Math.round(perceivedAgeMidpoints.reduce((s, v) => s + v, 0) / perceivedAgeMidpoints.length)
+    : null
+
+  const ageGap = (chronologicalAge != null && avgPerceivedAge != null) ? avgPerceivedAge - chronologicalAge : null
+
+  const agingIndexValues = bodyAnalyses
+    .map(a => a.analysis?.visual_aging_index)
+    .filter((v: any) => typeof v === 'number')
+
+  const avgAgingIndex = agingIndexValues.length
+    ? Math.round(agingIndexValues.reduce((s, v) => s + v, 0) / agingIndexValues.length)
+    : null
+
+  const latestFace = faceAnalyses[0]?.analysis ?? null
+
+  const gapColor = (gap: number | null) => {
+    if (gap == null) return '#EAE4D5'
+    if (gap <= 0) return '#4ADE80'
+    if (gap <= 5) return '#E7C980'
+    return '#FF4D6D'
+  }
+
+  const agingIndexColorFn = (v: number) => v >= 75 ? '#4ADE80' : v >= 55 ? '#8FC1E8' : v >= 35 ? '#E7C980' : '#FF4D6D'
+
   return (
     <div>
-      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-3">
-        {t('visual_menuReport')}
-      </p>
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-3">{t('visual_menuReport')}</p>
       <h2 className="text-[3rem] lg:text-[3.6rem] font-light leading-none text-[#EAE4D5] mb-6"
         style={{ fontFamily: "'Cormorant Garamond', serif" }}>
         {t('visual_reportTitle')}
       </h2>
-      <p className="text-[14px] italic text-white/55" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-        {t('visual_reportEmpty')}
-      </p>
+
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        {([['30', t('visual_report30')], ['90', t('visual_report90')], ['180', t('visual_report180')]] as [string, string][]).map(([val, label]) => (
+          <button key={val} onClick={() => setPeriod(val as any)}
+            className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-all ${
+              period === val ? 'border-[#8FC1E8]/70 bg-[#8FC1E8]/15 text-[#8FC1E8]' : 'border-white/10 text-white/55 hover:border-white/25'
+            }`}>
+            {label}
+          </button>
+        ))}
+        <div className="ml-auto flex gap-2">
+          <button onClick={onSendGlobal} disabled={sendingGlobal || filtered.length === 0}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/55 transition hover:border-[#8FC1E8]/45 hover:text-[#8FC1E8] disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {sendingGlobal ? t('visual_reportSending') : sentGlobal ? t('visual_reportSent') : t('visual_reportGlobal')}
+          </button>
+          <button onClick={onSendDetail} disabled={sendingDetail || filtered.length === 0}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/55 transition hover:border-[#8FC1E8]/45 hover:text-[#8FC1E8] disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {sendingDetail ? t('visual_reportSending') : sentDetail ? t('visual_reportSent') : t('visual_reportDetail')}
+          </button>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="text-[14px] italic text-white/55" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+          {t('visual_reportEmpty')}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4">
+
+          <div className="grid grid-cols-4 gap-2">
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_chronologicalAge')}</p>
+              <p className="text-[1.4rem] font-light leading-none text-[#EAE4D5]/80" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {chronologicalAge ?? '—'}
+              </p>
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_perceivedAge')}</p>
+              <p className="text-[1.4rem] font-light leading-none text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {avgPerceivedAge ?? '—'}
+              </p>
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_ageGap')}</p>
+              <p className="text-[1.4rem] font-light leading-none" style={{ fontFamily: "'Cormorant Garamond', serif", color: gapColor(ageGap) }}>
+                {ageGap != null ? `${ageGap > 0 ? '+' : ''}${ageGap}` : '—'}
+              </p>
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_agingIndex')}</p>
+              <p className="text-[1.4rem] font-light leading-none" style={{ fontFamily: "'Cormorant Garamond', serif", color: avgAgingIndex != null ? agingIndexColorFn(avgAgingIndex) : '#EAE4D5' }}>
+                {avgAgingIndex ?? '—'}<span className="text-[11px] text-white/30">/100</span>
+              </p>
+            </div>
+          </div>
+
+          {!chronologicalAge && (
+            <p className="text-[11px] text-white/40 italic -mt-2">{t('visual_noDob')}</p>
+          )}
+
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_faceSessionsCount')}</p>
+              <p className="text-[1.4rem] font-light leading-none text-[#EAE4D5]/80" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {faceAnalyses.length}
+              </p>
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_bodySessionsCount')}</p>
+              <p className="text-[1.4rem] font-light leading-none text-[#EAE4D5]/80" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {bodyAnalyses.length}
+              </p>
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{t('visual_glogauStage')}</p>
+              <p className="text-[1.4rem] font-light leading-none text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {latestFace?.glogau_stage ?? '—'}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      )}
     </div>
   )
 }
@@ -609,18 +847,120 @@ function CaptureBodySection() {
   )
 }
 
+// ── MODALE DE CONSENTEMENT — capture biométrique ────────────────────────────
+function ConsentModal({ locale, onAccept, onCancel }: { locale: string; onAccept: () => void; onCancel: () => void }) {
+  const [checked, setChecked] = useState(false)
+  const c = CONSENT_TEXT[locale] ?? CONSENT_TEXT.en
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+      <div className="relative w-full max-w-lg max-h-[85vh] rounded-[24px] border border-white/10 bg-[#040B14] shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden">
+        <div className="absolute top-0 left-[12%] w-[76%] h-[2px] bg-gradient-to-r from-transparent via-[#8FC1E8] to-transparent opacity-70" />
+
+        <div className="px-8 pt-8 pb-4 shrink-0">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]/80 mb-2">My Visual</p>
+          <h3 className="text-[1.6rem] font-light text-[#EAE4D5]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            {c.title}
+          </h3>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-4 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+          <p className="text-[13px] text-white/70 leading-relaxed mb-4">{c.intro}</p>
+
+          <ul className="flex flex-col gap-2 mb-5">
+            {c.points.map((p, i) => (
+              <li key={i} className="text-[12px] text-white/60 leading-relaxed flex gap-2">
+                <span className="text-[#8FC1E8]/70 shrink-0">—</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-[11px] uppercase tracking-[0.16em] text-[#8FC1E8]/70 mb-3">{c.recTitle}</p>
+
+          <div className="mb-4">
+            <p className="text-[12px] font-medium text-white/75 mb-1">{c.lightTitle}</p>
+            <ul className="flex flex-col gap-1">
+              {c.lightPoints.map((p, i) => (
+                <li key={i} className="text-[11px] text-white/55 leading-relaxed flex gap-2">
+                  <span className="shrink-0">—</span><span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-[12px] font-medium text-white/75 mb-1">{c.attireTitle}</p>
+            <ul className="flex flex-col gap-1">
+              {c.attirePoints.map((p, i) => (
+                <li key={i} className="text-[11px] text-white/55 leading-relaxed flex gap-2">
+                  <span className="shrink-0">—</span><span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-2">
+            <p className="text-[12px] font-medium text-white/75 mb-1">{c.faceTitle}</p>
+            <ul className="flex flex-col gap-1">
+              {c.facePoints.map((p, i) => (
+                <li key={i} className="text-[11px] text-white/55 leading-relaxed flex gap-2">
+                  <span className="shrink-0">—</span><span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="px-8 py-5 border-t border-white/8 shrink-0">
+          <label className="flex items-start gap-3 mb-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={(e) => setChecked(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[#8FC1E8]"
+            />
+            <span className="text-[11px] text-white/65 leading-relaxed">{c.checkbox}</span>
+          </label>
+
+          <div className="flex gap-3">
+            <button onClick={onCancel}
+              className="flex-1 rounded-full border border-white/10 py-3 text-[11px] uppercase tracking-[0.18em] text-white/50 transition hover:bg-white/[0.03]">
+              {locale === 'fr' ? 'Annuler' : locale === 'es' ? 'Cancelar' : 'Cancel'}
+            </button>
+            <button onClick={onAccept} disabled={!checked}
+              className="flex-1 rounded-full border border-[#8FC1E8]/65 bg-[#8FC1E8]/15 py-3 text-[11px] uppercase tracking-[0.18em] text-[#8FC1E8] transition hover:bg-[#8FC1E8]/25 disabled:opacity-30 disabled:cursor-not-allowed">
+              {c.cta}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignOut }: VisualSpaceProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [activeSection, setActiveSection] = useState<ActiveSection>(null)
   const [showQR, setShowQR] = useState(false)
+const [showConsentModal, setShowConsentModal] = useState(false)
+const [pendingAction, setPendingAction] = useState<'captureFace' | 'captureBody' | 'connectPhone' | null>(null)
+const [hasValidConsent, setHasValidConsent] = useState(false)
   const [qrToken, setQrToken] = useState<string | null>(null)
   const [faceShots, setFaceShots] = useState<CaptureShot[]>([])
   const [bodyShots, setBodyShots] = useState<CaptureShot[]>([])
   const [faceAnalysis, setFaceAnalysis] = useState<FaceAnalysis | null>(null)
   const [bodyAnalysis, setBodyAnalysis] = useState<BodyAnalysis | null>(null)
-  const [historySessions, setHistorySessions] = useState<{ date: string; faceCount: number; bodyCount: number }[]>([])
-  const [dataLoading, setDataLoading] = useState(true)
+const [historySessions, setHistorySessions] = useState<{ date: string; faceCount: number; bodyCount: number }[]>([])
+const [dataLoading, setDataLoading] = useState(true)
+const [allAnalyses, setAllAnalyses] = useState<{ capture_type: string; analysis: any; created_at: string }[]>([])
+const [chronologicalAge, setChronologicalAge] = useState<number | null>(null)
+const [reportPeriod, setReportPeriod] = useState<'30' | '90' | '180'>('30')
+const [sendingGlobal, setSendingGlobal] = useState(false)
+const [sendingDetail, setSendingDetail] = useState(false)
+const [sentGlobal, setSentGlobal] = useState(false)
+const [sentDetail, setSentDetail] = useState(false)
 
   const t = useTranslations('myspace')
   const tGlobal = useTranslations()
@@ -639,6 +979,17 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { setDataLoading(false); return }
+
+        // Vérification du consentement biométrique en vigueur
+        const { data: consent } = await supabase
+          .from('visual_consents')
+          .select('consent_version')
+          .eq('user_id', user.id)
+          .order('accepted_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        setHasValidConsent(consent?.consent_version === VISUAL_CONSENT_VERSION)
 
         const { data: captures } = await supabase
           .from('visual_captures')
@@ -679,7 +1030,7 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
         setFaceShots(faceResolved)
         setBodyShots(bodyResolved)
 
-        // Dernières analyses (une par capture_type)
+        // Dernières analyses (une par capture_type) + historique complet pour Rapport
         const { data: analyses } = await supabase
           .from('visual_analyses')
           .select('capture_type, analysis, created_at')
@@ -691,6 +1042,23 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
           const latestBodyAnalysis = analyses.find(a => a.capture_type === 'body')
           if (latestFaceAnalysis) setFaceAnalysis(latestFaceAnalysis.analysis as FaceAnalysis)
           if (latestBodyAnalysis) setBodyAnalysis(latestBodyAnalysis.analysis as BodyAnalysis)
+          setAllAnalyses(analyses as { capture_type: string; analysis: any; created_at: string }[])
+        }
+
+        // Âge chronologique — depuis date_of_birth (fiable pour Premium/Executive)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('date_of_birth')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.date_of_birth) {
+          const dob = new Date(profile.date_of_birth)
+          const today = new Date()
+          let age = today.getFullYear() - dob.getFullYear()
+          const m = today.getMonth() - dob.getMonth()
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+          setChronologicalAge(age)
         }
 
         // Historique — regroupement par jour
@@ -715,6 +1083,42 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
     loadCaptures()
   }, [])
 
+const handleAcceptConsent = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase.from('visual_consents').insert({
+    user_id: user.id,
+    consent_version: VISUAL_CONSENT_VERSION,
+    locale,
+  })
+
+  setHasValidConsent(true)
+  setShowConsentModal(false)
+
+  if (pendingAction === 'captureFace') setActiveSection('captureFace')
+  if (pendingAction === 'captureBody') setActiveSection('captureBody')
+  if (pendingAction === 'connectPhone') generateQRToken()
+
+  setPendingAction(null)
+}
+
+const handleCancelConsent = () => {
+  setShowConsentModal(false)
+  setPendingAction(null)
+}
+
+const requestActionWithConsent = (action: 'captureFace' | 'captureBody' | 'connectPhone') => {
+  if (hasValidConsent) {
+    if (action === 'captureFace') setActiveSection('captureFace')
+    if (action === 'captureBody') setActiveSection('captureBody')
+    if (action === 'connectPhone') generateQRToken()
+    return
+  }
+  setPendingAction(action)
+  setShowConsentModal(true)
+}
+
 const generateQRToken = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -728,6 +1132,35 @@ const generateQRToken = async () => {
     setQrToken(token)
     setShowQR(true)
   }
+
+const handleSendVisualReport = async (type: 'global' | 'detail') => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return
+  const setSending = type === 'global' ? setSendingGlobal : setSendingDetail
+  const setSent    = type === 'global' ? setSentGlobal    : setSentDetail
+  setSending(true)
+  setSent(false)
+  try {
+    await fetch('/api/visual-report-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        period: reportPeriod,
+        locale,
+        type,
+        email: user.email,
+        fullName,
+      }),
+    })
+    setSent(true)
+  } catch (e) {
+    console.error('visual report send error:', e)
+  } finally {
+    setSending(false)
+  }
+}
+
 
   const MENU_ITEMS: { id: ActiveSection; label: string }[] = [
     { id: 'results',  label: t('visual_menuResults') },
@@ -746,7 +1179,21 @@ const generateQRToken = async () => {
       case 'results':     return <ResultsSection faceShots={faceShots} bodyShots={bodyShots} faceAnalysis={faceAnalysis} bodyAnalysis={bodyAnalysis} loading={dataLoading} />
       case 'evolve':      return <EvolveSection />
       case 'history':     return <HistorySection sessions={historySessions} loading={dataLoading} />
-      case 'report':      return <ReportSection />
+      case 'report':
+  return (
+    <ReportSection
+      allAnalyses={allAnalyses}
+      chronologicalAge={chronologicalAge}
+      onSendGlobal={() => handleSendVisualReport('global')}
+      onSendDetail={() => handleSendVisualReport('detail')}
+      sendingGlobal={sendingGlobal}
+      sendingDetail={sendingDetail}
+      sentGlobal={sentGlobal}
+      sentDetail={sentDetail}
+      period={reportPeriod}
+      setPeriod={setReportPeriod}
+    />
+  )
       case 'captureFace': return <CaptureFaceSection />
       case 'captureBody': return <CaptureBodySection />
       default: return null
@@ -849,7 +1296,7 @@ const generateQRToken = async () => {
                   const isActive = activeSection === item.id
                   return (
                     <button key={item.id}
-                      onClick={() => setActiveSection(prev => prev === item.id ? null : item.id)}
+                      onClick={() => requestActionWithConsent(item.id as 'captureFace' | 'captureBody')}
                       className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left border transition-all duration-200 ${
                         isActive ? 'bg-black/20 border-white/10' : 'border-transparent hover:bg-black/10'
                       }`}>
@@ -864,7 +1311,7 @@ const generateQRToken = async () => {
                   )
                 })}
 
-                <button onClick={generateQRToken}
+                <button onClick={() => requestActionWithConsent('connectPhone')}
                   className="group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 mt-2 text-left border border-transparent hover:bg-black/10 transition-all duration-200">
                   <span className="text-[12px] uppercase tracking-[0.24em] text-white/55 group-hover:text-white/75">
                     {t('visual_connectPhone')}
@@ -881,13 +1328,17 @@ const generateQRToken = async () => {
           </div>
         </div>
 {/* ── CONTENU SECTION — droite ── */}
-        {activeSection && (
-          <div className="hidden md:flex absolute left-[520px] lg:left-[600px] top-[0px] bottom-[40px] right-0 z-30 px-10 lg:px-16">
-            <div className="w-full max-w-[960px] min-w-0 h-full flex flex-col overflow-hidden">
-              {renderSection()}
-            </div>
-          </div>
-        )}
+     {activeSection && (
+  <div className="hidden md:flex absolute left-[520px] lg:left-[600px] top-[0px] bottom-[40px] right-0 z-30 px-10 lg:px-16">
+    <div className="relative w-full max-w-[960px] min-w-0 h-full flex flex-col overflow-hidden">
+      {/* Panneau de fond — améliore le contraste sans dupliquer le style des cartes */}
+      <div className="absolute -top-6 -left-6 -right-6 bottom-60 bg-black/15 backdrop-blur-md border border-white/5 -z-10" />
+      <div className="flex-1 min-h-0 px-2 py-2">
+        {renderSection()}
+      </div>
+    </div>
+  </div>
+)}
       </div>
       {/* ══════════════════════════════════════
           MOBILE
@@ -942,7 +1393,7 @@ const generateQRToken = async () => {
                   const isActive = activeSection === item.id
                   return (
                     <button key={item.id}
-                      onClick={() => setActiveSection(prev => prev === item.id ? null : item.id)}
+                      onClick={() => requestActionWithConsent(item.id as 'captureFace' | 'captureBody')}
                       className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border transition-all ${
                         isActive ? 'bg-black/20 border-white/10' : 'border-transparent'
                       }`}>
@@ -955,7 +1406,7 @@ const generateQRToken = async () => {
                   )
                 })}
 
-                <button onClick={generateQRToken}
+                <button onClick={() => requestActionWithConsent('connectPhone')}
                   className="group flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all">
                   <span className="text-[11px] uppercase tracking-[0.24em] text-white/55">
                     {t('visual_connectPhone')}
@@ -973,24 +1424,34 @@ const generateQRToken = async () => {
         </div>
 
         {/* SECTION CONTENT MOBILE — overlay pleine largeur */}
-        {activeSection && (
-          <div className="absolute inset-0 z-50 bg-cover bg-center" style={{ backgroundImage: `url('${currentBg}')` }}>
-            <div className="absolute inset-0 bg-[#02040A]/50" />
-            <div className="relative z-10 flex flex-col h-full overflow-y-auto">
-              <div className="flex items-center justify-between px-4 pt-6 pb-3 shrink-0">
-                <button onClick={() => setActiveSection(null)}
-                  className="flex items-center gap-2 text-white/60 text-[11px] uppercase tracking-[0.18em]">
-                  <ArrowLeft className="h-4 w-4" />
-                  {t('visual_back')}
-                </button>
-              </div>
-              <div className="px-4 pb-8 flex-1">
-                {renderSection()}
-              </div>
-            </div>
-          </div>
-        )}
+{activeSection && (
+  <div className="absolute inset-0 z-50 bg-cover bg-center" style={{ backgroundImage: `url('${currentBg}')` }}>
+    <div className="absolute inset-0 bg-[#02040A]/50" />
+    {/* Panneau de fond — améliore le contraste sans dupliquer le style des cartes */}
+    <div className="absolute -top-6 -left-6 -right-6 bottom-16 bg-black/15 backdrop-blur-md border border-white/5 -z-10" />
+    <div className="relative z-10 flex flex-col h-full">
+      <div className="flex items-center justify-between px-4 pt-6 pb-3 shrink-0">
+        <button onClick={() => setActiveSection(null)}
+          className="flex items-center gap-2 text-white/60 text-[11px] uppercase tracking-[0.18em]">
+          <ArrowLeft className="h-4 w-4" />
+          {t('visual_back')}
+        </button>
       </div>
+      <div className="px-4 pb-8 flex-1 min-h-0 overflow-y-auto">
+        {renderSection()}
+      </div>
+    </div>
+  </div>
+)}
+      </div>
+
+      {showConsentModal && (
+        <ConsentModal
+          locale={locale}
+          onAccept={handleAcceptConsent}
+          onCancel={handleCancelConsent}
+        />
+      )}
 
       {showQR && qrToken && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
