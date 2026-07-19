@@ -217,11 +217,11 @@ export default function VisualCapturePage() {
               formData.append('image', blob, `${shot.pose}.jpg`)
               await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
             }
-            await fetch('/api/visual-analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, sessionId, captureType: 'face' }),
-            })
+           await fetch('/api/visual-analyze', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userId, sessionId, captureType: 'face', locale }),
+})
             setCaptureMode(null)
             setStatus('choice')
           }}
@@ -243,11 +243,11 @@ export default function VisualCapturePage() {
               formData.append('image', blob, `${shot.pose}.jpg`)
               await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
             }
-            await fetch('/api/visual-analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, sessionId, captureType: 'body' }),
-            })
+          await fetch('/api/visual-analyze', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userId, sessionId, captureType: 'body', locale }),
+})
             setCaptureMode(null)
             setStatus('choice')
           }}

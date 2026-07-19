@@ -11,6 +11,41 @@ interface CaptureShot {
   created_at: string
 }
 
+interface FaceAnalysis {
+  fitzpatrick_type?: string
+  griffiths_scores?: { forehead: number; periorbital: number; nasolabial: number; perioral: number }
+  glogau_stage?: string
+  glogau_justification?: string
+  pigmentation_load_percent?: number
+  vascularity_load_percent?: number
+  texture_score?: number // 0-9, cohérent avec l'échelle Griffiths
+  skin_laxity?: { jawline: string; eyelids: string; neck: string }
+  midface_volume_score?: number   // 0-4, Merz Midface Volume Scale
+  tear_trough_score?: number      // 0-4, Merz Tear Trough Scale
+  jowl_score?: number             // 0-4, Merz Jowl Scale
+  crows_feet_score?: number       // 0-4
+  facial_asymmetry?: string       // 'symmetric' | 'mild' | 'moderate' | 'pronounced'
+  fatigue_signs?: string
+  perceived_age_range?: [number, number]
+  confidence?: string
+  notes?: string
+}
+interface BodyAnalysis {
+  postural_alignment?: string
+  forward_head_posture?: string   // 'neutral' | 'mild' | 'pronounced'
+  pelvic_tilt?: string            // 'neutral' | 'anterior' | 'posterior'
+  waist_hip_ratio_estimate?: number | null
+  shoulder_hip_symmetry?: string
+  muscle_tone?: { arms: string; core: string; legs: string } // 'low' | 'moderate' | 'high' | 'not_assessable'
+  sarcopenia_indicators?: string
+  adiposity_distribution?: string // 'android' | 'gynoid' | 'mixed' | 'not_assessable'
+  skin_laxity_body?: { arms: string; abdomen: string } // 'mild' | 'moderate' | 'pronounced'
+  cellulite_grade?: number | null // 0-4, échelle Nürnberger-Müller
+  visual_aging_index?: number     // score composite 0-100
+  confidence?: string
+  notes?: string
+}
+
 // ── PROPS ─────────────────────────────────────────────────────────────────────
 interface VisualSpaceProps {
   memberTier: 'guest' | 'member' | 'premium' | 'executive'
@@ -27,17 +62,82 @@ function getVisualBg(sex: 'male' | 'female' | 'other'): string {
   return sex === 'female' ? '/myvisualf.png' : '/myvisualh.png'
 }
 
+const CONFIDENCE_KEYS: Record<string, string> = {
+  low: 'visual_confidenceLow', moderate: 'visual_confidenceModerate', high: 'visual_confidenceHigh',
+}
 // ── SECTION — RÉSULTATS ───────────────────────────────────────────────────────
 const FACE_POSE_LABELS: Record<string, string> = { center: 'Face', left: 'Profil gauche', right: 'Profil droit' }
 const BODY_POSE_LABELS: Record<string, string> = { front: 'Face', back: 'Dos', left: 'Profil gauche', right: 'Profil droit' }
 
-function ResultsSection({ faceShots, bodyShots, loading }: {
+const LAXITY_LABELS: Record<string, string> = { mild: 'Légère', moderate: 'Modérée', pronounced: 'Marquée' }
+const ORIENTATION_LABELS: Record<string, string> = {
+  neutral: 'Neutre', mild_kyphosis: 'Cyphose légère', pronounced_kyphosis: 'Cyphose marquée', not_assessable: 'Non évaluable',
+}
+const SYMMETRY_LABELS: Record<string, string> = {
+  symmetric: 'Symétrique', mild_asymmetry: 'Légère asymétrie', notable_asymmetry: 'Asymétrie notable', not_assessable: 'Non évaluable',
+}
+const MUSCLE_LABELS: Record<string, string> = { low: 'Faible', moderate: 'Modérée', high: 'Élevée', not_assessable: 'Non évaluable' }
+
+// ── Nouveaux dictionnaires — analyse enrichie (clés i18n, pas de texte en dur) ──
+const ASYMMETRY_KEYS: Record<string, string> = {
+  symmetric: 'visual_asymSymmetric', mild: 'visual_asymMild', moderate: 'visual_asymModerate',
+  pronounced: 'visual_asymPronounced', not_assessable: 'visual_notAssessable',
+}
+const FATIGUE_KEYS: Record<string, string> = {
+  none: 'visual_fatigueNone', mild: 'visual_fatigueMild', moderate: 'visual_fatigueModerate',
+  pronounced: 'visual_fatiguePronounced', not_assessable: 'visual_notAssessable',
+}
+const FORWARD_HEAD_KEYS: Record<string, string> = {
+  neutral: 'visual_postureNeutral', mild: 'visual_postureMildForward',
+  pronounced: 'visual_posturePronouncedForward', not_assessable: 'visual_notAssessable',
+}
+const PELVIC_TILT_KEYS: Record<string, string> = {
+  neutral: 'visual_pelvicNeutral', anterior: 'visual_pelvicAnterior',
+  posterior: 'visual_pelvicPosterior', not_assessable: 'visual_notAssessable',
+}
+const SARCOPENIA_KEYS: Record<string, string> = {
+  none: 'visual_sarcopeniaNone', mild: 'visual_sarcopeniaMild', moderate: 'visual_sarcopeniaModerate',
+  pronounced: 'visual_sarcopeniaPronounced', not_assessable: 'visual_notAssessable',
+}
+const ADIPOSITY_KEYS: Record<string, string> = {
+  android: 'visual_adiposityAndroid', gynoid: 'visual_adiposityGynoid',
+  mixed: 'visual_adiposityMixed', not_assessable: 'visual_notAssessable',
+}
+
+const SCALE_0_4_MAX = 4
+
+// ── LAYOUT PARTAGÉ — titre fixe, contenu défilant ────────────────────────────
+function SectionLayout({ badge, title, children }: { badge: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="shrink-0">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-3">
+          {badge}
+        </p>
+        <h2 className="text-[3rem] lg:text-[3.6rem] font-light leading-none text-[#EAE4D5] mb-6"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+          {title}
+        </h2>
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto pb-8" style={{ scrollbarWidth: 'none' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, loading }: {
   faceShots: CaptureShot[]
   bodyShots: CaptureShot[]
+  faceAnalysis: FaceAnalysis | null
+  bodyAnalysis: BodyAnalysis | null
   loading: boolean
 }) {
   const t = useTranslations('myspace')
   const hasAny = faceShots.length > 0 || bodyShots.length > 0
+
+  const FACE_ZONE_KEYS: Record<string, string> = {
+    jawline: 'visual_zoneJawline', eyelids: 'visual_zoneEyelids', neck: 'visual_zoneNeck',
+  }
 
   return (
     <div>
@@ -59,42 +159,284 @@ function ResultsSection({ faceShots, bodyShots, loading }: {
         </p>
       )}
 
-      {!loading && faceShots.length > 0 && (
-        <div className="mb-8">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">Dernière capture — Visage</p>
-          <div className="grid grid-cols-3 gap-3 max-w-[560px]">
-            {faceShots.map((shot) => (
-              <div key={shot.pose} className="flex flex-col items-center gap-2">
-                <div className="relative w-full aspect-[3/4] rounded-[12px] overflow-hidden border border-white/8">
-                  <img src={shot.url} alt={shot.pose} className="w-full h-full object-cover" />
-                </div>
-                <p className="text-[9px] uppercase tracking-[0.14em] text-white/50">{FACE_POSE_LABELS[shot.pose] ?? shot.pose}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!loading && bodyShots.length > 0 && (
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">Dernière capture — Corps</p>
-          <div className="grid grid-cols-4 gap-3 max-w-[560px]">
-            {bodyShots.map((shot) => (
-              <div key={shot.pose} className="flex flex-col items-center gap-2">
-                <div className="relative w-full aspect-[3/4] rounded-[10px] overflow-hidden border border-white/8">
-                  <img src={shot.url} alt={shot.pose} className="w-full h-full object-cover" />
-                </div>
-                <p className="text-[8px] uppercase tracking-[0.12em] text-white/50 text-center">{BODY_POSE_LABELS[shot.pose] ?? shot.pose}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {!loading && hasAny && (
-        <p className="mt-8 text-[12px] text-white/35 italic max-w-[600px]">
-          L'analyse scientifique détaillée (Griffiths, Glogau, repères posturaux) sera intégrée à cette section prochainement.
-        </p>
+        <div className="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-490px)]" style={{ scrollbarWidth: 'none' }}>
+
+          {/* ══════════════ ANALYSE VISAGE ══════════════ */}
+          {faceShots.length > 0 && (
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">{t('visual_faceAnalysisTitle')}</p>
+              <div className="flex gap-6 flex-wrap">
+                <div className="grid grid-cols-3 gap-2 w-[180px] shrink-0">
+                  {faceShots.map((shot) => (
+                    <div key={shot.pose} className="flex flex-col items-center gap-2">
+                      <div className="relative w-full aspect-[3/4] rounded-[12px] overflow-hidden border border-white/8">
+                        <img src={shot.url} alt={shot.pose} className="w-full h-full object-cover" />
+                      </div>
+                      <p className="text-[8px] uppercase tracking-[0.12em] text-white/50 text-center">{FACE_POSE_LABELS[shot.pose] ?? shot.pose}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {faceAnalysis && (
+                  <div className="flex-1 min-w-[280px] rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 flex flex-col gap-4">
+
+                    {faceAnalysis.perceived_age_range && (
+                      <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3">
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_perceivedAge')}</p>
+                        <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {faceAnalysis.perceived_age_range[0]}–{faceAnalysis.perceived_age_range[1]} <span className="text-[13px] text-white/50">{t('visual_yearsUnit')}</span>
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_glogauStage')}</p>
+                        <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {faceAnalysis.glogau_stage ?? '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_fitzpatrick')}</p>
+                        <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {faceAnalysis.fitzpatrick_type ?? '—'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {faceAnalysis.griffiths_scores && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-2">{t('visual_griffithsScores')}</p>
+                        <div className="flex flex-col gap-1.5">
+                          {[
+                            [t('visual_zoneForehead'), faceAnalysis.griffiths_scores.forehead],
+                            [t('visual_zonePeriorbital'), faceAnalysis.griffiths_scores.periorbital],
+                            [t('visual_zoneNasolabial'), faceAnalysis.griffiths_scores.nasolabial],
+                            [t('visual_zonePerioral'), faceAnalysis.griffiths_scores.perioral],
+                          ].map(([label, val]) => (
+                            <div key={label as string} className="flex items-center gap-2">
+                              <span className="text-[10px] text-white/60 w-[90px]">{label}</span>
+                              <div className="flex-1 h-[3px] bg-white/8 rounded-full">
+                                <div className="h-[3px] rounded-full bg-[#8FC1E8]" style={{ width: `${((val as number) / 9) * 100}%` }} />
+                              </div>
+                              <span className="text-[10px] text-white/50 w-[16px] text-right">{val}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(faceAnalysis.midface_volume_score != null || faceAnalysis.tear_trough_score != null ||
+                      faceAnalysis.jowl_score != null || faceAnalysis.crows_feet_score != null ||
+                      faceAnalysis.texture_score != null) && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-2">{t('visual_volumetryTexture')}</p>
+                        <div className="flex flex-col gap-1.5">
+                          {[
+                            [t('visual_midfaceVolume'), faceAnalysis.midface_volume_score, 4],
+                            [t('visual_tearTrough'), faceAnalysis.tear_trough_score, 4],
+                            [t('visual_jowl'), faceAnalysis.jowl_score, 4],
+                            [t('visual_crowsFeet'), faceAnalysis.crows_feet_score, 4],
+                            [t('visual_textureScore'), faceAnalysis.texture_score, 9],
+                          ].filter(([, val]) => val != null).map(([label, val, max]) => (
+                            <div key={label as string} className="flex items-center gap-2">
+                              <span className="text-[10px] text-white/60 w-[110px]">{label}</span>
+                              <div className="flex-1 h-[3px] bg-white/8 rounded-full">
+                                <div className="h-[3px] rounded-full bg-[#8FC1E8]" style={{ width: `${((val as number) / (max as number)) * 100}%` }} />
+                              </div>
+                              <span className="text-[10px] text-white/50 w-[24px] text-right">{val}/{max}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {faceAnalysis.skin_laxity && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1.5">{t('visual_skinLaxity')}</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {Object.entries(faceAnalysis.skin_laxity).map(([zone, val]) => (
+                            <span key={zone} className="text-[9px] px-2 py-1 rounded-full border border-white/10 text-white/60">
+                              {t(FACE_ZONE_KEYS[zone] ?? 'visual_notAssessable')}: {LAXITY_LABELS[val as string] ?? val}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {faceAnalysis.pigmentation_load_percent != null && (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_pigmentationLoad')}</p>
+                          <p className="text-[13px] text-white/75">{faceAnalysis.pigmentation_load_percent}%</p>
+                        </div>
+                      )}
+                      {faceAnalysis.vascularity_load_percent != null && (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_vascularity')}</p>
+                          <p className="text-[13px] text-white/75">{faceAnalysis.vascularity_load_percent}%</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {faceAnalysis.facial_asymmetry && (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_facialAsymmetry')}</p>
+                          <p className="text-[12px] text-white/75">{t(ASYMMETRY_KEYS[faceAnalysis.facial_asymmetry] ?? 'visual_notAssessable')}</p>
+                        </div>
+                      )}
+                      {faceAnalysis.fatigue_signs && (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_fatigueSigns')}</p>
+                          <p className="text-[12px] text-white/75">{t(FATIGUE_KEYS[faceAnalysis.fatigue_signs] ?? 'visual_notAssessable')}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {faceAnalysis.notes && (
+                      <p className="text-[11px] text-white/55 leading-relaxed border-t border-white/8 pt-3">
+                        {faceAnalysis.notes}
+                      </p>
+                    )}
+
+                 {faceAnalysis.confidence && (
+  <p className="text-[9px] text-white/35 uppercase tracking-[0.1em]">
+    {t('visual_confidenceLabel')} : {t(CONFIDENCE_KEYS[faceAnalysis.confidence] ?? 'visual_notAssessable')}
+  </p>
+)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════ ANALYSE CORPS ══════════════ */}
+          {bodyShots.length > 0 && (
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">{t('visual_bodyAnalysisTitle')}</p>
+              <div className="flex gap-6 flex-wrap">
+                <div className="grid grid-cols-4 gap-1.5 w-[180px] shrink-0">
+                  {bodyShots.map((shot) => (
+                    <div key={shot.pose} className="flex flex-col items-center gap-2">
+                      <div className="relative w-full aspect-[3/4] rounded-[10px] overflow-hidden border border-white/8">
+                        <img src={shot.url} alt={shot.pose} className="w-full h-full object-cover" />
+                      </div>
+                      <p className="text-[7px] uppercase tracking-[0.1em] text-white/50 text-center">{BODY_POSE_LABELS[shot.pose] ?? shot.pose}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {bodyAnalysis && (
+                  <div className="flex-1 min-w-[280px] rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 flex flex-col gap-4">
+
+                    {bodyAnalysis.visual_aging_index != null && (
+                      <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3">
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_agingIndex')}</p>
+                        <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {bodyAnalysis.visual_aging_index}<span className="text-[13px] text-white/50">/100</span>
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_posturalAlignment')}</p>
+                        <p className="text-[13px] text-white/80">{ORIENTATION_LABELS[bodyAnalysis.postural_alignment ?? ''] ?? '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_shoulderHipSymmetry')}</p>
+                        <p className="text-[13px] text-white/80">{SYMMETRY_LABELS[bodyAnalysis.shoulder_hip_symmetry ?? ''] ?? '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_waistHipRatio')}</p>
+                        <p className="text-[13px] text-white/80">{bodyAnalysis.waist_hip_ratio_estimate?.toFixed(2) ?? '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_forwardHeadPosture')}</p>
+                        <p className="text-[13px] text-white/80">{t(FORWARD_HEAD_KEYS[bodyAnalysis.forward_head_posture ?? ''] ?? 'visual_notAssessable')}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_pelvicTilt')}</p>
+                        <p className="text-[13px] text-white/80">{t(PELVIC_TILT_KEYS[bodyAnalysis.pelvic_tilt ?? ''] ?? 'visual_notAssessable')}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_adiposityDistribution')}</p>
+                        <p className="text-[13px] text-white/80">{t(ADIPOSITY_KEYS[bodyAnalysis.adiposity_distribution ?? ''] ?? 'visual_notAssessable')}</p>
+                      </div>
+                    </div>
+
+                    {bodyAnalysis.muscle_tone && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1.5">{t('visual_muscleTone')}</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {[
+                            [t('visual_muscleArms'), bodyAnalysis.muscle_tone.arms],
+                            [t('visual_muscleCore'), bodyAnalysis.muscle_tone.core],
+                            [t('visual_muscleLegs'), bodyAnalysis.muscle_tone.legs],
+                          ].map(([zone, val]) => (
+                            <span key={zone as string} className="text-[9px] px-2 py-1 rounded-full border border-white/10 text-white/60">
+                              {zone}: {MUSCLE_LABELS[val as string] ?? val}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {bodyAnalysis.skin_laxity_body && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1.5">{t('visual_skinLaxityBody')}</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {[
+                            [t('visual_laxityArms'), bodyAnalysis.skin_laxity_body.arms],
+                            [t('visual_laxityAbdomen'), bodyAnalysis.skin_laxity_body.abdomen],
+                          ].map(([zone, val]) => (
+                            <span key={zone as string} className="text-[9px] px-2 py-1 rounded-full border border-white/10 text-white/60">
+                              {zone}: {LAXITY_LABELS[val as string] ?? val}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {bodyAnalysis.cellulite_grade != null && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_celluliteGrade')}</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-[3px] bg-white/8 rounded-full">
+                            <div className="h-[3px] rounded-full bg-[#8FC1E8]" style={{ width: `${(bodyAnalysis.cellulite_grade / SCALE_0_4_MAX) * 100}%` }} />
+                          </div>
+                          <span className="text-[10px] text-white/50 w-[24px] text-right">{bodyAnalysis.cellulite_grade}/4</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {bodyAnalysis.sarcopenia_indicators && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_sarcopeniaIndicators')}</p>
+                        <p className="text-[12px] text-white/75">{t(SARCOPENIA_KEYS[bodyAnalysis.sarcopenia_indicators] ?? 'visual_notAssessable')}</p>
+                      </div>
+                    )}
+
+                    {bodyAnalysis.notes && (
+                      <p className="text-[11px] text-white/55 leading-relaxed border-t border-white/8 pt-3">
+                        {bodyAnalysis.notes}
+                      </p>
+                    )}
+
+                  {bodyAnalysis.confidence && (
+  <p className="text-[9px] text-white/35 uppercase tracking-[0.1em]">
+    {t('visual_confidenceLabel')} : {t(CONFIDENCE_KEYS[bodyAnalysis.confidence] ?? 'visual_notAssessable')}
+  </p>
+)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
       )}
     </div>
   )
@@ -252,6 +594,8 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
   const [qrToken, setQrToken] = useState<string | null>(null)
   const [faceShots, setFaceShots] = useState<CaptureShot[]>([])
   const [bodyShots, setBodyShots] = useState<CaptureShot[]>([])
+  const [faceAnalysis, setFaceAnalysis] = useState<FaceAnalysis | null>(null)
+  const [bodyAnalysis, setBodyAnalysis] = useState<BodyAnalysis | null>(null)
   const [historySessions, setHistorySessions] = useState<{ date: string; faceCount: number; bodyCount: number }[]>([])
   const [dataLoading, setDataLoading] = useState(true)
 
@@ -312,6 +656,20 @@ export default function VisualSpace({ memberTier, fullName, sex, onBack, onSignO
         setFaceShots(faceResolved)
         setBodyShots(bodyResolved)
 
+        // Dernières analyses (une par capture_type)
+        const { data: analyses } = await supabase
+          .from('visual_analyses')
+          .select('capture_type, analysis, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (analyses) {
+          const latestFaceAnalysis = analyses.find(a => a.capture_type === 'face')
+          const latestBodyAnalysis = analyses.find(a => a.capture_type === 'body')
+          if (latestFaceAnalysis) setFaceAnalysis(latestFaceAnalysis.analysis as FaceAnalysis)
+          if (latestBodyAnalysis) setBodyAnalysis(latestBodyAnalysis.analysis as BodyAnalysis)
+        }
+
         // Historique — regroupement par jour
         const byDay: Record<string, { faceCount: number; bodyCount: number }> = {}
         for (const c of captures) {
@@ -362,7 +720,7 @@ const generateQRToken = async () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case 'results':     return <ResultsSection faceShots={faceShots} bodyShots={bodyShots} loading={dataLoading} />
+      case 'results':     return <ResultsSection faceShots={faceShots} bodyShots={bodyShots} faceAnalysis={faceAnalysis} bodyAnalysis={bodyAnalysis} loading={dataLoading} />
       case 'evolve':      return <EvolveSection />
       case 'history':     return <HistorySection sessions={historySessions} loading={dataLoading} />
       case 'report':      return <ReportSection />
@@ -499,17 +857,15 @@ const generateQRToken = async () => {
             </div>
           </div>
         </div>
-
-        {/* ── CONTENU SECTION — droite ── */}
+{/* ── CONTENU SECTION — droite ── */}
         {activeSection && (
-          <div className="hidden md:flex absolute left-[520px] lg:left-[600px] top-0 right-0 bottom-[40px] items-start z-30 px-10 lg:px-16 pt-[160px]">
-            <div className="w-full max-w-[960px] min-w-0 overflow-hidden">
+          <div className="hidden md:flex absolute left-[520px] lg:left-[600px] top-[0px] bottom-[40px] right-0 z-30 px-10 lg:px-16">
+            <div className="w-full max-w-[960px] min-w-0 h-full flex flex-col overflow-hidden">
               {renderSection()}
             </div>
           </div>
         )}
       </div>
-
       {/* ══════════════════════════════════════
           MOBILE
       ══════════════════════════════════════ */}
