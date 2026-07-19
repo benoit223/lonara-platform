@@ -20,6 +20,7 @@ export default function VisualCapturePage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [captureMode, setCaptureMode] = useState<CaptureMode>(null)
+const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -203,56 +204,68 @@ export default function VisualCapturePage() {
         </div>
       </div>
 
-      {captureMode === 'face' && userId && (
-        <FaceCaptureFlow
-          onComplete={async (shots) => {
-            const sessionId = crypto.randomUUID()
-            for (const shot of shots) {
-              const blob = await (await fetch(shot.dataUrl)).blob()
-              const formData = new FormData()
-              formData.append('userId', userId)
-              formData.append('captureType', 'face')
-              formData.append('pose', shot.pose)
-              formData.append('sessionId', sessionId)
-              formData.append('image', blob, `${shot.pose}.jpg`)
-              await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
-            }
-           await fetch('/api/visual-analyze', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ userId, sessionId, captureType: 'face', locale }),
-})
-            setCaptureMode(null)
-            setStatus('choice')
-          }}
-          onCancel={() => setCaptureMode(null)}
-        />
-      )}
+  {captureMode === 'face' && userId && (
+  <FaceCaptureFlow
+    onComplete={async (shots) => {
+      setIsProcessing(true)
+      const sessionId = crypto.randomUUID()
+      for (const shot of shots) {
+        const blob = await (await fetch(shot.dataUrl)).blob()
+        const formData = new FormData()
+        formData.append('userId', userId)
+        formData.append('captureType', 'face')
+        formData.append('pose', shot.pose)
+        formData.append('sessionId', sessionId)
+        formData.append('image', blob, `${shot.pose}.jpg`)
+        await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
+      }
+     await fetch('/api/visual-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, sessionId, captureType: 'face', locale }),
+      })
+      setIsProcessing(false)
+      setCaptureMode(null)
+      setStatus('choice')
+    }}
+    onCancel={() => setCaptureMode(null)}
+  />
+)}
 
-      {captureMode === 'body' && userId && (
-        <BodyCaptureFlow
-          onComplete={async (shots) => {
-            const sessionId = crypto.randomUUID()
-            for (const shot of shots) {
-              const blob = await (await fetch(shot.dataUrl)).blob()
-              const formData = new FormData()
-              formData.append('userId', userId)
-              formData.append('captureType', 'body')
-              formData.append('pose', shot.pose)
-              formData.append('sessionId', sessionId)
-              formData.append('image', blob, `${shot.pose}.jpg`)
-              await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
-            }
-          await fetch('/api/visual-analyze', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ userId, sessionId, captureType: 'body', locale }),
-})
-            setCaptureMode(null)
-            setStatus('choice')
-          }}
-          onCancel={() => setCaptureMode(null)}
-        />
+ {captureMode === 'body' && userId && (
+  <BodyCaptureFlow
+    onComplete={async (shots) => {
+      setIsProcessing(true)
+      const sessionId = crypto.randomUUID()
+      for (const shot of shots) {
+        const blob = await (await fetch(shot.dataUrl)).blob()
+        const formData = new FormData()
+        formData.append('userId', userId)
+        formData.append('captureType', 'body')
+        formData.append('pose', shot.pose)
+        formData.append('sessionId', sessionId)
+        formData.append('image', blob, `${shot.pose}.jpg`)
+        await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
+      }
+      await fetch('/api/visual-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, sessionId, captureType: 'body', locale }),
+      })
+      setIsProcessing(false)
+      setCaptureMode(null)
+      setStatus('choice')
+    }}
+    onCancel={() => setCaptureMode(null)}
+  />
+)}
+   {isProcessing && (
+        <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-sm flex items-center justify-center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8FC1E8" strokeWidth="1.4"
+            className="animate-spin" style={{ animationDuration: '1.6s' }}>
+            <path d="M6 2h12M6 22h12M8 2c0 4 2 6 4 6s4-2 4-6M8 22c0-4 2-6 4-6s4 2 4 6" />
+          </svg>
+        </div>
       )}
     </main>
   )

@@ -127,7 +127,7 @@ async function getSignedUrls(paths: string[]): Promise<string[]> {
 export async function POST(req: NextRequest) {
   try {
     const { userId, sessionId, captureType, locale } = await req.json()
-console.log('DEBUG locale reçue:', locale)
+
     if (!userId || !sessionId || !captureType) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
