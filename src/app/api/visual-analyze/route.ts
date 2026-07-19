@@ -82,7 +82,13 @@ Assess:
 - Adiposity distribution — overall fat distribution pattern visible from front/back views — rate as "android" (abdominal-predominant), "gynoid" (hip/thigh-predominant), or "mixed"
 - Body skin laxity — arms, abdomen — each rated "mild", "moderate", or "pronounced"
 - Cellulite grade (0-4) — using the Nürnberger-Müller scale, if visible and assessable from the provided poses
-- Visual aging index — a single composite score (0-100) synthesizing posture, muscle tone, and skin laxity into one overall visual musculoskeletal aging indicator, where 100 represents optimal youthful presentation and 0 represents maximal visible aging signs across all assessed criteria
+- Visual aging index — a single composite score (0-100) synthesizing posture, muscle tone, and skin laxity into one overall visual musculoskeletal aging indicator. Calibrate the score against these bands:
+  - 90-100: minimal visual aging signs, posture/tone/skin firmness well preserved
+  - 75-89: good overall level, a few mild signs, nothing pronounced
+  - 55-74: moderate signs, some criteria warrant attention
+  - 35-54: more noticeable signs, several criteria show visible aging
+  - 0-34: pronounced signs across all assessed criteria
+  Pick the score within the appropriate band based on the overall severity you observe; do not default to band boundaries.
 - Confidence level based on photo quality and completeness of the 4-pose set
 
 Rules:
@@ -121,7 +127,7 @@ async function getSignedUrls(paths: string[]): Promise<string[]> {
 export async function POST(req: NextRequest) {
   try {
     const { userId, sessionId, captureType, locale } = await req.json()
-
+console.log('DEBUG locale reçue:', locale)
     if (!userId || !sessionId || !captureType) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }

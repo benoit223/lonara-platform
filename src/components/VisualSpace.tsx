@@ -106,6 +106,20 @@ const ADIPOSITY_KEYS: Record<string, string> = {
 
 const SCALE_0_4_MAX = 4
 
+// ── Interprétations — Glogau ──────────────────────────────────────────────
+const GLOGAU_INTERPRETATION_KEYS: Record<string, string> = {
+  I: 'visual_glogauI', II: 'visual_glogauII', III: 'visual_glogauIII', IV: 'visual_glogauIV',
+}
+
+// ── Interprétation — Indice de vieillissement visuel (paliers 0-100) ──────
+function getAgingIndexInterpretationKey(score: number): string {
+  if (score >= 90) return 'visual_agingIndexExcellent'
+  if (score >= 75) return 'visual_agingIndexGood'
+  if (score >= 55) return 'visual_agingIndexModerate'
+  if (score >= 35) return 'visual_agingIndexNoticeable'
+  return 'visual_agingIndexPronounced'
+}
+
 // ── LAYOUT PARTAGÉ — titre fixe, contenu défilant ────────────────────────────
 function SectionLayout({ badge, title, children }: { badge: string; title: string; children: React.ReactNode }) {
   return (
@@ -190,20 +204,26 @@ function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, load
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_glogauStage')}</p>
-                        <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                          {faceAnalysis.glogau_stage ?? '—'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_fitzpatrick')}</p>
-                        <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                          {faceAnalysis.fitzpatrick_type ?? '—'}
-                        </p>
-                      </div>
-                    </div>
+                 <div className="grid grid-cols-2 gap-3">
+  <div>
+    <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_glogauStage')}</p>
+    <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+      {faceAnalysis.glogau_stage ?? '—'}
+    </p>
+  </div>
+  <div>
+    <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_fitzpatrick')}</p>
+    <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+      {faceAnalysis.fitzpatrick_type ?? '—'}
+    </p>
+  </div>
+</div>
+
+{faceAnalysis.glogau_stage && GLOGAU_INTERPRETATION_KEYS[faceAnalysis.glogau_stage] && (
+  <p className="text-[11px] text-white/60 leading-relaxed italic">
+    {t(GLOGAU_INTERPRETATION_KEYS[faceAnalysis.glogau_stage])}
+  </p>
+)}
 
                     {faceAnalysis.griffiths_scores && (
                       <div>
@@ -331,14 +351,17 @@ function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, load
                 {bodyAnalysis && (
                   <div className="flex-1 min-w-[280px] rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 flex flex-col gap-4">
 
-                    {bodyAnalysis.visual_aging_index != null && (
-                      <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3">
-                        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_agingIndex')}</p>
-                        <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                          {bodyAnalysis.visual_aging_index}<span className="text-[13px] text-white/50">/100</span>
-                        </p>
-                      </div>
-                    )}
+                {bodyAnalysis.visual_aging_index != null && (
+  <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3">
+    <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">{t('visual_agingIndex')}</p>
+    <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+      {bodyAnalysis.visual_aging_index}<span className="text-[13px] text-white/50">/100</span>
+    </p>
+    <p className="text-[11px] text-white/60 leading-relaxed italic mt-2">
+      {t(getAgingIndexInterpretationKey(bodyAnalysis.visual_aging_index))}
+    </p>
+  </div>
+)}
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
