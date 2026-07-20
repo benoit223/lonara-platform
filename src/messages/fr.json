@@ -10,6 +10,10 @@
   "myfuel": "Mon Carburant",
 "myvisual": "Mon Visuel",
 "myspace": {
+  "visual_narrativeUpdate": "Mettre à jour",
+"visual_narrativeUpdating": "Génération…",
+"visual_narrativeLastUpdate": "Dernière mise à jour du rapport :",
+"visual_narrativeTitle": "Analyse",
   "visual_report30": "30 jours",
 "visual_report90": "90 jours",
 "visual_report180": "6 mois",

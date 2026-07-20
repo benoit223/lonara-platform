@@ -636,7 +636,7 @@ function HistorySection({ sessions, loading }: { sessions: HistorySession[]; loa
   )
 }
 
-function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDetail, sendingGlobal, sendingDetail, sentGlobal, sentDetail, period, setPeriod }: {
+function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDetail, sendingGlobal, sendingDetail, sentGlobal, sentDetail, period, setPeriod, narrative, narrativeGeneratedAt, narrativeLoading, onUpdateNarrative, lastSessionDate }: {
   allAnalyses: { capture_type: string; analysis: any; created_at: string }[]
   chronologicalAge: number | null
   onSendGlobal: () => void
@@ -647,6 +647,11 @@ function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDeta
   sentDetail: boolean
   period: '30' | '90' | '180'
   setPeriod: (p: '30' | '90' | '180') => void
+  narrative: string | null
+  narrativeGeneratedAt: string | null
+  narrativeLoading: boolean
+  onUpdateNarrative: () => void
+  lastSessionDate: string | null
 }) {
   const t = useTranslations('myspace')
 
@@ -695,7 +700,7 @@ function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDeta
         {t('visual_reportTitle')}
       </h2>
 
-      <div className="flex flex-wrap items-center gap-2 mb-6">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         {([['30', t('visual_report30')], ['90', t('visual_report90')], ['180', t('visual_report180')]] as [string, string][]).map(([val, label]) => (
           <button key={val} onClick={() => setPeriod(val as any)}
             className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-all ${
@@ -704,6 +709,19 @@ function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDeta
             {label}
           </button>
         ))}
+
+{(() => {
+  const isUpToDate = !lastSessionDate || Boolean(narrativeGeneratedAt && new Date(narrativeGeneratedAt) >= new Date(lastSessionDate))
+  return (
+    <button onClick={onUpdateNarrative} disabled={narrativeLoading || isUpToDate}
+              className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-all ${
+                isUpToDate ? 'border-white/8 text-white/30 cursor-not-allowed' : 'border-[#8FC1E8]/65 bg-[#8FC1E8]/15 text-[#8FC1E8] hover:bg-[#8FC1E8]/25'
+              } disabled:opacity-50`}>
+              {narrativeLoading ? t('visual_narrativeUpdating') : t('visual_narrativeUpdate')}
+            </button>
+          )
+        })()}
+
         <div className="ml-auto flex gap-2">
           <button onClick={onSendGlobal} disabled={sendingGlobal || filtered.length === 0}
             className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/55 transition hover:border-[#8FC1E8]/45 hover:text-[#8FC1E8] disabled:opacity-40 disabled:cursor-not-allowed">
@@ -722,12 +740,18 @@ function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDeta
         </div>
       </div>
 
+      {narrativeGeneratedAt && (
+        <p className="text-[10px] text-white/35 mb-6">
+          {t('visual_narrativeLastUpdate')} {new Date(narrativeGeneratedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+        </p>
+      )}
+
       {filtered.length === 0 ? (
         <p className="text-[14px] italic text-white/55" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
           {t('visual_reportEmpty')}
         </p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] md:max-h-[calc(100vh-490px)] [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
 
           <div className="grid grid-cols-4 gap-2">
             <div className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
@@ -780,6 +804,13 @@ function ReportSection({ allAnalyses, chronologicalAge, onSendGlobal, onSendDeta
               </p>
             </div>
           </div>
+
+          {narrative && (
+            <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">{t('visual_narrativeTitle')}</p>
+              <p className="text-[13px] text-white/70 leading-relaxed whitespace-pre-line">{narrative}</p>
+            </div>
+          )}
 
         </div>
       )}
@@ -961,6 +992,9 @@ const [sendingGlobal, setSendingGlobal] = useState(false)
 const [sendingDetail, setSendingDetail] = useState(false)
 const [sentGlobal, setSentGlobal] = useState(false)
 const [sentDetail, setSentDetail] = useState(false)
+const [narrative, setNarrative] = useState<string | null>(null)
+const [narrativeGeneratedAt, setNarrativeGeneratedAt] = useState<string | null>(null)
+const [narrativeLoading, setNarrativeLoading] = useState(false)
 
   const t = useTranslations('myspace')
   const tGlobal = useTranslations()
@@ -1043,6 +1077,21 @@ const [sentDetail, setSentDetail] = useState(false)
           if (latestFaceAnalysis) setFaceAnalysis(latestFaceAnalysis.analysis as FaceAnalysis)
           if (latestBodyAnalysis) setBodyAnalysis(latestBodyAnalysis.analysis as BodyAnalysis)
           setAllAnalyses(analyses as { capture_type: string; analysis: any; created_at: string }[])
+        }
+
+        // Dernière narrative de rapport générée (période 30j par défaut)
+        const { data: lastNarrative } = await supabase
+          .from('visual_report_narratives')
+          .select('narrative, generated_at')
+          .eq('user_id', user.id)
+          .eq('period', '30')
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (lastNarrative) {
+          setNarrative(lastNarrative.narrative)
+          setNarrativeGeneratedAt(lastNarrative.generated_at)
         }
 
         // Âge chronologique — depuis date_of_birth (fiable pour Premium/Executive)
@@ -1133,6 +1182,28 @@ const generateQRToken = async () => {
     setShowQR(true)
   }
 
+const handleUpdateNarrative = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  setNarrativeLoading(true)
+  try {
+    const res = await fetch('/api/visual-report-narrative', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, period: reportPeriod, locale }),
+    })
+    const data = await res.json()
+    if (data.narrative) {
+      setNarrative(data.narrative)
+      setNarrativeGeneratedAt(data.generatedAt)
+    }
+  } catch (e) {
+    console.error('narrative update error:', e)
+  } finally {
+    setNarrativeLoading(false)
+  }
+}
+
 const handleSendVisualReport = async (type: 'global' | 'detail') => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return
@@ -1191,7 +1262,26 @@ const handleSendVisualReport = async (type: 'global' | 'detail') => {
       sentGlobal={sentGlobal}
       sentDetail={sentDetail}
       period={reportPeriod}
-      setPeriod={setReportPeriod}
+      setPeriod={async (p) => {
+        setReportPeriod(p)
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data: lastNarrative } = await supabase
+          .from('visual_report_narratives')
+          .select('narrative, generated_at')
+          .eq('user_id', user.id)
+          .eq('period', p)
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        setNarrative(lastNarrative?.narrative ?? null)
+        setNarrativeGeneratedAt(lastNarrative?.generated_at ?? null)
+      }}
+      narrative={narrative}
+      narrativeGeneratedAt={narrativeGeneratedAt}
+      narrativeLoading={narrativeLoading}
+      onUpdateNarrative={handleUpdateNarrative}
+      lastSessionDate={allAnalyses[0]?.created_at ?? null}
     />
   )
       case 'captureFace': return <CaptureFaceSection />

@@ -11,6 +11,10 @@
   "myfuel": "My Fuel",
   "myvisual": "My Visual",
 "myspace": {
+  "visual_narrativeUpdate": "Update",
+"visual_narrativeUpdating": "Generating…",
+"visual_narrativeLastUpdate": "Last report update:",
+"visual_narrativeTitle": "Analysis",
   "visual_report30": "30 days",
 "visual_report90": "90 days",
 "visual_report180": "6 months",
