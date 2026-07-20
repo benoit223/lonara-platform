@@ -1136,11 +1136,13 @@ const handleAcceptConsent = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  await supabase.from('visual_consents').insert({
+  const { error } = await supabase.from('visual_consents').insert({
     user_id: user.id,
     consent_version: VISUAL_CONSENT_VERSION,
     locale,
   })
+
+  console.log('DEBUG insertion consentement — erreur:', error)
 
   setHasValidConsent(true)
   setShowConsentModal(false)
