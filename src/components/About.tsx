@@ -206,6 +206,24 @@ export default function About({ onClose }: AboutProps) {
             <p>{t('myfuelP3')}</p>
           </section>
 
+          {/* SECTION MY VISUAL */}
+          <section className="space-y-3 md:space-y-4 pt-6 md:pt-8">
+            <p className="text-[1.1rem] md:text-[1.4rem] tracking-[0.04em] text-[#C7AC60]/80 mb-3 md:mb-5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {t('myvisualTitle')}
+            </p>
+            <p>{t('myvisualP1')}</p>
+            <p>{t('myvisualP2')}</p>
+            <div className="rounded-[1.2rem] md:rounded-[1.5rem] border border-[#C7AC60]/10 bg-white/[0.03] p-4 md:p-5">
+              <p className="text-[#C7AC60] uppercase tracking-[0.18em] text-[10px] md:text-[11px] mb-3 md:mb-4">{t('myvisualLabel')}</p>
+              <ul className="space-y-2 md:space-y-3 list-disc pl-5 text-white/70">
+                {(t.raw('myvisualFeatures') as string[]).map((item: string, i: number) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <p>{t('myvisualP3')}</p>
+          </section>
+
           {/* SECTION BIOMARKERS ACTIFS */}
           <section className="space-y-3 md:space-y-4 pt-6 md:pt-8">
             <p className="text-[1.1rem] md:text-[1.4rem] tracking-[0.04em] text-[#C7AC60]/80 mb-3 md:mb-5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>

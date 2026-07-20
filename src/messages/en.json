@@ -11,6 +11,10 @@
   "myfuel": "My Fuel",
   "myvisual": "My Visual",
 "myspace": {
+  "visual_goodMorning": "Good morning",
+"visual_goodAfternoon": "Good afternoon",
+"visual_goodEvening": "Good evening",
+"visual_goodNight": "Good night",
   "visual_historyRecommendation": "For optimal tracking, a session every 1 to 3 months is recommended.",
 "visual_sessionsIn": "sessions in",
 "visual_viewDetail": "View detail",
@@ -181,7 +185,7 @@
 "visual_captureBodyTitle": "Body Capture",
 "visual_captureBodyDesc": "Four guided photos — front, back, left profile, right profile — for postural and morphological analysis.",
   "visual_badge": "My Visual",
-"visual_greeting": "Hello,",
+"visual_greeting": "Hello",
 "visual_tagline": "A visual signal, alongside your biomarkers.",
 "visual_loadingTitle": "Entering My Visual",
 "visual_loadingDesc": "Preparing your visual vitality module",
@@ -684,6 +688,21 @@
     "Meal Detail Report — complete log of all scanned meals with macros, scores, and AI analysis"
   ],
   "myfuelP3": "My Fuel does not replace dietary counseling. It provides continuous nutritional awareness aligned with longevity science — making each meal a data point in the member's biological arc.",
+ "myvisualTitle": "My Visual — Phenotypic Aging Intelligence",
+"myvisualP1": "My Visual is Lonara's AI visual analysis module, integrated directly into the My Space dashboard. It translates guided photographs of the face and body into scientific indicators of phenotypic aging — a visual complement to blood biomarkers and behavioral assessment.",
+"myvisualP2": "Each capture session — three facial shots or four body shots — is analyzed by artificial intelligence using recognized clinical scales: Fitzpatrick, Glogau, Griffiths, as well as Merz facial volumetry scales. The module also estimates a perceived age, a composite body aging index, and a series of postural and muscular markers.",
+"myvisualLabel": "MY VISUAL — KEY FEATURES",
+"myvisualFeatures": [
+  "Guided phone capture (PWA) or upload of existing photos from a computer",
+  "Facial analysis: Fitzpatrick phototype, Glogau stage, Griffiths score by zone, Merz volumetry (midface volume, tear trough, jowls), skin texture, pigmentation and vascular load",
+  "Body analysis: postural alignment, forward head posture, pelvic tilt, waist-hip ratio, shoulder-hip symmetry, muscle tone by zone, adiposity distribution, indirect sarcopenia signs, skin laxity, cellulite grade",
+  "Composite visual aging index (0–100) and perceived age estimate, compared to chronological age",
+  "Trend tracking over time — 18 selectable indicators with visual trend",
+  "Complete history of past sessions, individually viewable",
+  "Visual Intelligence PDF Report — AI summary and narrative over 30, 90, or 180 days, sent by email",
+  "Explicit biometric consent and data retention limited to 7 months for photographs"
+],
+"myvisualP3": "My Visual does not replace dermatological or medical advice. It provides an indicative visual estimate, complementary to the platform's other signals, to objectify the evolution of phenotypic aging over time.",
   "biomarkersActiveTitle": "36 Active Scientific Biomarkers",
   "biomarkersActiveP1": "The Lonara Executive™ biomarker panel integrates 36 scientific markers across 8 clinical categories, each calibrated against clinical optimal ranges and cross-referenced with the member's assessment profile.",
   "biomarkersActiveLabel": "8 BIOMARKER PANELS",
@@ -990,6 +1009,7 @@
 "assessment": {
 "planMemberF5": "My Fuel — 3 days/week · 3 scans/day",
 "planPremiumF6": "My Fuel — 24 scans/week",
+"planPremiumF7": "My Visual — Unlimited scans",
 "planExecutiveF6": "My Fuel — Unlimited scans",
   "viewPlans": "View membership plans",
 "viewPlansSubtitle": "Compare features and pricing",
@@ -1017,7 +1037,7 @@
 "planMemberF2": "Web report — 2 pages",
 "planMemberF3": "PDF export — color + print versions",
 "planMemberF4": "No dashboard",
-"planMemberCTA": "Start — 1€/month",
+"planMemberCTA": "Start — 2€/month",
 
 "planPremiumLabel": "Advanced",
 "planPremiumName": "Premium",
@@ -1027,7 +1047,7 @@
 "planPremiumF3": "Complete dashboard — history & evolution",
 "planPremiumF4": "Scientific biomarkers (standard blood panel)",
 "planPremiumF5": "No specialist consultation",
-"planPremiumCTA": "Subscribe — 4€/month",
+"planPremiumCTA": "Subscribe — 6€/month",
 
 "planExecutiveLabel": "Elite",
 "planExecutiveName": "Executive",
@@ -1786,7 +1806,7 @@
     "premiumF2": "Biomarker panel (12 markers)",
     "premiumF3": "Lab requisition PDF",
     "premiumF4": "Priority report generation",
-
+"premiumF6": "My Visual — Unlimited scans",
     "executiveF1": "Everything in Premium",
     "executiveF2": "Full biomarker panel (36 markers)",
     "executiveF3": "Epigenetic & multi-omics panels",

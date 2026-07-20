@@ -686,9 +686,11 @@ const getDotColor = (num: number | null, idx: number) => {
                     }`}>
                     {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
                     <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
-                      isActive
-                        ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
-                        : isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
+                      item.id === 'new'
+                        ? 'text-[#C7AC60]/80'
+                        : isActive
+                          ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+                          : isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
                     }`}>
                       {item.label}
                     </span>
@@ -824,9 +826,11 @@ const getDotColor = (num: number | null, idx: number) => {
                       className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left transition-all ${isActive ? 'bg-black/8 border border-black/10' : 'border border-transparent'}`}>
                       {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
                       <span className={`text-[11px] uppercase tracking-[0.24em] ${
-                        isActive
-                          ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
-                          : isNight ? 'text-white/40' : 'text-black/40'
+                        item.id === 'new'
+                          ? 'text-[#C7AC60]/80'
+                          : isActive
+                            ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+                            : isNight ? 'text-white/40' : 'text-black/40'
                       }`}>{item.label}</span>
                       {isActive && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
                     </button>

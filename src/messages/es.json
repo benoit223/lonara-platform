@@ -4,12 +4,16 @@
     "reports": "INFORMES",
     "science": "CIENCIA",
     "labs": "LABS",
-    "myspace": "MI ESPACIO",
-    "myfuel": "Mi Combustible"
+    "myspace": "My Space",
+    "myfuel": "My Fuel"
   },
-  "myfuel": "Mi Combustible",
-"myvisual": "Mi Visual",
+  "myfuel": "My Fuel",
+"myvisual": "My Visual",
 "myspace": {
+  "visual_goodMorning": "Buenos días",
+"visual_goodAfternoon": "Buenas tardes",
+"visual_goodEvening": "Buenas noches",
+"visual_goodNight": "Buenas noches",
   "visual_historyRecommendation": "Para un seguimiento óptimo, se recomienda una sesión cada 1 a 3 meses.",
 "visual_sessionsIn": "sesiones en",
 "visual_viewDetail": "Ver detalle",
@@ -180,7 +184,7 @@
 "visual_captureBodyTitle": "Captura Corporal",
 "visual_captureBodyDesc": "Cuatro fotos guiadas — frente, espalda, perfil izquierdo, perfil derecho — para el análisis postural y morfológico.",
   "visual_badge": "My Visual",
-"visual_greeting": "Hola,",
+"visual_greeting": "Hola",
 "visual_tagline": "Una señal visual, junto a sus biomarcadores.",
 "visual_loadingTitle": "Accediendo a My Visual",
 "visual_loadingDesc": "Preparando su módulo de vitalidad visual",
@@ -683,6 +687,21 @@
     "Informe Detallado de Comidas — registro completo de todas las comidas escaneadas con macros, puntuaciones y análisis IA"
   ],
   "myfuelP3": "My Fuel no reemplaza el asesoramiento dietético. Proporciona una conciencia nutricional continua alineada con la ciencia de la longevidad — convirtiendo cada comida en un punto de datos en el arco biológico del miembro.",
+ "myvisualTitle": "My Visual — Inteligencia de Envejecimiento Fenotípico",
+"myvisualP1": "My Visual es el módulo de análisis visual con IA de Lonara, integrado directamente en el panel My Space. Traduce fotografías guiadas del rostro y el cuerpo en indicadores científicos de envejecimiento fenotípico — un complemento visual a los biomarcadores sanguíneos y la evaluación conductual.",
+"myvisualP2": "Cada sesión de captura — tres fotos del rostro o cuatro del cuerpo — es analizada por inteligencia artificial según escalas clínicas reconocidas: Fitzpatrick, Glogau, Griffiths, así como las escalas Merz de volumetría facial. El módulo también estima una edad percibida, un índice compuesto de envejecimiento corporal y una serie de marcadores posturales y musculares.",
+"myvisualLabel": "MY VISUAL — FUNCIONES CLAVE",
+"myvisualFeatures": [
+  "Captura guiada por teléfono (PWA) o carga de fotos existentes desde el ordenador",
+  "Análisis facial: fototipo Fitzpatrick, estadio Glogau, puntuación Griffiths por zona, volumetría Merz (volumen mediofacial, surco lagrimal, papada), textura cutánea, carga pigmentaria y vascular",
+  "Análisis corporal: alineación postural, postura cervical, báscula pélvica, ratio cintura-cadera, simetría hombros-caderas, tono muscular por zona, distribución de la adiposidad, signos indirectos de sarcopenia, laxitud cutánea, grado de celulitis",
+  "Índice compuesto de envejecimiento visual (0–100) y estimación de edad percibida, comparados con la edad cronológica",
+  "Seguimiento de la evolución en el tiempo — 18 indicadores seleccionables con tendencia visual",
+  "Historial completo de sesiones pasadas, consultable individualmente",
+  "Informe de Inteligencia Visual en PDF — resumen y narrativa de IA en 30, 90 o 180 días, enviado por email",
+  "Consentimiento biométrico explícito y conservación de datos limitada a 7 meses para las fotografías"
+],
+"myvisualP3": "My Visual no sustituye un consejo dermatológico o médico. Proporciona una estimación visual indicativa, complementaria a las demás señales de la plataforma, para objetivar la evolución del envejecimiento fenotípico en el tiempo.",
   "biomarkersActiveTitle": "36 Biomarcadores Científicos Activos",
   "biomarkersActiveP1": "El panel de biomarcadores Lonara Executive™ integra 36 marcadores científicos en 8 categorías clínicas, cada uno calibrado contra rangos óptimos clínicos y cruzado con el perfil de evaluación del miembro.",
   "biomarkersActiveLabel": "8 PANELES DE BIOMARCADORES",
@@ -988,7 +1007,8 @@
   },
 "assessment": {
   "planMemberF5": "My Fuel — 3 días/semana · 3 scans/día",
-"planPremiumF6": "My Fuel — 24 scans/semana",
+"planPremiumF6": "My Fuel — 24 escaneos/semana",
+"planPremiumF7": "My Visual — Escaneos ilimitados",
 "planExecutiveF6": "My Fuel — Scans ilimitados",
 "viewPlans": "Ver planes de membresía",
 "viewPlansSubtitle": "Comparar funciones y precios",
@@ -1016,7 +1036,7 @@
 "planMemberF2": "Informe web — 2 páginas",
 "planMemberF3": "Exportación PDF — versión color + impresión",
 "planMemberF4": "Sin panel de control",
-"planMemberCTA": "Empezar — 1€/mes",
+"planMemberCTA": "Empezar — 2€/mes",
 
 "planPremiumLabel": "Avanzado",
 "planPremiumName": "Premium",
@@ -1026,7 +1046,7 @@
 "planPremiumF3": "Panel completo — historial y evolución",
 "planPremiumF4": "Biomarcadores científicos (panel de sangre estándar)",
 "planPremiumF5": "Sin consulta con especialista",
-"planPremiumCTA": "Suscribirse — 4€/mes",
+"planPremiumCTA": "Suscribirse — 6€/mes",
 
 "planExecutiveLabel": "Élite",
 "planExecutiveName": "Executive",
@@ -1520,7 +1540,7 @@
     "alignedAge": "Alineado con la edad cronológica"
   },
   "optimization": {
-    "mySpace": "Mi Espacio",
+    "mySpace": "My Space",
     "sendReportClassic": "Enviar el informe",
 "sendReportPrestige": "Enviar — Prestigio",
 "sending": "Enviando…",
@@ -1785,7 +1805,7 @@
     "premiumF2": "Panel de biomarcadores (12 marcadores)",
     "premiumF3": "PDF de requisición de laboratorio",
     "premiumF4": "Generación de informe prioritaria",
-
+"premiumF6": "My Visual — Escaneos ilimitados",
     "executiveF1": "Todo lo del plan Premium",
     "executiveF2": "Panel completo de biomarcadores (36 marcadores)",
     "executiveF3": "Paneles epigenéticos y multi-ómicos",

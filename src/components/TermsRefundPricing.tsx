@@ -126,7 +126,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                 <div className="rounded-[1.2rem] border border-[#035AA8]/25 bg-[#035AA8]/[0.06] p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[1.4rem] font-light text-[#5C96D8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Member</span>
-                    <span className="text-[11px] text-[#5C96D8]/60">1€/mois</span>
+                    <span className="text-[11px] text-[#5C96D8]/60">2€/mois</span>
                   </div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-white/30 mb-2">{t('terms.commitment3')}</p>
                   <p className="text-[12px] leading-[1.7] text-white/55">{t('terms.memberRefund')}</p>
@@ -136,7 +136,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                 <div className="rounded-[1.2rem] border border-[#C7AC60]/25 bg-[#C7AC60]/[0.06] p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[1.4rem] font-light text-[#C7AC60]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Premium</span>
-                    <span className="text-[11px] text-[#C7AC60]/60">4€/mois</span>
+                    <span className="text-[11px] text-[#C7AC60]/60">6€/mois</span>
                   </div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-white/30 mb-2">{t('terms.commitment6')}</p>
                   <p className="text-[12px] leading-[1.7] text-white/55">{t('terms.premiumRefund')}</p>
@@ -193,7 +193,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
               {/* Member */}
               <div className="rounded-[1.2rem] border border-[#035AA8]/25 bg-[#035AA8]/[0.06] p-5">
                 <p className="text-[10px] uppercase tracking-[0.22em] text-[#5C96D8]/70 mb-2">Member</p>
-                <p className="text-[2rem] font-light text-[#5C96D8] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>1€</p>
+                <p className="text-[2rem] font-light text-[#5C96D8] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>2€</p>
                 <p className="text-[11px] text-white/35 mb-3">{t('terms.perMonthMin3')}</p>
                 <div className="space-y-1.5">
                   <p className="text-[11px] text-white/45">✓ {t('terms.memberF1')}</p>
@@ -207,7 +207,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
               {/* Premium */}
               <div className="rounded-[1.2rem] border border-[#C7AC60]/25 bg-[#C7AC60]/[0.06] p-5">
                 <p className="text-[10px] uppercase tracking-[0.22em] text-[#C7AC60]/70 mb-2">Premium</p>
-                <p className="text-[2rem] font-light text-[#C7AC60] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>4€</p>
+                <p className="text-[2rem] font-light text-[#C7AC60] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>6€</p>
                 <p className="text-[11px] text-white/35 mb-3">{t('terms.perMonthMin6')}</p>
                 <div className="space-y-1.5">
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF1')}</p>
@@ -215,6 +215,7 @@ export default function TermsRefundPricing({ onClose }: TermsRefundPricingProps)
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF3')}</p>
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF4')}</p>
                   <p className="text-[11px] text-white/45">✓ {t('terms.premiumF5')}</p>
+                  <p className="text-[11px] text-white/45">✓ {t('terms.premiumF6')}</p>
                 </div>
               </div>
 

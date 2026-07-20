@@ -1731,8 +1731,8 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
       {/* ── BLOC GAUCHE — desktop ── */}
       <div className="hidden md:flex relative z-20 mx-auto max-w-[1850px] min-h-screen items-stretch px-4 md:px-8 lg:px-0">
         <div className="relative flex w-full max-w-[760px] flex-col justify-center px-8 lg:pl-0 lg:pr-16 items-start pointer-events-auto">
-          <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-[260px]">
-            <div className="relative rounded-[32px] lg:rounded-[36px] border border-white/10 bg-black/40 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-hidden h-[500px] lg:h-[524px]">
+          <div className="relative ml-0 w-full max-w-[490px] -mt-16 lg:-mt-[260px]">
+            <div className="relative rounded-[32px] lg:rounded-[36px] border border-white/10 bg-black/40 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-hidden h-[524px] lg:h-[564px]">
               <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#8FC1E8] to-transparent opacity-70" />
 
               <p className="mb-6 text-[13px] uppercase tracking-[0.28em] text-[#8FC1E8]/80"
@@ -1741,7 +1741,15 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
               </p>
               <h2 className="text-[42px] lg:text-[50px] font-light leading-[1.05] text-[#EAE4D5]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                {t('visual_greeting')} <span className="italic">{firstName}</span>
+                {(() => {
+                  const hour = new Date().getHours()
+                  if (hour >= 5 && hour < 12) return t('visual_goodMorning')
+                  if (hour >= 12 && hour < 18) return t('visual_goodAfternoon')
+                  if (hour >= 18 && hour < 22) return t('visual_goodEvening')
+                  return t('visual_goodNight')
+                })()} 
+                <br />
+                <span className="italic">{firstName}</span>
               </h2>
               <p className="mt-3 text-[14px] font-[450] leading-[1.75] italic text-white/70 max-w-[380px]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
@@ -1842,7 +1850,15 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
               </p>
               <h2 className="text-[28px] font-light leading-[1.05] text-[#EAE4D5]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                {t('visual_greeting')} <span className="italic">{firstName}</span>
+                {(() => {
+                  const hour = new Date().getHours()
+                  if (hour >= 5 && hour < 12) return t('visual_goodMorning')
+                  if (hour >= 12 && hour < 18) return t('visual_goodAfternoon')
+                  if (hour >= 18 && hour < 22) return t('visual_goodEvening')
+                  return t('visual_goodNight')
+                })()} 
+                <br />
+                <span className="italic">{firstName}</span>
               </h2>
               <p className="mt-2 text-[12px] font-light leading-[1.7] italic text-white/70"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>

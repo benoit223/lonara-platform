@@ -671,7 +671,7 @@ onStart(
                     {t('planMemberName')}
                   </h3>
                   <div className="flex items-end gap-1 mb-2">
-                    <span className="text-[2.2rem] font-light text-[#5C96D8]">1€</span>
+                    <span className="text-[2.2rem] font-light text-[#5C96D8]">2€</span>
                     <span className="text-[11px] text-white/30 mb-1">{t('perMonth')}</span>
                   </div>
                   <p className="text-[10px] text-white/30 mb-6">{t('planMemberCommitment')}</p>
@@ -700,7 +700,7 @@ onStart(
                     {t('planPremiumName')}
                   </h3>
                   <div className="flex items-end gap-1 mb-2">
-                    <span className="text-[2.2rem] font-light text-[#C7AC60]">4€</span>
+                    <span className="text-[2.2rem] font-light text-[#C7AC60]">6€</span>
                     <span className="text-[11px] text-white/30 mb-1">{t('perMonth')}</span>
                   </div>
                   <p className="text-[10px] text-white/30 mb-6">{t('planPremiumCommitment')}</p>
@@ -710,6 +710,7 @@ onStart(
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF3')}</div>
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF4')}</div>
                     <div className="text-[11px] text-white/50">✓ {t('planPremiumF6')}</div>
+                    <div className="text-[11px] text-white/50">✓ {t('planPremiumF7')}</div>
                   </div>
                   <button
                     type="button"

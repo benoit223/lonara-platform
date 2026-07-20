@@ -8,8 +8,6 @@ const supabaseAdmin = createClient(
 async function handlePurge(req: Request) {
   try {
     const authHeader = req.headers.get('authorization')
-    console.log('DEBUG authHeader reçu:', authHeader)
-    console.log('DEBUG PURGE_SECRET défini:', process.env.PURGE_SECRET ? 'OUI' : 'NON (undefined)')
     if (authHeader !== `Bearer ${process.env.PURGE_SECRET}`) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
