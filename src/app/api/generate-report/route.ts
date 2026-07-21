@@ -468,18 +468,18 @@ export async function POST(req: Request) {
   }
 
   // ── FLAGS CONDITIONS — prédispositions critiques ──────────────────────────
-  const conditionFlags = (lifestyleData?.healthConditions ?? [])
-    .filter((c: any) =>
-      c.severity === 'severe' ||
-      (c.severity === 'moderate' && c.family_history) ||
-      ['genetic', 'oncological', 'neurological'].includes(c.category)
-    )
-    .slice(0, 2)
-    .map((c: any) => ({
-      title: `${c.condition_label}${c.family_history ? ' (family history)' : ''} — predisposition requiring monitoring`,
-      impact: c.severity === 'severe' ? 'impact_immediate' : 'impact_optimization',
-      severity: c.severity === 'severe' ? 'critical' : 'moderate',
-    }))
+const conditionFlags = (lifestyleData?.healthConditions ?? [])
+  .filter((c: any) =>
+    c.severity === 'severe' ||
+    (c.severity === 'moderate' && c.family_history) ||
+    ['genetic', 'oncological', 'neurological'].includes(c.category)
+  )
+  .slice(0, 2)
+  .map((c: any) => ({
+    title: `condition_flag::${c.condition_label}::${c.family_history ? 'family' : 'nofamily'}`,
+    impact: c.severity === 'severe' ? 'impact_immediate' : 'impact_optimization',
+    severity: c.severity === 'severe' ? 'critical' : 'moderate',
+  }))
 
   const conditionRisks = (lifestyleData?.healthConditions ?? [])
     .filter((c: any) => c.severity === 'severe' || c.family_history)

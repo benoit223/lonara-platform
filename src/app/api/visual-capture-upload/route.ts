@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     const captureType = formData.get('captureType') as string
     const pose = formData.get('pose') as string
     const sessionId = formData.get('sessionId') as string
+    const retained = formData.get('retained') === 'true'
     const image = formData.get('image') as File
 
     if (!userId || !captureType || !pose || !image) {
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
         pose,
         image_url: fileName,
         session_id: sessionId || null,
+        retained,
       })
       .select()
       .single()

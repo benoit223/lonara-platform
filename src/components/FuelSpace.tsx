@@ -1137,9 +1137,8 @@ export default function FuelSpace({ memberTier, fullName, onBack, onSignOut }: F
         <div className="hidden md:flex relative z-20 mx-auto max-w-[1850px] min-h-screen items-stretch px-4 md:px-8 lg:px-0">
           {/* Bloc gauche */}
           <div className="relative flex w-full max-w-[760px] flex-col justify-center px-8 lg:pl-0 lg:pr-16 items-start pointer-events-auto">
-  <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-[296px]">
-            <div className="relative rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[484px] lg:h-[500px]">
-              <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#1D9E75] to-transparent opacity-70" />
+<div className="relative ml-0 w-full max-w-[490px] -mt-16 lg:-mt-[280px]">
+  <div className="relative rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[524px] lg:h-[564px]">          <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#1D9E75] to-transparent opacity-70" />
 
             <p className="mb-6 text-[13px] uppercase tracking-[0.28em] text-[#3DD4A0]/80"
   style={{ fontFamily: 'Inter, sans-serif' }}>

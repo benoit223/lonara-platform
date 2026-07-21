@@ -128,12 +128,12 @@ const tb = useTranslations('biological')
     <h3 className="text-[22px] md:text-[28px] font-extralight text-[#EAE4D5] mb-6">{tb('pillar_radar_title')}</h3>
 
     {(() => {
-      const pillars = [
-        { label: 'Activate', score: report.pillarScores?.activate ?? 50 },
-        { label: 'Balance',  score: report.pillarScores?.balance  ?? 50 },
-        { label: 'Protect',  score: report.pillarScores?.protect  ?? 50 },
-        { label: 'Restore',  score: report.pillarScores?.restore  ?? 50 },
-      ]
+   const pillars = [
+  { label: tb('pillar_activate'), score: report.pillarScores?.activate ?? 50 },
+  { label: tb('pillar_balance'),  score: report.pillarScores?.balance  ?? 50 },
+  { label: tb('pillar_protect'),  score: report.pillarScores?.protect  ?? 50 },
+  { label: tb('pillar_restore'),  score: report.pillarScores?.restore  ?? 50 },
+]
 
      const cx = 210
 const cy = 190
@@ -688,13 +688,13 @@ ly: cy + (maxR + 57) * Math.sin(angle),
                   : delta < 0 ? `${Math.abs(delta)}${tb('years_older')}`
                   : tb('aligned')
 
-                const milestones = [
-                  { label: 'Current', age: bioAge, color: bioColor, pct: 0, desc: deltaDesc },
-                  { label: '30 Days', age: proj30d, color: '#5C96D8', pct: 25, desc: `−${bioAge - proj30d}y` },
-                  { label: '90 Days', age: proj90d, color: '#5C96D8', pct: 50, desc: `−${bioAge - proj90d}y` },
-                  { label: '6 Months', age: proj6m, color: '#C7AC60', pct: 75, desc: `−${bioAge - proj6m}y` },
-                  { label: '12 Months', age: proj12m, color: '#7EE2A8', pct: 100, desc: `−${bioAge - proj12m}y` },
-                ]
+              const milestones = [
+  { label: tb('milestone_current'), age: bioAge, color: bioColor, pct: 0, desc: deltaDesc },
+  { label: tb('milestone_30days'), age: proj30d, color: '#5C96D8', pct: 25, desc: `-${bioAge - proj30d}y` },
+  { label: tb('milestone_90days'), age: proj90d, color: '#5C96D8', pct: 50, desc: `-${bioAge - proj90d}y` },
+  { label: tb('milestone_6months'), age: proj6m, color: '#C7AC60', pct: 75, desc: `-${bioAge - proj6m}y` },
+  { label: tb('milestone_12months'), age: proj12m, color: '#7EE2A8', pct: 100, desc: `-${bioAge - proj12m}y` },
+]
 
                 const minAge = Math.min(proj12m, bioAge) - 2
                 const maxAge = Math.max(chronoAge, bioAge) + 2

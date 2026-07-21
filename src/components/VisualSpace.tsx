@@ -504,13 +504,42 @@ function BodyAnalysisCard({ bodyAnalysis }: { bodyAnalysis: BodyAnalysis }) {
   )
 }
 
+function RetentionToggle({ enabled, onToggle, limitInfo }: {
+  enabled: boolean
+  onToggle: (v: boolean) => void
+  limitInfo: { type: 'face' | 'body'; renewsAt: string } | null
+}) {
+  const t = useTranslations('myspace')
+  return (
+    <div className="mb-6 rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 flex items-center justify-between gap-4">
+      <div>
+        <p className="text-[12px] text-white/80 mb-1">{t('visual_retainToggleLabel')}</p>
+        <p className="text-[11px] text-white/50 leading-relaxed">{t('visual_retainToggleDesc')}</p>
+        {limitInfo && (
+          <p className="text-[11px] text-[#E7C980]/90 mt-2">
+            {t('visual_retainLimitReached')} — {t('visual_retainRenewsNextMonth')}
+          </p>
+        )}
+      </div>
+      <button
+        onClick={() => onToggle(!enabled)}
+        className={`shrink-0 relative w-12 h-6 rounded-full transition-all ${enabled ? 'bg-[#8FC1E8]/60' : 'bg-white/10'}`}
+      >
+        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${enabled ? 'left-6' : 'left-0.5'}`} />
+      </button>
+    </div>
+  )
+}
 
-function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, loading }: {
+function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, loading, retainHistoryEnabled, onToggleRetention, retentionLimitInfo }: {
   faceShots: CaptureShot[]
   bodyShots: CaptureShot[]
   faceAnalysis: FaceAnalysis | null
   bodyAnalysis: BodyAnalysis | null
   loading: boolean
+  retainHistoryEnabled: boolean
+  onToggleRetention: (v: boolean) => void
+  retentionLimitInfo: { type: 'face' | 'body'; renewsAt: string } | null
 }) {
   const t = useTranslations('myspace')
   const hasAny = faceShots.length > 0 || bodyShots.length > 0
@@ -529,6 +558,8 @@ function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, load
         {t('visual_resultsTitle')}
       </h2>
 
+      <RetentionToggle enabled={retainHistoryEnabled} onToggle={onToggleRetention} limitInfo={retentionLimitInfo} />
+
       {loading && (
         <p className="text-[13px] text-white/40 italic">Chargement…</p>
       )}
@@ -540,7 +571,7 @@ function ResultsSection({ faceShots, bodyShots, faceAnalysis, bodyAnalysis, load
       )}
 
       {!loading && hasAny && (
-        <div className="flex flex-col gap-8 overflow-y-auto max-h-[70vh] md:max-h-[calc(100vh-490px)] [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex flex-col gap-8 overflow-y-auto max-h-[65vh] md:max-h-[calc(100vh-530px)] [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
 
           {/* ══════════════ ANALYSE VISAGE ══════════════ */}
           {faceShots.length > 0 && (
@@ -820,24 +851,33 @@ function HistorySection({ allAnalyses, loading }: {
             <p className="text-[12px] text-white/65 leading-relaxed">{t('visual_historyRecommendation')}</p>
           </div>
 
-          {selected ? (
-            <div>
-              <button onClick={() => setSelectedId(null)}
-                className="mb-4 text-[11px] uppercase tracking-[0.18em] text-[#8FC1E8]/80 hover:text-[#8FC1E8] transition">
-                ← {t('visual_closeDetail')}
-              </button>
-              <p className="text-[13px] text-white/70 mb-4">
-                {new Date(selected.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                {' — '}
-                {selected.capture_type === 'face' ? t('visual_faceAnalysisTitle') : t('visual_bodyAnalysisTitle')}
-              </p>
-              <div className="flex gap-6 flex-wrap">
-                {selected.capture_type === 'face'
-                  ? <FaceAnalysisCard faceAnalysis={selected.analysis as FaceAnalysis} />
-                  : <BodyAnalysisCard bodyAnalysis={selected.analysis as BodyAnalysis} />}
-              </div>
+{selected ? (
+  <div>
+    <button onClick={() => setSelectedId(null)}
+      className="mb-4 text-[11px] uppercase tracking-[0.18em] text-[#8FC1E8]/80 hover:text-[#8FC1E8] transition">
+      ← {t('visual_closeDetail')}
+    </button>
+    <p className="text-[13px] text-white/70 mb-4">
+      {new Date(selected.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+      {' — '}
+      {selected.capture_type === 'face' ? t('visual_faceAnalysisTitle') : t('visual_bodyAnalysisTitle')}
+    </p>
+    <div className="flex gap-6 flex-wrap">
+      {(selected as any).photos && (
+        <div className={`grid ${selected.capture_type === 'face' ? 'grid-cols-3' : 'grid-cols-4'} gap-2 w-[180px] shrink-0`}>
+          {(selected as any).photos.map((shot: CaptureShot) => (
+            <div key={shot.pose} className="relative aspect-[3/4] rounded-[10px] overflow-hidden border border-white/8">
+              <img src={shot.url} alt={shot.pose} className="w-full h-full object-cover" />
             </div>
-          ) : (
+          ))}
+        </div>
+      )}
+      {selected.capture_type === 'face'
+        ? <FaceAnalysisCard faceAnalysis={selected.analysis as FaceAnalysis} />
+        : <BodyAnalysisCard bodyAnalysis={selected.analysis as BodyAnalysis} />}
+    </div>
+  </div>
+) : (
             <div className="flex flex-col gap-6">
               {months.map((monthKey) => {
                 const items = byMonth[monthKey]
@@ -1299,6 +1339,8 @@ const [hasValidConsent, setHasValidConsent] = useState(false)
   const [bodyShots, setBodyShots] = useState<CaptureShot[]>([])
   const [faceAnalysis, setFaceAnalysis] = useState<FaceAnalysis | null>(null)
   const [bodyAnalysis, setBodyAnalysis] = useState<BodyAnalysis | null>(null)
+  const [retainHistoryEnabled, setRetainHistoryEnabled] = useState(false)
+const [retentionLimitInfo, setRetentionLimitInfo] = useState<{ type: 'face' | 'body'; renewsAt: string } | null>(null)
 const [historySessions, setHistorySessions] = useState<{ date: string; faceCount: number; bodyCount: number }[]>([])
 const [dataLoading, setDataLoading] = useState(true)
 const [allAnalyses, setAllAnalyses] = useState<{ capture_type: string; analysis: any; created_at: string }[]>([])
@@ -1328,13 +1370,12 @@ const [isUploadingBody, setIsUploadingBody] = useState(false)
   }, [])
 
   // ── Chargement des captures existantes ────────────────────────────────────
-  useEffect(() => {
-    const loadCaptures = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) { setDataLoading(false); return }
+const loadCaptures = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setDataLoading(false); return }
 
-        // Vérification du consentement biométrique en vigueur
+// Vérification du consentement biométrique en vigueur
         const { data: consent } = await supabase
           .from('visual_consents')
           .select('consent_version')
@@ -1345,112 +1386,153 @@ const [isUploadingBody, setIsUploadingBody] = useState(false)
 
         setHasValidConsent(consent?.consent_version === VISUAL_CONSENT_VERSION)
 
+        // Préférence de conservation des photos dans l'historique
+        const { data: profileSettings } = await supabase
+          .from('profiles')
+          .select('visual_retain_history')
+          .eq('id', user.id)
+          .single()
+        if (profileSettings) setRetainHistoryEnabled(profileSettings.visual_retain_history ?? false)
+
         const { data: captures } = await supabase
           .from('visual_captures')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
 
-        if (!captures || captures.length === 0) { setDataLoading(false); return }
+    if (!captures || captures.length === 0) { setDataLoading(false); return }
 
-        // Dernière capture par pose (face)
-        const latestFace: Record<string, any> = {}
-        const latestBody: Record<string, any> = {}
-        for (const c of captures) {
-          if (c.capture_type === 'face' && !latestFace[c.pose]) latestFace[c.pose] = c
-          if (c.capture_type === 'body' && !latestBody[c.pose]) latestBody[c.pose] = c
-        }
-
-        const resolveUrl = async (path: string) => {
-          const res = await fetch('/api/visual-signed-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path }),
-          })
-          const json = await res.json()
-          return json.url as string
-        }
-
-        const faceResolved = await Promise.all(
-          Object.values(latestFace).map(async (c: any) => ({
-            pose: c.pose, url: await resolveUrl(c.image_url), created_at: c.created_at,
-          }))
-        )
-        const bodyResolved = await Promise.all(
-          Object.values(latestBody).map(async (c: any) => ({
-            pose: c.pose, url: await resolveUrl(c.image_url), created_at: c.created_at,
-          }))
-        )
-        setFaceShots(faceResolved)
-        setBodyShots(bodyResolved)
-
-        // Dernières analyses (une par capture_type) + historique complet pour Rapport
-        const { data: analyses } = await supabase
-          .from('visual_analyses')
-          .select('capture_type, analysis, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (analyses) {
-          const latestFaceAnalysis = analyses.find(a => a.capture_type === 'face')
-          const latestBodyAnalysis = analyses.find(a => a.capture_type === 'body')
-          if (latestFaceAnalysis) setFaceAnalysis(latestFaceAnalysis.analysis as FaceAnalysis)
-          if (latestBodyAnalysis) setBodyAnalysis(latestBodyAnalysis.analysis as BodyAnalysis)
-          setAllAnalyses(analyses as { capture_type: string; analysis: any; created_at: string }[])
-        }
-
-        // Dernière narrative de rapport générée (période 30j par défaut)
-        const { data: lastNarrative } = await supabase
-          .from('visual_report_narratives')
-          .select('narrative, generated_at')
-          .eq('user_id', user.id)
-          .eq('period', '30')
-          .order('generated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        if (lastNarrative) {
-          setNarrative(lastNarrative.narrative)
-          setNarrativeGeneratedAt(lastNarrative.generated_at)
-        }
-
-        // Âge chronologique — depuis date_of_birth (fiable pour Premium/Executive)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('date_of_birth')
-          .eq('id', user.id)
-          .single()
-
-        if (profile?.date_of_birth) {
-          const dob = new Date(profile.date_of_birth)
-          const today = new Date()
-          let age = today.getFullYear() - dob.getFullYear()
-          const m = today.getMonth() - dob.getMonth()
-          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
-          setChronologicalAge(age)
-        }
-
-        // Historique — regroupement par jour
-        const byDay: Record<string, { faceCount: number; bodyCount: number }> = {}
-        for (const c of captures) {
-          const day = new Date(c.created_at).toISOString().split('T')[0]
-          if (!byDay[day]) byDay[day] = { faceCount: 0, bodyCount: 0 }
-          if (c.capture_type === 'face') byDay[day].faceCount++
-          else byDay[day].bodyCount++
-        }
-        setHistorySessions(
-          Object.entries(byDay)
-            .map(([date, v]) => ({ date, ...v }))
-            .sort((a, b) => b.date.localeCompare(a.date))
-        )
-      } catch (e) {
-        console.error('VisualSpace loadCaptures error:', e)
-      } finally {
-        setDataLoading(false)
-      }
+    // Dernière capture par pose (face)
+    const latestFace: Record<string, any> = {}
+    const latestBody: Record<string, any> = {}
+    for (const c of captures) {
+      if (c.capture_type === 'face' && !latestFace[c.pose]) latestFace[c.pose] = c
+      if (c.capture_type === 'body' && !latestBody[c.pose]) latestBody[c.pose] = c
     }
-    loadCaptures()
-  }, [])
+
+    const resolveUrl = async (path: string) => {
+      const res = await fetch('/api/visual-signed-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      })
+      const json = await res.json()
+      return json.url as string
+    }
+
+    const faceResolved = await Promise.all(
+      Object.values(latestFace).map(async (c: any) => ({
+        pose: c.pose, url: await resolveUrl(c.image_url), created_at: c.created_at,
+      }))
+    )
+    const bodyResolved = await Promise.all(
+      Object.values(latestBody).map(async (c: any) => ({
+        pose: c.pose, url: await resolveUrl(c.image_url), created_at: c.created_at,
+      }))
+    )
+    setFaceShots(faceResolved)
+    setBodyShots(bodyResolved)
+
+    // Dernières analyses (une par capture_type) + historique complet pour Rapport
+const { data: analyses } = await supabase
+  .from('visual_analyses')
+  .select('capture_type, analysis, created_at, session_id')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+
+if (analyses) {
+  const latestFaceAnalysis = analyses.find(a => a.capture_type === 'face')
+  const latestBodyAnalysis = analyses.find(a => a.capture_type === 'body')
+  if (latestFaceAnalysis) setFaceAnalysis(latestFaceAnalysis.analysis as FaceAnalysis)
+  if (latestBodyAnalysis) setBodyAnalysis(latestBodyAnalysis.analysis as BodyAnalysis)
+
+  // Récupérer les captures retenues pour joindre les photos aux analyses historiques
+  const { data: retainedCaptures } = await supabase
+    .from('visual_captures')
+    .select('session_id, pose, image_url, capture_type')
+    .eq('user_id', user.id)
+    .eq('retained', true)
+
+  const resolveUrl = async (path: string) => {
+    const res = await fetch('/api/visual-signed-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    })
+    const json = await res.json()
+    return json.url as string
+  }
+
+  const analysesWithPhotos = await Promise.all(
+    (analyses as any[]).map(async (a) => {
+      const shotsForSession = (retainedCaptures ?? []).filter(
+        c => c.session_id === a.session_id && c.capture_type === a.capture_type
+      )
+      if (shotsForSession.length === 0) return { ...a, photos: null }
+      const resolvedShots = await Promise.all(
+        shotsForSession.map(async (c) => ({ pose: c.pose, url: await resolveUrl(c.image_url) }))
+      )
+      return { ...a, photos: resolvedShots }
+    })
+  )
+
+  setAllAnalyses(analysesWithPhotos as { capture_type: string; analysis: any; created_at: string; photos: CaptureShot[] | null }[])
+}
+
+    // Dernière narrative de rapport générée (période 30j par défaut)
+    const { data: lastNarrative } = await supabase
+      .from('visual_report_narratives')
+      .select('narrative, generated_at')
+      .eq('user_id', user.id)
+      .eq('period', '30')
+      .order('generated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (lastNarrative) {
+      setNarrative(lastNarrative.narrative)
+      setNarrativeGeneratedAt(lastNarrative.generated_at)
+    }
+
+    // Âge chronologique — depuis date_of_birth (fiable pour Premium/Executive)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('date_of_birth')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.date_of_birth) {
+      const dob = new Date(profile.date_of_birth)
+      const today = new Date()
+      let age = today.getFullYear() - dob.getFullYear()
+      const m = today.getMonth() - dob.getMonth()
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+      setChronologicalAge(age)
+    }
+
+    // Historique — regroupement par jour
+    const byDay: Record<string, { faceCount: number; bodyCount: number }> = {}
+    for (const c of captures) {
+      const day = new Date(c.created_at).toISOString().split('T')[0]
+      if (!byDay[day]) byDay[day] = { faceCount: 0, bodyCount: 0 }
+      if (c.capture_type === 'face') byDay[day].faceCount++
+      else byDay[day].bodyCount++
+    }
+    setHistorySessions(
+      Object.entries(byDay)
+        .map(([date, v]) => ({ date, ...v }))
+        .sort((a, b) => b.date.localeCompare(a.date))
+    )
+  } catch (e) {
+    console.error('VisualSpace loadCaptures error:', e)
+  } finally {
+    setDataLoading(false)
+  }
+}
+
+useEffect(() => {
+  loadCaptures()
+}, [])
 const handleAcceptConsent = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -1501,12 +1583,26 @@ const handleUploadAnalyzeFace = async () => {
   setIsUploadingFace(true)
   try {
     const sessionId = crypto.randomUUID()
+
+    let retainThisSession = false
+    if (retainHistoryEnabled) {
+      const res = await fetch('/api/visual-retention-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, captureType: 'face' }),
+      })
+      const { canRetain, renewsAt } = await res.json()
+      retainThisSession = canRetain
+      setRetentionLimitInfo(canRetain ? null : { type: 'face', renewsAt })
+    }
+
     for (const [pose, file] of shots) {
       const formData = new FormData()
       formData.append('userId', user.id)
       formData.append('captureType', 'face')
       formData.append('pose', pose)
       formData.append('sessionId', sessionId)
+      formData.append('retained', String(retainThisSession))
       formData.append('image', file, `${pose}.jpg`)
       await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
     }
@@ -1516,6 +1612,8 @@ const handleUploadAnalyzeFace = async () => {
       body: JSON.stringify({ userId: user.id, sessionId, captureType: 'face', locale }),
     })
     setFaceUploads({ center: null, left: null, right: null })
+    setDataLoading(true)
+    await loadCaptures()
     setActiveSection('results')
   } catch (e) {
     console.error('face upload/analyze error:', e)
@@ -1533,12 +1631,26 @@ const handleUploadAnalyzeBody = async () => {
   setIsUploadingBody(true)
   try {
     const sessionId = crypto.randomUUID()
+
+    let retainThisSession = false
+    if (retainHistoryEnabled) {
+      const res = await fetch('/api/visual-retention-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, captureType: 'body' }),
+      })
+      const { canRetain, renewsAt } = await res.json()
+      retainThisSession = canRetain
+      setRetentionLimitInfo(canRetain ? null : { type: 'body', renewsAt })
+    }
+
     for (const [pose, file] of shots) {
       const formData = new FormData()
       formData.append('userId', user.id)
       formData.append('captureType', 'body')
       formData.append('pose', pose)
       formData.append('sessionId', sessionId)
+      formData.append('retained', String(retainThisSession))
       formData.append('image', file, `${pose}.jpg`)
       await fetch('/api/visual-capture-upload', { method: 'POST', body: formData })
     }
@@ -1548,6 +1660,8 @@ const handleUploadAnalyzeBody = async () => {
       body: JSON.stringify({ userId: user.id, sessionId, captureType: 'body', locale }),
     })
     setBodyUploads({ front: null, back: null, left: null, right: null })
+    setDataLoading(true)
+    await loadCaptures()
     setActiveSection('results')
   } catch (e) {
     console.error('body upload/analyze error:', e)
@@ -1571,6 +1685,14 @@ const generateQRToken = async () => {
     setQrToken(token)
     setShowQR(true)
   }
+
+const handleToggleRetention = async (value: boolean) => {
+  setRetainHistoryEnabled(value)
+  if (!value) setRetentionLimitInfo(null)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('profiles').update({ visual_retain_history: value }).eq('id', user.id)
+}
 
 const handleUpdateNarrative = async () => {
   const { data: { user } } = await supabase.auth.getUser()
@@ -1637,7 +1759,7 @@ const handleSendVisualReport = async (type: 'global' | 'detail') => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case 'results':     return <ResultsSection faceShots={faceShots} bodyShots={bodyShots} faceAnalysis={faceAnalysis} bodyAnalysis={bodyAnalysis} loading={dataLoading} />
+      case 'results':     return <ResultsSection faceShots={faceShots} bodyShots={bodyShots} faceAnalysis={faceAnalysis} bodyAnalysis={bodyAnalysis} loading={dataLoading} retainHistoryEnabled={retainHistoryEnabled} onToggleRetention={handleToggleRetention} retentionLimitInfo={retentionLimitInfo} />
       case 'evolve':      return <EvolveSection allAnalyses={allAnalyses} />
       case 'history':     return <HistorySection allAnalyses={allAnalyses} loading={dataLoading} />
       case 'report':
@@ -1731,7 +1853,7 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
       {/* ── BLOC GAUCHE — desktop ── */}
       <div className="hidden md:flex relative z-20 mx-auto max-w-[1850px] min-h-screen items-stretch px-4 md:px-8 lg:px-0">
         <div className="relative flex w-full max-w-[760px] flex-col justify-center px-8 lg:pl-0 lg:pr-16 items-start pointer-events-auto">
-          <div className="relative ml-0 w-full max-w-[490px] -mt-16 lg:-mt-[260px]">
+          <div className="relative ml-0 w-full max-w-[490px] -mt-16 lg:-mt-[280px]">
             <div className="relative rounded-[32px] lg:rounded-[36px] border border-white/10 bg-black/40 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-hidden h-[524px] lg:h-[564px]">
               <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#8FC1E8] to-transparent opacity-70" />
 
@@ -1739,7 +1861,7 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
                 style={{ fontFamily: 'Inter, sans-serif' }}>
                 {t('visual_badge')}
               </p>
-              <h2 className="text-[42px] lg:text-[50px] font-light leading-[1.05] text-[#EAE4D5]"
+              <h2 className="text-[48px] lg:text-[58px] font-light leading-[1.05] text-[#EAE4D5]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {(() => {
                   const hour = new Date().getHours()
@@ -1747,9 +1869,7 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
                   if (hour >= 12 && hour < 18) return t('visual_goodAfternoon')
                   if (hour >= 18 && hour < 22) return t('visual_goodEvening')
                   return t('visual_goodNight')
-                })()} 
-                <br />
-                <span className="italic">{firstName}</span>
+                })()} <span className="italic">{firstName}</span>
               </h2>
               <p className="mt-3 text-[14px] font-[450] leading-[1.75] italic text-white/70 max-w-[380px]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
@@ -1848,7 +1968,7 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
               <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#8FC1E8]/80" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {t('visual_badge')}
               </p>
-              <h2 className="text-[28px] font-light leading-[1.05] text-[#EAE4D5]"
+              <h2 className="text-[32px] font-light leading-[1.05] text-[#EAE4D5]"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {(() => {
                   const hour = new Date().getHours()
@@ -1856,9 +1976,7 @@ case 'captureBody': return <CaptureBodySection uploads={bodyUploads} setUploads=
                   if (hour >= 12 && hour < 18) return t('visual_goodAfternoon')
                   if (hour >= 18 && hour < 22) return t('visual_goodEvening')
                   return t('visual_goodNight')
-                })()} 
-                <br />
-                <span className="italic">{firstName}</span>
+                })()} <span className="italic">{firstName}</span>
               </h2>
               <p className="mt-2 text-[12px] font-light leading-[1.7] italic text-white/70"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}>

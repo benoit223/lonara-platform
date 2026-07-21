@@ -11,14 +11,26 @@ interface MySpaceModalProps {
 }
 
 const SLIDES = [
-  { id: 'state',      bg: '/lonamatin.png',    character: 'Lona',    label: 'STATE' },
-  { id: 'understand', bg: '/lonajour.png',     character: 'Lona',    label: 'UNDERSTAND' },
-  { id: 'protocols',  bg: '/engineamatin.png', character: 'EngineA', label: 'OPTIMIZE — PROTOCOLS' },
-  { id: 'products',   bg: '/engineajour.png',  character: 'EngineA', label: 'OPTIMIZE — PRODUCTS' },
-  { id: 'sleep',      bg: '/engineasoir.png',  character: 'EngineA', label: 'OPTIMIZE — SLEEP' },
-  { id: 'nutrition',  bg: '/engineanuit.png',  character: 'EngineA', label: 'OPTIMIZE — NUTRITION' },
-  { id: 'evolve',     bg: '/gummysoir.png',    character: 'Gummy',   label: 'EVOLVE' },
-  { id: 'connect',    bg: '/gummynuit.png',    character: 'Gummy',   label: 'CONNECT' },
+  { id: 'state',        bg: '/lonamatin.png',    character: 'Lona',    label: 'STATE' },
+  { id: 'understand',   bg: '/lonajour.png',     character: 'Lona',    label: 'UNDERSTAND' },
+  { id: 'protocols',    bg: '/engineamatin.png', character: 'EngineA', label: 'OPTIMIZE — PROTOCOLS' },
+  { id: 'products',     bg: '/engineajour.png',  character: 'EngineA', label: 'OPTIMIZE — PRODUCTS' },
+  { id: 'sleep',        bg: '/engineasoir.png',  character: 'EngineA', label: 'OPTIMIZE — SLEEP' },
+  { id: 'nutrition',    bg: '/engineanuit.png',  character: 'EngineA', label: 'OPTIMIZE — NUTRITION' },
+  { id: 'evolve',       bg: '/gummysoir.png',    character: 'Gummy',   label: 'EVOLVE' },
+  { id: 'fuelToday',    bg: '/fuelmidi.png',  character: 'EngineA', label: 'MY FUEL — TODAY' },
+  { id: 'fuelScan',     bg: '/fuelmatin.png', character: 'EngineA', label: 'MY FUEL — SCAN' },
+  { id: 'fuelFeed',     bg: '/fuelaprem.png', character: 'EngineA', label: 'MY FUEL — FEED' },
+  { id: 'fuelEvolve',   bg: '/fuelsoir.png',  character: 'EngineA', label: 'MY FUEL — EVOLVE' },
+  { id: 'fuelReport',   bg: '/fuelsoir.png',  character: 'EngineA', label: 'MY FUEL — REPORT' },
+  { id: 'fuelSetup',    bg: '/fuelmatin.png', character: 'EngineA', label: 'MY FUEL — SETUP' },
+  { id: 'visualResults',      bg: '/myvisualh.png', character: 'Lona', label: 'MY VISUAL — RESULTS' },
+  { id: 'visualCaptureFace',  bg: '/myvisualf.png', character: 'Lona', label: 'MY VISUAL — CAPTURE FACE' },
+  { id: 'visualCaptureBody',  bg: '/myvisualh.png', character: 'Lona', label: 'MY VISUAL — CAPTURE BODY' },
+  { id: 'visualEvolve',       bg: '/myvisualf.png', character: 'Lona', label: 'MY VISUAL — EVOLVE' },
+  { id: 'visualHistory',      bg: '/myvisualh.png', character: 'Lona', label: 'MY VISUAL — HISTORY' },
+  { id: 'visualReport',       bg: '/myvisualf.png', character: 'Lona', label: 'MY VISUAL — REPORT' },
+  { id: 'connect',      bg: '/gummynuit.png',    character: 'Gummy',   label: 'CONNECT' },
 ]
 
 // ── SLIDE STATE (my01) ────────────────────────────────────────────────────────
@@ -461,6 +473,570 @@ function SlideEvolve() {
   )
 }
 
+// ── SLIDE MY FUEL — TODAY (fuel01) ────────────────────────────────────────────
+function SlideFuelToday() {
+  const macros = [
+    { label: 'PROTEIN', consumed: 92, target: '80–110', color: '#1D9E75' },
+    { label: 'CARBS',   consumed: 140, target: '150–200', color: '#E7C980' },
+    { label: 'FAT',     consumed: 55, target: '50–70', color: '#5C96D8' },
+    { label: 'KCAL',    consumed: 1620, target: '1800–2200', color: '#EAE4D5' },
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">TODAY</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Your active sprint, daily macro targets, and real-time nutritional tracking.</p>
+
+      <div className="rounded-[1.2rem] border border-[#1D9E75]/40 bg-[#0A3566]/40 backdrop-blur-xl px-5 py-4 mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#3DD4A0]/80">RHYTHM SPRINT</span>
+          <span className="text-[11px] text-white/65">9 days left · Day 5/14</span>
+        </div>
+        <p className="text-[12px] text-white/75 mb-3 italic">Goal: Anti-inflammatory reset</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[['SCANNED', '12'], ['AVG SCORE', '78'], ['TODAY', '2']].map(([label, val]) => (
+            <div key={label} className="text-center">
+              <p className="text-[9px] uppercase tracking-[0.14em] text-white/55 mb-0.5">{label}</p>
+              <p className="text-[1.4rem] font-light text-[#EAE4D5]/80" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{val}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/45 backdrop-blur-xl px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/65 mb-4">DAILY TARGETS</p>
+        {macros.map((m) => (
+          <div key={m.label} className="mb-3">
+            <div className="flex justify-between mb-1">
+              <span className="text-[11px] text-white/75">{m.label}</span>
+              <span className="text-[11px] text-white/55">{m.consumed} / {m.target}</span>
+            </div>
+            <div className="h-[3px] w-full bg-white/8 rounded-full">
+              <div className="h-[3px] rounded-full" style={{ width: '65%', background: m.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 rounded-[1.2rem] border border-[#1D9E75]/30 bg-[#1D9E75]/5 px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#3DD4A0]/70 mb-2">AI INSIGHT</p>
+        <p className="text-[12px] text-white/70 leading-relaxed">Your protein intake is well-aligned with your anti-inflammatory goal. Consider adding omega-3 sources at dinner to further support recovery.</p>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY FUEL — SCAN (fuel02) ─────────────────────────────────────────────
+function SlideFuelScan() {
+  const analysisSteps = [
+    { label: 'Identify foods', done: true },
+    { label: 'Estimate macros', done: true },
+    { label: 'Score longevity coherence', done: true },
+    { label: 'Cross-check conditions & biomarkers', done: false },
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">SCAN</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Photograph any meal — Engine A analyzes macros, longevity coherence, and personalized alerts in seconds.</p>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-6 py-6 mb-3">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="rounded-[1.2rem] border border-dashed border-white/30 bg-white/[0.03] py-10 flex flex-col items-center gap-3">
+            <div className="h-12 w-12 rounded-full border border-white/10 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/60">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <p className="text-[12px] text-white/60">Take or upload a photo</p>
+            <p className="text-[9px] text-white/30">JPG, PNG — max 10MB</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/55 mb-2">MEAL TIME</p>
+              <div className="flex gap-2 flex-wrap">
+                {['Breakfast', 'Lunch', 'Dinner', 'Snack'].map((m, i) => (
+                  <span key={m} className={`rounded-full border px-3 py-1.5 text-[10px] ${i === 1 ? 'border-[#1D9E75]/70 bg-[#1D9E75]/15 text-[#3DD4A0]' : 'border-white/10 text-white/55'}`}>{m}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/55 mb-2">NOTE (OPTIONAL)</p>
+              <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[11px] text-white/30">Add context to your meal...</div>
+            </div>
+            <div className="mt-1 rounded-full border border-[#1D9E75]/65 bg-[#1D9E75]/15 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-[#3DD4A0]">Analyze Meal</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/45 backdrop-blur-xl px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/65 mb-3">WHAT ENGINE A CHECKS</p>
+        <div className="flex flex-col gap-2">
+          {analysisSteps.map((s) => (
+            <div key={s.label} className="flex items-center gap-3">
+              <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${s.done ? 'border-[#1D9E75] bg-[#1D9E75]/20' : 'border-white/15'}`}>
+                {s.done && <span className="text-[#3DD4A0] text-[9px]">✓</span>}
+              </div>
+              <p className="text-[12px] text-white/65">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY FUEL — FEED (fuel03) ─────────────────────────────────────────────
+function SlideFuelFeed() {
+  const logs = [
+    { meal: 'Breakfast', score: 84, protein: 28, carbs: 35, fat: 12, time: '08:15' },
+    { meal: 'Snack', score: 58, protein: 8, carbs: 22, fat: 6, time: '10:30' },
+    { meal: 'Lunch', score: 72, protein: 32, carbs: 48, fat: 18, time: '12:40' },
+    { meal: 'Snack', score: 65, protein: 12, carbs: 18, fat: 8, time: '16:00' },
+    { meal: 'Dinner', score: 65, protein: 25, carbs: 40, fat: 22, time: '19:20' },
+    { meal: 'Dinner', score: 48, protein: 20, carbs: 55, fat: 25, time: 'Yesterday' },
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">FEED</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Every scanned meal, with its score, macros, and AI narrative.</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {logs.map((log, i) => {
+          const color = log.score >= 70 ? '#1D9E75' : log.score >= 45 ? '#E7C980' : '#E24B4A'
+          return (
+            <div key={i} className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-[13px] font-medium text-[#EAE4D5]/80">{log.meal}</p>
+                  <p className="text-[10px] text-white/55">{log.time}</p>
+                </div>
+                <p className="text-[1.4rem] font-light leading-none" style={{ color, fontFamily: "'Cormorant Garamond', serif" }}>{log.score}</p>
+              </div>
+              <div className="h-[2px] w-full bg-white/8 rounded-full mb-3">
+                <div className="h-[2px] rounded-full" style={{ width: `${log.score}%`, background: color }} />
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <span className="text-[10px] text-white/65"><span className="text-white/40">P </span>{log.protein}g</span>
+                <span className="text-[10px] text-white/65"><span className="text-white/40">C </span>{log.carbs}g</span>
+                <span className="text-[10px] text-white/65"><span className="text-white/40">F </span>{log.fat}g</span>
+              </div>
+              {log.score < 55 && (
+                <p className="mt-2 text-[9px] px-2 py-0.5 rounded-full border border-[#E7C980]/45 bg-[#E7C980]/5 text-[#E7C980]/90 inline-block">High sugar detected</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY FUEL — EVOLVE (fuel04) ───────────────────────────────────────────
+function SlideFuelEvolve() {
+  const pts = [55,50,45,48,42,38,40,35,32,30]
+  const path = pts.map((v,i) => `${i===0?'M':'L'} ${i*26} ${65-v*0.9}`).join(' ')
+  const macroSparklines = [
+    { label: 'PROTEIN', color: '#1D9E75', points: '0,20 15,15 30,18 45,10 60,8', current: '92g', delta: '+14g vs week 1' },
+    { label: 'CARBS', color: '#E7C980', points: '0,10 15,14 30,12 45,18 60,16', current: '140g', delta: '−22g vs week 1' },
+    { label: 'FAT', color: '#5C96D8', points: '0,18 15,16 30,14 45,15 60,12', current: '55g', delta: '−6g vs week 1' },
+    { label: 'KCAL', color: '#EAE4D5', points: '0,12 15,13 30,10 45,11 60,9', current: '1620', delta: 'stable' },
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">EVOLVE</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Your fuel score and macro trends over the last 30 days.</p>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">FUEL SCORE</p>
+          <p className="text-[11px] text-[#3DD4A0]/80">76/100 latest</p>
+        </div>
+        <svg viewBox="0 0 260 65" className="w-full h-[60px]">
+          <path d={path} fill="none" stroke="#1D9E75" strokeWidth="1.8" strokeLinecap="round" />
+          {pts.map((v,i) => <circle key={i} cx={i*26} cy={65-v*0.9} r="2.3" fill="#1D9E75" opacity="0.8" />)}
+        </svg>
+        <div className="flex justify-between mt-1">
+          <span className="text-[9px] text-white/40">30 days ago</span>
+          <span className="text-[9px] text-white/40">Today</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        {macroSparklines.map((m) => (
+          <div key={m.label} className="rounded-[1rem] border border-white/8 bg-black/45 backdrop-blur-xl px-3 py-3">
+            <p className="text-[9px] uppercase tracking-[0.14em] text-white/55 mb-1">{m.label}</p>
+            <p className="text-[1.1rem] font-light mb-1" style={{ color: m.color, fontFamily: "'Cormorant Garamond', serif" }}>{m.current}</p>
+            <svg viewBox="0 0 60 30" className="w-full h-[22px]">
+              <polyline points={m.points} fill="none" stroke={m.color} strokeWidth="1.5" />
+            </svg>
+            <p className="text-[8px] text-white/35 mt-1">{m.delta}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-[1.2rem] border border-[#1D9E75]/30 bg-[#1D9E75]/5 px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#3DD4A0]/70 mb-2">TREND ANALYSIS</p>
+        <p className="text-[12px] text-white/70 leading-relaxed">Protein consistency has improved steadily over the sprint, while sugar-heavy snacks have declined — a pattern strongly aligned with your anti-inflammatory goal.</p>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY FUEL — REPORT (fuel05) ───────────────────────────────────────────
+function SlideFuelReport() {
+  const byMeal = [
+    { meal: 'Breakfast', avg: 82, count: 21 },
+    { meal: 'Lunch', avg: 75, count: 22 },
+    { meal: 'Dinner', avg: 63, count: 19 },
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">REPORT</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">A synthesis of your nutritional coherence — send by email or view over 30/90/180 days.</p>
+
+      <div className="flex items-center gap-2 mb-3">
+        {['30 Days', '90 Days', '180 Days'].map((p, i) => (
+          <span key={p} className={`rounded-full border px-4 py-1.5 text-[10px] uppercase tracking-[0.14em] ${i === 0 ? 'border-[#1D9E75]/70 bg-[#1D9E75]/15 text-[#3DD4A0]' : 'border-white/10 text-white/55'}`}>{p}</span>
+        ))}
+        <div className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/50">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Send Report
+        </div>
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-1">AVG SCORE</p>
+            <p className="text-[3rem] font-light leading-none text-[#3DD4A0]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>74</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-1">TOTAL MEALS</p>
+            <p className="text-[3rem] font-light leading-none text-[#EAE4D5]/70" style={{ fontFamily: "'Cormorant Garamond', serif" }}>62</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {byMeal.map((m) => {
+          const color = m.avg >= 70 ? '#1D9E75' : m.avg >= 45 ? '#E7C980' : '#E24B4A'
+          return (
+            <div key={m.meal} className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{m.meal}</p>
+              <p className="text-[1.4rem] font-light leading-none mb-1" style={{ color, fontFamily: "'Cormorant Garamond', serif" }}>{m.avg}</p>
+              <p className="text-[9px] text-white/30">{m.count} meals</p>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">AVG MACROS</p>
+        <div className="grid grid-cols-4 gap-4">
+          {[['PROTEIN','88','g','#1D9E75'],['CARBS','165','g','#E7C980'],['FAT','58','g','#5C96D8'],['KCAL','1950','','#EAE4D5']].map(([label,val,unit,color]) => (
+            <div key={label as string}>
+              <p className="text-[9px] uppercase tracking-[0.14em] text-white/40 mb-1">{label}</p>
+              <p className="text-[1.4rem] font-light" style={{ color: color as string, fontFamily: "'Cormorant Garamond', serif" }}>{val}<span className="text-[11px] text-white/30">{unit}</span></p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY FUEL — SETUP (fuel06) ────────────────────────────────────────────
+function SlideFuelSetup() {
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#3DD4A0]/80 mb-1 md:mb-2">NEW SPRINT</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Fuel</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Choose a mode, duration, and goal — Engine A calculates your personalized macro targets.</p>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-6 py-6 mb-3">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="flex flex-col gap-3">
+            {[['Pulse', 'Quick calibration, 7 days', 'All members'], ['Rhythm', 'Structured sprint, 14 days', 'Premium+'], ['Protocol', 'Deep optimization, 30 days', 'Executive']].map(([mode, desc, tier], i) => (
+              <div key={mode} className={`rounded-[1rem] border px-5 py-2.5 ${i === 1 ? 'border-[#1D9E75]/70 bg-[#1D9E75]/10' : 'border-white/10 bg-white/[0.03]'}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-[#EAE4D5]">{mode}</span>
+                  <span className="text-[8px] uppercase tracking-[0.14em] text-white/30">{tier}</span>
+                </div>
+                <p className="text-[11px] text-white/60 mt-1">{desc}</p>
+              </div>
+            ))}
+            <div className="mt-2">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-white/45 mb-2">DURATION</p>
+              <div className="flex gap-2">
+                {['7', '14', '30'].map((d, i) => (
+                  <span key={d} className={`flex-1 rounded-full border py-1.5 text-center text-[10px] uppercase tracking-[0.1em] ${i === 1 ? 'border-[#1D9E75]/70 bg-[#1D9E75]/15 text-[#3DD4A0]' : 'border-white/10 text-white/65'}`}>{d} days</span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/65 mb-3">GOAL</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {['General', 'Inflammation', 'Protein', 'Weight Loss', 'Blood Sugar', 'Longevity'].map((g, i) => (
+                <span key={g} className={`rounded-full border px-3 py-1.5 text-[11px] ${i === 1 ? 'border-[#1D9E75]/70 bg-[#1D9E75]/15 text-[#3DD4A0]' : 'border-white/10 text-white/65'}`}>{g}</span>
+              ))}
+            </div>
+            <div className="rounded-[1rem] border border-white/8 bg-black/45 backdrop-blur-xl px-4 py-3 mb-4">
+              <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-2">PROJECTED DAILY TARGETS</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[['Protein', '80–110g'], ['Carbs', '150–200g']].map(([label, val]) => (
+                  <div key={label} className="flex justify-between">
+                    <span className="text-[10px] text-white/55">{label}</span>
+                    <span className="text-[10px] text-white/80">{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-full border border-[#1D9E75]/65 bg-[#1D9E75]/15 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-[#3DD4A0]">Start Sprint</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — RESULTS (visual01) ──────────────────────────────────────
+function SlideVisualResults() {
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">RESULTS</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Visual</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Your latest facial and postural analysis using clinical scales — Glogau, Fitzpatrick, Griffiths, Merz.</p>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-3">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-4">FACE ANALYSIS</p>
+        <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3 mb-3">
+          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">PERCEIVED AGE</p>
+          <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>32–37 <span className="text-[13px] text-white/50">yrs</span></p>
+        </div>
+        <div className="grid grid-cols-4 gap-3 mb-3">
+          {[['GLOGAU', 'II'], ['FITZPATRICK', 'III'], ['MIDFACE', '1/4'], ['TEAR TROUGH', '1/4']].map(([label, val]) => (
+            <div key={label}>
+              <p className="text-[8px] uppercase tracking-[0.12em] text-white/45 mb-1">{label}</p>
+              <p className="text-[1.2rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{val}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[['Jawline', 'Mild'], ['Eyelids', 'Mild'], ['Neck', 'Moderate']].map(([zone, val]) => (
+            <span key={zone} className="text-[9px] px-2 py-1 rounded-full border border-white/10 text-white/60">{zone}: {val}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-4">BODY ANALYSIS</p>
+        <div className="rounded-[0.8rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-4 py-3 mb-3">
+          <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 mb-1">VISUAL AGING INDEX</p>
+          <p className="text-[1.8rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>78<span className="text-[13px] text-white/50">/100</span></p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {[['POSTURAL ALIGNMENT', 'Neutral'], ['MUSCLE TONE', 'Moderate'], ['ADIPOSITY', 'Mixed'], ['WHR', '0.87']].map(([label, val]) => (
+            <div key={label} className="flex justify-between">
+              <span className="text-[10px] text-white/60">{label}</span>
+              <span className="text-[11px] text-white/80">{val}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — CAPTURE FACE (visual02) ─────────────────────────────────
+function SlideVisualCaptureFace() {
+  const poses = ['Face', 'Profil gauche', 'Profil droit']
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">CAPTURE FACE</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Facial Capture</h2>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-4 mt-2">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#8FC1E8]/70 mb-2">RECOMMENDATIONS</p>
+        <p className="text-[12px] text-white/60 leading-relaxed">Prefer natural, diffuse light. No makeup if possible, hair pulled back from the forehead and cheeks, no glasses.</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 mb-4 max-w-[720px]">
+        {poses.map((pose) => (
+          <div key={pose} className="relative aspect-[3/4] max-h-[280px] rounded-[0.8rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-white/50 text-center px-2 bg-black/40 rounded-full py-1">{pose}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full max-w-[720px] rounded-full border border-white/10 bg-white/[0.03] py-4 text-center text-[12px] uppercase tracking-[0.22em] text-white/25 cursor-not-allowed">Analyze</div>
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — CAPTURE BODY (visual03) ─────────────────────────────────
+function SlideVisualCaptureBody() {
+  const poses = ['Face', 'Dos', 'Profil gauche', 'Profil droit']
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">CAPTURE BODY</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Body Capture</h2>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-4 mt-2">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#8FC1E8]/70 mb-2">RECOMMENDATIONS</p>
+        <p className="text-[12px] text-white/60 leading-relaxed">Prefer natural, diffuse light. Wear fitted, neutral clothing for a more accurate silhouette analysis.</p>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {poses.map((pose) => (
+          <div key={pose} className="relative aspect-[3/4] rounded-[1rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center">
+            <span className="text-[9px] uppercase tracking-[0.12em] text-white/50 text-center px-1 bg-black/40 rounded-full py-1">{pose}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full rounded-full border border-white/10 bg-white/[0.03] py-4 text-center text-[12px] uppercase tracking-[0.22em] text-white/25 cursor-not-allowed">Analyze</div>
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — EVOLVE (visual04) ───────────────────────────────────────
+function SlideVisualEvolve() {
+  const pts = [45,48,52,55,58,62,65,68,72,75]
+  const path = pts.map((v,i) => `${i===0?'M':'L'} ${i*26} ${100-v*0.9}`).join(' ')
+  const allMetrics = ['Perceived Age', 'Fitzpatrick', 'Glogau Stage', 'Griffiths Score', 'Midface Volume', 'Tear Trough', 'Jowl', 'Visual Aging Index', 'Postural Alignment', 'Muscle Tone', 'Adiposity', 'Sarcopenia', 'Skin Laxity', 'Cellulite Grade']
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">EVOLVE</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Visual</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Track any of your 18 visual metrics over time — from perceived age to muscle tone.</p>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {allMetrics.map((m, i) => (
+          <span key={m} className={`rounded-full border px-3 py-1.5 text-[10px] ${i === 7 ? 'border-[#8FC1E8]/70 bg-[#8FC1E8]/15 text-[#8FC1E8]' : 'border-white/10 text-white/55'}`}>{m}</span>
+        ))}
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4 mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">VISUAL AGING INDEX</p>
+          <p className="text-[11px] text-[#8FC1E8]/80">78/100 — latest</p>
+        </div>
+        <svg viewBox="0 0 260 100" className="w-full h-[90px]">
+          <path d={path} fill="none" stroke="#8FC1E8" strokeWidth="1.8" strokeLinecap="round" />
+          {pts.map((v,i) => <circle key={i} cx={i*26} cy={100-v*0.9} r="2.5" fill="#8FC1E8" opacity="0.85" />)}
+        </svg>
+        <div className="flex justify-between mt-1">
+          <span className="text-[9px] text-white/40">Jan 2026</span>
+          <span className="text-[9px] text-white/40">Jul 2026</span>
+        </div>
+      </div>
+
+      <div className="rounded-[1.2rem] border border-[#8FC1E8]/30 bg-[#8FC1E8]/5 px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#8FC1E8]/70 mb-2">TREND ANALYSIS</p>
+        <p className="text-[12px] text-white/70 leading-relaxed">Your visual aging index has improved by 30 points over 6 months — the steepest gains coincide with consistent My Fuel sprints and improved sleep patterns.</p>
+      </div>
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — HISTORY (visual05) ──────────────────────────────────────
+function SlideVisualHistory() {
+  const groups = [
+    { month: 'July 2026', sessions: [
+      { date: 'Jul 18', type: 'Face Analysis' },
+      { date: 'Jul 12', type: 'Body Analysis' },
+      { date: 'Jul 05', type: 'Face Analysis' },
+    ]},
+    { month: 'June 2026', sessions: [
+      { date: 'Jun 28', type: 'Body Analysis' },
+      { date: 'Jun 20', type: 'Face Analysis' },
+      { date: 'Jun 14', type: 'Face Analysis' },
+    ]},
+  ]
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">HISTORY</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Visual</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">Every past session, grouped by month — with the option to keep photos alongside your data.</p>
+
+      <div className="rounded-[1rem] border border-[#8FC1E8]/20 bg-[#8FC1E8]/5 px-5 py-3 mb-4">
+        <p className="text-[12px] text-white/65 leading-relaxed">Enable photo retention to compare your visual evolution side by side.</p>
+      </div>
+
+      {groups.map((g) => (
+        <div key={g.month} className="mb-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-white/45 mb-2">{g.sessions.length} sessions in {g.month}</p>
+          <div className="flex flex-col gap-2">
+            {g.sessions.map((s) => (
+              <div key={s.date} className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-[13px] text-white/80">{s.date}</p>
+                  <p className="text-[11px] text-white/45">{s.type}</p>
+                </div>
+                <span className="text-[11px] text-[#8FC1E8]/70">View →</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── SLIDE MY VISUAL — REPORT (visual06) ───────────────────────────────────────
+function SlideVisualReport() {
+  return (
+    <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">REPORT</p>
+      <h2 className="text-[2rem] md:text-[2.8rem] font-light text-[#EAE4D5] mb-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>My Visual</h2>
+      <p className="text-[12px] md:text-[13px] text-white/45 mb-3 md:mb-5 max-w-[600px]">A synthesis comparing your perceived age against your chronological and biological age.</p>
+
+      <div className="flex items-center gap-2 mb-3">
+        {['30 Days', '90 Days', '180 Days'].map((p, i) => (
+          <span key={p} className={`rounded-full border px-4 py-1.5 text-[10px] uppercase tracking-[0.14em] ${i === 0 ? 'border-[#8FC1E8]/70 bg-[#8FC1E8]/15 text-[#8FC1E8]' : 'border-white/10 text-white/55'}`}>{p}</span>
+        ))}
+        <div className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/50">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Send Report
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        {[['CHRONO AGE','56'],['PERCEIVED AGE','35'],['AGE GAP','−21'],['AGING INDEX','78']].map(([label,val]) => (
+          <div key={label} className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{label}</p>
+            <p className="text-[1.4rem] font-light text-[#8FC1E8]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{val}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {[['FACE SESSIONS', '9'], ['BODY SESSIONS', '7'], ['GLOGAU STAGE', 'II']].map(([label, val]) => (
+          <div key={label} className="rounded-[1rem] border border-white/8 bg-black/24 backdrop-blur-xl px-4 py-3">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-white/45 mb-1">{label}</p>
+            <p className="text-[1.4rem] font-light text-[#EAE4D5]/80" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{val}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-[1.2rem] border border-white/8 bg-black/24 backdrop-blur-xl px-5 py-4">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">NARRATIVE</p>
+        <p className="text-[13px] text-white/70 leading-relaxed">Your perceived age trends consistently below your chronological age, corroborating a strong biological profile. Facial vascularity and fatigue signs remain low, aligning with your nutritional coherence over the same period.</p>
+      </div>
+    </div>
+  )
+}
+
 // ── SLIDE CONNECT (my05) ──────────────────────────────────────────────────────
 function SlideConnect() {
   const messages = [
@@ -552,6 +1128,18 @@ const { data, error: authError } = result
     sleep:      <SlideSleep />,
     nutrition:  <SlideNutrition />,
     evolve:     <SlideEvolve />,
+    fuelToday:    <SlideFuelToday />,
+    fuelScan:     <SlideFuelScan />,
+    fuelFeed:     <SlideFuelFeed />,
+    fuelEvolve:   <SlideFuelEvolve />,
+    fuelReport:   <SlideFuelReport />,
+    fuelSetup:    <SlideFuelSetup />,
+    visualResults:     <SlideVisualResults />,
+    visualCaptureFace: <SlideVisualCaptureFace />,
+    visualCaptureBody: <SlideVisualCaptureBody />,
+    visualEvolve:      <SlideVisualEvolve />,
+    visualHistory:     <SlideVisualHistory />,
+    visualReport:      <SlideVisualReport />,
     connect:    <SlideConnect />,
   }
 
@@ -565,8 +1153,9 @@ const { data, error: authError } = result
 
         {/* Calculs selon le slide */}
         {(() => {
-          const isNight = slide.bg.includes('nuit') || slide.bg.includes('soir')
-          const isDark = slide.bg.includes('nuit')
+  const isFuelOrVisual = slide.id.startsWith('fuel') || slide.id.startsWith('visual')
+const isNight = isFuelOrVisual || slide.bg.includes('nuit') || slide.bg.includes('soir')
+const isDark = isFuelOrVisual || slide.bg.includes('nuit')
           const greetings: Record<string, string> = {
             state:      'Good morning',
             understand: 'Good day',
@@ -575,6 +1164,18 @@ const { data, error: authError } = result
             sleep:      'Good evening',
             nutrition:  'Good evening',
             evolve:     'Good evening',
+            fuelToday:    'Good day',
+            fuelScan:     'Good morning',
+            fuelFeed:     'Good day',
+            fuelEvolve:   'Good evening',
+            fuelReport:   'Good night',
+            fuelSetup:    'Good morning',
+            visualResults:     'Good morning',
+            visualCaptureFace: 'Good morning',
+            visualCaptureBody: 'Good day',
+            visualEvolve:      'Good evening',
+            visualHistory:     'Good day',
+            visualReport:      'Good night',
             connect:    'Good night',
           }
           const phrases: Record<string, string> = {
@@ -585,6 +1186,18 @@ const { data, error: authError } = result
             sleep:      "As the day softens into evening, your body prepares its most sacred act — regeneration.",
             nutrition:  "What you choose to nourish yourself with tonight becomes the foundation of tomorrow's vitality.",
             evolve:     "Every assessment is a checkpoint on a longer arc — your biological story, written one day at a time.",
+            fuelToday:    "What fuels your body today shapes the vitality you carry tomorrow.",
+            fuelScan:     "A single photograph, a complete nutritional truth.",
+            fuelFeed:     "Every meal is a data point in the story of your longevity.",
+            fuelEvolve:   "Patterns emerge not in a single meal, but in the rhythm of many.",
+            fuelReport:   "Coherence, measured — one plate at a time.",
+            fuelSetup:    "Precision begins with intention. Choose your rhythm.",
+            visualResults:     "The mirror tells a story only precision can truly read.",
+            visualCaptureFace: "Stillness, light, and honesty — the foundation of a clear reading.",
+            visualCaptureBody: "The body remembers what words cannot say.",
+            visualEvolve:      "Aging is not linear. Neither is your trajectory.",
+            visualHistory:     "Every session is a frame in the film of your evolution.",
+            visualReport:      "Perception and biology, finally in the same conversation.",
             connect:    "In the stillness of night, your companion remains present — a quiet intelligence at the edge of sleep.",
           }
           const badgeColor = isDark ? 'text-[#C7AC60]/70' : 'text-black/70'
@@ -597,9 +1210,17 @@ const { data, error: authError } = result
           const chevronColor = isDark ? 'text-white/25' : 'text-black/25'
           const logo = isDark ? '/LOGOOFFICIELTRANSP.png' : '/LOGOOFFICIELTRANSPNOIR.png'
           const dividerColor = isDark ? 'from-white/5 to-transparent' : 'from-black/15 to-transparent'
-          const greeting = greetings[slide.id] ?? 'Welcome'
-          const phrase = phrases[slide.id] ?? ''
+ const greeting = greetings[slide.id] ?? 'Welcome'
+const phrase = phrases[slide.id] ?? ''
 
+const badgeTexts: Record<string, string> = {
+  fuel: 'Nutritional Intelligence',
+  visual: 'Visual Vitality Analysis',
+  default: 'High-Precision Biological Profiling',
+}
+const badgeText = slide.id.startsWith('fuel') ? badgeTexts.fuel
+  : slide.id.startsWith('visual') ? badgeTexts.visual
+  : badgeTexts.default
           return (
             <>
               {/* Navbar simulée */}
@@ -623,7 +1244,7 @@ const { data, error: authError } = result
               <div className="absolute left-0 top-0 bottom-[140px] w-[420px] hidden md:flex items-center z-10">
                 <div className="ml-8 w-[340px] rounded-[32px] border border-white/6 bg-black/24 px-10 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] h-[484px] lg:h-[524px] relative">
                   <div className="absolute top-0 left-[12%] w-[76%] h-[2px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-                  <p className={`mb-4 text-[11px] uppercase tracking-[0.28em] ${badgeColor}`}>High-Precision Biological Profiling</p>
+                  <p className={`mb-4 text-[11px] uppercase tracking-[0.28em] ${badgeColor}`}>{badgeText}</p>
                   <div className={`text-[36px] font-light leading-[1.05] ${textColor}`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                     {greeting} <span className={`italic ${textColorItalic}`}>Sophie</span>
                   </div>

@@ -603,16 +603,26 @@ function PriorityItem({ title, impact, severity, t }: any) {
     moderate: 'border-[#FF9F43]/35 bg-[#FF9F43]/[0.10] text-[#FF9F43] shadow-[0_0_25px_rgba(255,159,67,0.12)]',
     low:      'border-[#E7D19A]/20 bg-[#C7AC60]/[0.06] text-[#E7D19A] shadow-[0_0_20px_rgba(199,172,96,0.10)]',
   }
+
+  let displayTitle = title
+  if (title.startsWith('priority_') || title.startsWith('flag_')) {
+    displayTitle = t(title)
+  } else if (title.startsWith('condition_flag::')) {
+    const [, conditionLabel, familyFlag] = title.split('::')
+    displayTitle = familyFlag === 'family'
+      ? t('conditionPredispositionFamily', { condition: conditionLabel })
+      : t('conditionPredisposition', { condition: conditionLabel })
+  }
+
   return (
    <div className={`flex items-center justify-between rounded-[18px] border px-4 py-4 ${severityStyles[severity] ?? severityStyles.low}`}>
   <p className="text-sm text-[#EAE4D5]/85 flex-1 pr-4">
-    {(title.startsWith('priority_') || title.startsWith('flag_')) ? t(title) : title}
+    {displayTitle}
   </p>
   <span className="text-[11px] tracking-[0.2em] uppercase text-right shrink-0 w-[120px]">{t(impact)}</span>
 </div>
   )
 }
-
 function MetadataItem({ label, value }: any) {
   return (
     <div className="min-w-0">

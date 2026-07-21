@@ -9,6 +9,7 @@ import UnderstandSection from './UnderstandSection'
 import OptimizeSection from './OptimizeSection'
 import StateSection from './StateSection'
 import { getTimeOfDay, getMySpaceBg, isNightTime } from '../lib/timeOfDay'
+import SummarySection from './SummarySection'
 
 interface MySpaceProps {
   memberTier: 'guest' | 'member' | 'premium' | 'executive'
@@ -26,7 +27,7 @@ interface MySpaceProps {
   onVisual: () => void
 }
 
-type MenuItem = 'state' | 'understand' | 'optimize' | 'evolve' | 'connect'
+type MenuItem = 'state' | 'understand' | 'optimize' | 'evolve' | 'connect' | 'summary'
 type MenuItemOrNew = MenuItem | 'new'
 
 function getGreeting(name: string, t: any): string {
@@ -292,6 +293,12 @@ function SectionContent({
       description: t('connectDesc'),
       extra: <ChatSection lastAssessment={lastAssessment} bgCharacter={bgCharacter} messages={chatMessages} setMessages={setChatMessages} />,
     },
+ summary: {
+  eyebrow: t('summaryEyebrow'),
+  title: t('menuSummary'),
+  description: t('summaryDesc'),
+  extra: <SummarySection />,
+},
   }
 
   const { eyebrow, title, description, extra } = content[active]
@@ -613,15 +620,22 @@ const getDotColor = (num: number | null, idx: number) => {
               {tRoot('myfuel')}
             </button>
 
-           {/* ── MY VISUAL ── */}
-            <button
-              onClick={onVisual}
-              className="relative group flex items-center gap-2 rounded-full border border-[#4A90C2]/40 bg-black/20 px-5 py-2 text-[11px] uppercase tracking-[0.22em] text-[#8FC1E8] backdrop-blur-xl transition-all hover:border-[#4A90C2]/60 hover:bg-black/30 hover:text-[#B5DBF5]"
-            >
-              <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#8FC1E8]/60 to-transparent pointer-events-none" />
-              {tRoot('myvisual')}
-            </button>
-
+    {/* ── MY VISUAL ── */}
+<button
+  onClick={() => { if ((localTier || memberTier) !== 'member') onVisual() }}
+  disabled={(localTier || memberTier) === 'member'}
+  title={(localTier || memberTier) === 'member' ? t('visualMemberLocked') : undefined}
+  className={`relative group flex items-center gap-2 rounded-full border px-5 py-2 text-[11px] uppercase tracking-[0.22em] backdrop-blur-xl transition-all ${
+    (localTier || memberTier) === 'member'
+      ? 'border-white/10 bg-black/10 text-white/25 cursor-not-allowed'
+      : 'border-[#4A90C2]/40 bg-black/20 text-[#8FC1E8] hover:border-[#4A90C2]/60 hover:bg-black/30 hover:text-[#B5DBF5]'
+  }`}
+>
+  {(localTier || memberTier) !== 'member' && (
+    <div className="absolute top-0 left-[18%] w-[64%] h-[1px] bg-gradient-to-r from-transparent via-[#8FC1E8]/60 to-transparent pointer-events-none" />
+  )}
+  {tRoot('myvisual')}
+</button>
 
             <button onClick={onBack}
               className="flex items-center gap-2 text-white/35 hover:text-white/70 transition-all text-[11px] md:text-[13px] uppercase tracking-[0.18em]">
@@ -649,12 +663,12 @@ const getDotColor = (num: number | null, idx: number) => {
         <div className="relative flex w-full max-w-[760px] flex-col justify-center px-8 lg:pl-0 lg:pr-16 items-start pointer-events-auto">
           <div className="absolute left-[-200px] top-[180px] h-[480px] w-[480px] rounded-full bg-cyan-400/[0.018] blur-[120px]" />
           <div className="absolute left-[240px] bottom-[120px] h-[320px] w-[320px] rounded-full bg-cyan-300/[0.015] blur-[90px]" />
-          <div className="relative ml-0 max-w-[490px] -mt-16 lg:-mt-70 rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[524px] lg:h-[564px]">
+      <div className="relative ml-0 w-full max-w-[490px] -mt-16 lg:-mt-[280px] rounded-[32px] lg:rounded-[36px] border border-white/6 bg-black/24 px-10 lg:px-12 py-8 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)] overflow-hidden h-[524px] lg:h-[564px]">
             <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-            <p className={`mb-6 text-[13px] uppercase tracking-[0.28em] ${isNight ? 'text-[#C7AC60]/70' : 'text-black/70'}`}
-              style={{ fontFamily: 'Inter, sans-serif' }}>
-              {t('badge')}
-            </p>
+    <p className="mb-6 text-[13px] uppercase tracking-[0.28em] text-[#C7AC60]"
+  style={{ fontFamily: 'Inter, sans-serif' }}>
+  {t('badge')}
+</p>
             <h1 className="max-w-[760px] leading-[1.02] tracking-[0.01em]"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}>
         <div className={`text-[48px] lg:text-[58px] font-light leading-[1.05] ${isNight ? 'text-white/80' : 'text-black/80'}`}>
@@ -675,39 +689,55 @@ const getDotColor = (num: number | null, idx: number) => {
               )}
             </div>
             <div className="mt-5 h-px bg-gradient-to-r from-black/15 to-transparent" />
-            <nav className="mt-4 flex flex-col">
-              {([...MENU_ITEMS, { id: 'new' as MenuItemOrNew, label: t('newAssessment') }] as { id: MenuItemOrNew; label: string }[]).map((item) => {
-                const isActive = item.id !== 'new' && activeSection === item.id
-                return (
-                  <button key={item.id}
-                    onClick={() => item.id === 'new' ? onStartAssessment() : setActiveSection(prev => prev === item.id ? null : item.id as MenuItem)}
-                    className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left transition-all duration-200 ${
-                      isActive ? 'bg-black/8 border border-black/10' : 'border border-transparent hover:bg-black/[0.04]'
-                    }`}>
-                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
-                    <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
-                      item.id === 'new'
-                        ? 'text-[#C7AC60]/80'
-                        : isActive
-                          ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
-                          : isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
-                    }`}>
-                      {item.label}
-                    </span>
-                    {isActive && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
-                  </button>
-                )
-              })}
-            </nav>
-            <button
-              onClick={onSignOut}
-              className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 mt-2 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200`}>
-              <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
-                isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
-              }`}>
-                {t('signOut')}
-              </span>
-            </button>
+   <nav className="mt-4 flex flex-col">
+  {([...MENU_ITEMS, { id: 'new' as MenuItemOrNew, label: t('newAssessment') }] as { id: MenuItemOrNew; label: string }[]).map((item) => {
+    const isActive = item.id !== 'new' && activeSection === item.id
+    return (
+      <button key={item.id}
+        onClick={() => item.id === 'new' ? onStartAssessment() : setActiveSection(prev => prev === item.id ? null : item.id as MenuItem)}
+        className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left transition-all duration-200 ${
+          isActive ? 'bg-black/8 border border-black/10' : 'border border-transparent hover:bg-black/[0.04]'
+        }`}>
+        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
+        <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
+          item.id === 'new'
+            ? 'text-[#C7AC60]/80'
+            : isActive
+              ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+              : isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
+        }`}>
+          {item.label}
+        </span>
+        {isActive && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
+      </button>
+    )
+  })}
+
+  <button
+    onClick={() => setActiveSection(prev => prev === 'summary' ? null : 'summary' as MenuItem)}
+    className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 text-left transition-all duration-200 ${
+      activeSection === 'summary' ? 'bg-black/8 border border-black/10' : 'border border-transparent hover:bg-black/[0.04]'
+    }`}>
+    {activeSection === 'summary' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
+    <span className={`text-[12px] uppercase tracking-[0.24em] font-bold transition-all ${
+      activeSection === 'summary'
+        ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+        : isNight ? 'text-white/60 group-hover:text-white/80' : 'text-black/60 group-hover:text-black/80'
+    }`}>
+      {t('menuSummary')}
+    </span>
+    {activeSection === 'summary' && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
+  </button>
+</nav>
+<button
+  onClick={onSignOut}
+  className={`group relative flex items-center gap-4 rounded-[0.8rem] px-4 py-1 mt-2 text-left border border-transparent hover:bg-black/[0.04] transition-all duration-200`}>
+  <span className={`text-[12px] uppercase tracking-[0.24em] transition-all ${
+    isNight ? 'text-white/40 group-hover:text-white/65' : 'text-black/40 group-hover:text-black/65'
+  }`}>
+    {t('signOut')}
+  </span>
+</button>
           </div>
         </div>
       </div>
@@ -798,7 +828,7 @@ const getDotColor = (num: number | null, idx: number) => {
             {/* Card greeting — même style glassmorphique que Hero */}
             <div className="relative w-full rounded-[20px] border border-white/6 bg-black/24 px-5 py-4 backdrop-blur-[14px] shadow-[0_0_80px_rgba(0,0,0,0.45)]">
               <div className="absolute top-0 left-[12%] w-[76%] h-[2px] blur-[0.4px] bg-gradient-to-r from-transparent via-[#E7D19A] to-transparent opacity-90" />
-              <p className={`mb-2 text-[9px] uppercase tracking-[0.22em] ${isNight ? 'text-[#C7AC60]/70' : 'text-black/60'}`} style={{ fontFamily: 'Inter, sans-serif' }}>{t('badge')}</p>
+              <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#C7AC60]" style={{ fontFamily: 'Inter, sans-serif' }}>{t('badge')}</p>
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 <span className={`text-[32px] font-light leading-[1.05] ${isNight ? 'text-white/80' : 'text-black/80'}`}>
                   {greetingBase.replace(',', '')} <span className={`italic ${isNight ? 'text-white/90' : 'text-black/90'}`}>{greetingName}</span>
@@ -817,35 +847,69 @@ const getDotColor = (num: number | null, idx: number) => {
               <div className="mt-4 h-px bg-gradient-to-r from-black/15 to-transparent" />
 
               {/* Menu vertical dans la card — même style que Hero */}
-              <nav className="mt-3 flex flex-col">
-                {([...MENU_ITEMS, { id: 'new' as MenuItemOrNew, label: t('newAssessment') }] as { id: MenuItemOrNew; label: string }[]).map((item) => {
-                  const isActive = item.id !== 'new' && activeSection === item.id
-                  return (
-                    <button key={item.id}
-                      onClick={() => item.id === 'new' ? onStartAssessment() : setActiveSection(prev => prev === item.id ? null : item.id as MenuItem)}
-                      className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left transition-all ${isActive ? 'bg-black/8 border border-black/10' : 'border border-transparent'}`}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
-                      <span className={`text-[11px] uppercase tracking-[0.24em] ${
-                        item.id === 'new'
-                          ? 'text-[#C7AC60]/80'
-                          : isActive
-                            ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
-                            : isNight ? 'text-white/40' : 'text-black/40'
-                      }`}>{item.label}</span>
-                      {isActive && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
-                    </button>
-                  )
-                })}
-              </nav>
-              <button
-                onClick={onSignOut}
-                className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 mt-1 text-left border border-transparent transition-all`}>
-                <span className={`text-[11px] uppercase tracking-[0.24em] ${
-                  isNight ? 'text-white/40' : 'text-black/40'
-                }`}>
-                  {t('signOut')}
-                </span>
-              </button>
+<nav className="mt-3 flex flex-col">
+  {([...MENU_ITEMS, { id: 'new' as MenuItemOrNew, label: t('newAssessment') }] as { id: MenuItemOrNew; label: string }[]).map((item) => {
+    const isActive = item.id !== 'new' && activeSection === item.id
+    return (
+      <button key={item.id}
+        onClick={() => item.id === 'new' ? onStartAssessment() : setActiveSection(prev => prev === item.id ? null : item.id as MenuItem)}
+        className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left transition-all ${isActive ? 'bg-black/8 border border-black/10' : 'border border-transparent'}`}>
+        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
+        <span className={`text-[11px] uppercase tracking-[0.24em] ${
+          item.id === 'new'
+            ? 'text-[#C7AC60]/80'
+            : isActive
+              ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+              : isNight ? 'text-white/40' : 'text-black/40'
+        }`}>{item.label}</span>
+        {isActive && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
+      </button>
+    )
+  })}
+
+  <button
+    onClick={() => setActiveSection(prev => prev === 'summary' ? null : 'summary' as MenuItem)}
+    className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left transition-all ${activeSection === 'summary' ? 'bg-black/8 border border-black/10' : 'border border-transparent'}`}>
+    {activeSection === 'summary' && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
+    <span className={`text-[11px] uppercase tracking-[0.24em] font-bold ${
+      activeSection === 'summary'
+        ? isNight ? 'text-[#C7AC60] font-medium' : 'text-black font-medium'
+        : isNight ? 'text-white/40' : 'text-black/40'
+    }`}>{t('menuSummary')}</span>
+    {activeSection === 'summary' && <ChevronRight className="ml-auto h-3 w-3 text-black/25" />}
+  </button>
+
+  <div className="mt-2 pt-2 border-t border-black/10 flex flex-col gap-1">
+    <button
+      onClick={onFuel}
+      className="group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all"
+    >
+      <span className="text-[11px] uppercase tracking-[0.24em] text-[#3DD4A0]">
+        {tRoot('myfuel')}
+      </span>
+    </button>
+    <button
+      onClick={() => { if ((localTier || memberTier) !== 'member') onVisual() }}
+      disabled={(localTier || memberTier) === 'member'}
+      className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 text-left border border-transparent transition-all ${
+        (localTier || memberTier) === 'member' ? 'opacity-30 cursor-not-allowed' : ''
+      }`}
+    >
+      <span className="text-[11px] uppercase tracking-[0.24em] text-[#8FC1E8]">
+        {tRoot('myvisual')}
+      </span>
+    </button>
+  </div>
+</nav>
+<button
+  onClick={onSignOut}
+  className={`group relative flex items-center gap-3 rounded-[0.8rem] px-3 py-1.5 mt-1 text-left border border-transparent transition-all`}>
+  <span className={`text-[11px] uppercase tracking-[0.24em] ${
+    isNight ? 'text-white/40' : 'text-black/40'
+  }`}>
+    {t('signOut')}
+  </span>
+</button>
             </div>
 
             {/* 4 métriques — 2x2 compact */}
@@ -903,13 +967,6 @@ const getDotColor = (num: number | null, idx: number) => {
             </div>
           </div>
         )}
-
-        {/* COPYRIGHT MOBILE */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
-          <p className="text-[9px] font-thin uppercase tracking-[0.24em] whitespace-nowrap text-white/30" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {tLegal('legal.copyright')}
-          </p>
-        </div>
 
       </div>
     </section>

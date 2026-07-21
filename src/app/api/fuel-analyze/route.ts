@@ -173,8 +173,14 @@ Respond with this exact JSON structure:
     "fat": <number in grams>,
     "kcal": <number>
   },
-  "fuel_score": <integer 0-100, longevity coherence score>,
-  "score_rationale": "<2 sentences explaining the score>",
+  "quality_flags": {
+    "ultra_processed": <boolean>,
+    "high_sugar": <boolean>,
+    "high_sodium": <boolean>,
+    "anti_inflammatory": <boolean>,
+    "fiber_rich": <boolean>
+  },
+  "score_rationale": "<2 sentences explaining the nutritional quality of this meal>",
   "alerts": [
     { "type": "warning|info|danger", "message": "<short alert, max 8 words>" }
   ],
@@ -184,14 +190,6 @@ Respond with this exact JSON structure:
   "ai_narrative": "<2-3 sentences, Lonara voice, personalized to this member's profile, referencing their biomarkers or conditions if relevant. Warm but precise.>"
 }
 
-
-
-SCORING GUIDE:
-- 85-100: Exceptional longevity alignment
-- 70-84: Good, minor optimizations possible  
-- 50-69: Moderate, notable gaps
-- 30-49: Poor alignment, significant issues
-- 0-29: Highly problematic for longevity
 
 ALERTS: Only flag real issues — inflammatory ingredients conflicting with conditions, blood sugar risks given glucose markers, sodium issues given cardiovascular profile, etc. Max 3 alerts.
 RECOMMENDATIONS: Max 2, concrete and actionable. Reference the member's specific goals or conditions when possible.
@@ -222,30 +220,88 @@ Respond in this language: ${locale}`
       temperature: 0.3,
     })
 
-    const rawContent = completion.choices[0]?.message?.content ?? '{}'
-    const clean = rawContent.replace(/```json|```/g, '').trim()
-    const parsed = JSON.parse(clean)
+   const rawContent = completion.choices[0]?.message?.content ?? '{}'
+const clean = rawContent.replace(/```json|```/g, '').trim()
+const parsed = JSON.parse(clean)
 
-    // ── Sauvegarder dans fuel_logs ────────────────────────────────────────
-    const { data: log, error: logError } = await supabase
-      .from('fuel_logs')
-      .insert({
-        user_id:          userId,
-        sprint_id:        resolvedSprintId,
-        meal_time:        mealTime,
-        time_of_day:      timeOfDay,
-        image_url:        imageUrl,
-        note:             note || null,
-        macros:           parsed.macros ?? null,
-        fuel_score:       parsed.fuel_score ?? null,
-        alerts:           parsed.alerts ?? null,
-        recommendations:  parsed.recommendations ?? null,
-        ai_narrative:     parsed.ai_narrative ?? null,
-        identified_foods: parsed.identified_foods ?? null,
-        score_rationale:  parsed.score_rationale ?? null,
-      })
-      .select()
-      .single()
+// ── Récupérer les cibles macro du sprint actif, si disponible ─────────
+let macroTargets: { protein_g: { min: number; max: number }; carbs_g: { min: number; max: number }; fat_g: { min: number; max: number }; kcal: { min: number; max: number } } | null = null
+if (resolvedSprintId) {
+  const { data: sprintData } = await supabase
+    .from('fuel_sprints')
+    .select('macro_targets')
+    .eq('id', resolvedSprintId)
+    .maybeSingle()
+  macroTargets = sprintData?.macro_targets ?? null
+}
+
+// ── Calcul déterministe du fuel_score ──────────────────────────────────
+function computeFuelScore(macros: any, flags: any, targets: typeof macroTargets, alerts: any[]): number {
+  let score = 70 // base neutre
+
+  const protein = macros?.protein ?? 0
+  const carbs   = macros?.carbs ?? 0
+  const fat     = macros?.fat ?? 0
+  const kcal    = macros?.kcal ?? 0
+
+  // Alignement avec les cibles du sprint (si dispo) — cette portion du repas
+  // est jugée par sa proportion de macros plutôt que par un absolu journalier
+  if (targets) {
+    const proteinRatio = protein / Math.max(targets.protein_g.max / 3, 1) // ~1/3 des cibles jour par repas
+    const carbsRatio   = carbs   / Math.max(targets.carbs_g.max / 3, 1)
+    const fatRatio     = fat     / Math.max(targets.fat_g.max / 3, 1)
+
+    if (proteinRatio >= 0.6 && proteinRatio <= 1.4) score += 8
+    else if (proteinRatio < 0.3) score -= 6
+
+    if (carbsRatio > 1.6) score -= 8
+    if (fatRatio > 1.6) score -= 6
+  }
+
+  // Qualité intrinsèque
+  if (flags?.ultra_processed)     score -= 15
+  if (flags?.high_sugar)          score -= 10
+  if (flags?.high_sodium)         score -= 6
+  if (flags?.anti_inflammatory)   score += 8
+  if (flags?.fiber_rich)          score += 6
+
+  // Pénalité par alerte générée (danger > warning > info)
+  for (const a of alerts ?? []) {
+    if (a.type === 'danger')  score -= 10
+    else if (a.type === 'warning') score -= 5
+    else score -= 2
+  }
+
+  // Variation fine anti-répétition — dérivée du ratio kcal/macros réel du repas
+  // (évite les valeurs "rondes" tout en restant déterministe et reproductible)
+  const microVariation = Math.round(((protein * 4 + carbs * 4 + fat * 9) % 7) - 3)
+  score += microVariation
+
+  return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+const computedScore = computeFuelScore(parsed.macros, parsed.quality_flags, macroTargets, parsed.alerts)
+
+// ── Sauvegarder dans fuel_logs ────────────────────────────────────────
+const { data: log, error: logError } = await supabase
+  .from('fuel_logs')
+  .insert({
+    user_id:          userId,
+    sprint_id:        resolvedSprintId,
+    meal_time:        mealTime,
+    time_of_day:      timeOfDay,
+    image_url:        imageUrl,
+    note:             note || null,
+    macros:           parsed.macros ?? null,
+    fuel_score:       computedScore,
+    alerts:           parsed.alerts ?? null,
+    recommendations:  parsed.recommendations ?? null,
+    ai_narrative:     parsed.ai_narrative ?? null,
+    identified_foods: parsed.identified_foods ?? null,
+    score_rationale:  parsed.score_rationale ?? null,
+  })
+  .select()
+  .single()
 
     if (logError) {
       console.error('fuel_logs insert error:', logError)

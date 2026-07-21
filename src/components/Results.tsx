@@ -148,6 +148,11 @@ if (assessmentId && data) {
     pillar_balance:  data.pillarScores?.balance  ?? null,
     pillar_protect:  data.pillarScores?.protect  ?? null,
     pillar_restore:  data.pillarScores?.restore  ?? null,
+    engine_a_scores: data.scores ?? null,
+    weaknesses:      data.weaknesses ?? null,
+    strengths:       data.strengths ?? null,
+    flags:           data.flags ?? null,
+    dominant_pillar: data.dominantPillar ?? null,
   })
   .eq('id', assessmentId)
 
