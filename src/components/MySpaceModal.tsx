@@ -19,7 +19,7 @@ const SLIDES = [
   { id: 'nutrition',    bg: '/engineanuit.png',  character: 'EngineA', label: 'OPTIMIZE — NUTRITION' },
   { id: 'evolve',       bg: '/gummysoir.png',    character: 'Gummy',   label: 'EVOLVE' },
   { id: 'fuelToday',    bg: '/fuelmidi.png',  character: 'EngineA', label: 'MY FUEL — TODAY' },
-  { id: 'fuelScan',     bg: '/fuelmatin.png', character: 'EngineA', label: 'MY FUEL — SCAN' },
+  { id: 'fuelScan',     bg: '/fuelmatin.png', character: 'EngineA', label: 'MY FUEL — SCAN A MEAL' },
   { id: 'fuelFeed',     bg: '/fuelaprem.png', character: 'EngineA', label: 'MY FUEL — FEED' },
   { id: 'fuelEvolve',   bg: '/fuelsoir.png',  character: 'EngineA', label: 'MY FUEL — EVOLVE' },
   { id: 'fuelReport',   bg: '/fuelsoir.png',  character: 'EngineA', label: 'MY FUEL — REPORT' },
@@ -857,7 +857,11 @@ function SlideVisualResults() {
 
 // ── SLIDE MY VISUAL — CAPTURE FACE (visual02) ─────────────────────────────────
 function SlideVisualCaptureFace() {
-  const poses = ['Face', 'Profil gauche', 'Profil droit']
+  const poses: { label: string; src: string }[] = [
+    { label: 'Face', src: '/visage.png' },
+    { label: 'Profil gauche', src: '/profilA.png' },
+    { label: 'Profil droit', src: '/profilB.png' },
+  ]
   return (
     <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
       <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">CAPTURE FACE</p>
@@ -870,8 +874,9 @@ function SlideVisualCaptureFace() {
 
       <div className="grid grid-cols-3 gap-3 mb-4 max-w-[720px]">
         {poses.map((pose) => (
-          <div key={pose} className="relative aspect-[3/4] max-h-[280px] rounded-[0.8rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-white/50 text-center px-2 bg-black/40 rounded-full py-1">{pose}</span>
+          <div key={pose.label} className="relative aspect-[3/4] max-h-[280px] rounded-[0.8rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center overflow-hidden">
+            <img src={pose.src} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" />
+            <span className="relative text-[10px] uppercase tracking-[0.14em] text-white/50 text-center px-2 bg-black/40 rounded-full py-1">{pose.label}</span>
           </div>
         ))}
       </div>
@@ -883,7 +888,12 @@ function SlideVisualCaptureFace() {
 
 // ── SLIDE MY VISUAL — CAPTURE BODY (visual03) ─────────────────────────────────
 function SlideVisualCaptureBody() {
-  const poses = ['Face', 'Dos', 'Profil gauche', 'Profil droit']
+  const poses: { label: string; src: string }[] = [
+    { label: 'Face', src: '/face.png' },
+    { label: 'Dos', src: '/dos.png' },
+    { label: 'Profil gauche', src: '/coteA.png' },
+    { label: 'Profil droit', src: '/coteB.png' },
+  ]
   return (
     <div className="absolute inset-0 flex flex-col px-4 md:px-16 pt-[80px] md:pt-[110px] pb-[110px] md:pb-[100px] overflow-y-auto">
       <p className="text-[11px] uppercase tracking-[0.28em] text-[#8FC1E8]/80 mb-1 md:mb-2">CAPTURE BODY</p>
@@ -896,8 +906,9 @@ function SlideVisualCaptureBody() {
 
       <div className="grid grid-cols-4 gap-3 mb-4">
         {poses.map((pose) => (
-          <div key={pose} className="relative aspect-[3/4] rounded-[1rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center">
-            <span className="text-[9px] uppercase tracking-[0.12em] text-white/50 text-center px-1 bg-black/40 rounded-full py-1">{pose}</span>
+          <div key={pose.label} className="relative aspect-[3/4] rounded-[1rem] border border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center overflow-hidden">
+            <img src={pose.src} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" />
+            <span className="relative text-[9px] uppercase tracking-[0.12em] text-white/50 text-center px-1 bg-black/40 rounded-full py-1">{pose.label}</span>
           </div>
         ))}
       </div>
@@ -1221,24 +1232,44 @@ const badgeTexts: Record<string, string> = {
 const badgeText = slide.id.startsWith('fuel') ? badgeTexts.fuel
   : slide.id.startsWith('visual') ? badgeTexts.visual
   : badgeTexts.default
+
+const menuSets: Record<string, string[]> = {
+  myspace: ['STATE', 'UNDERSTAND', 'OPTIMIZE', 'EVOLVE', 'CONNECT', 'NEW ASSESSMENT'],
+  fuel:    ['TODAY', 'EVOLVE', 'FEED', 'REPORT', 'SCAN A MEAL', 'NEW SPRINT'],
+  visual:  ['RESULTS', 'EVOLUTION', 'HISTORY', 'REPORT', 'CAPTURE FACE', 'CAPTURE BODY'],
+}
+const activeMenuSet = slide.id.startsWith('fuel') ? menuSets.fuel
+  : slide.id.startsWith('visual') ? menuSets.visual
+  : menuSets.myspace
+
+const navbarLabels: Record<string, string> = {
+  fuel: 'MY FUEL — Sophie',
+  visual: 'MY VISUAL — Sophie',
+  default: 'MY SPACE — Sophie',
+}
+const navbarLabel = slide.id.startsWith('fuel') ? navbarLabels.fuel
+  : slide.id.startsWith('visual') ? navbarLabels.visual
+  : navbarLabels.default
           return (
             <>
-              {/* Navbar simulée */}
-              <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 md:px-6 pt-3 md:pt-4">
-                <img src={logo} alt="Lonara" className="h-14 md:h-20 w-auto opacity-90 mt-1 md:mt-2" />
-                <div className="flex items-center gap-2 md:gap-4">
-                  <div className="flex items-center gap-0.5 md:gap-1 rounded-full border border-white/15 bg-white/[0.06] px-1 py-1 backdrop-blur-xl">
-                    {['Lona', 'EngineA', 'Gummy'].map((char) => (
-                      <div key={char} className={`rounded-full px-2 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[11px] uppercase tracking-[0.12em] md:tracking-[0.18em] ${char === slide.character ? 'bg-white/20 text-white' : 'text-white/40'}`}>{char}</div>
-                    ))}
-                  </div>
-                  <span className="hidden md:inline text-[11px] uppercase tracking-[0.18em] text-white/52">DASHBOARD — Sophie</span>
-                  <button onClick={() => { setShowTour(false); setCurrentSlide(0) }}
-                    className="flex items-center gap-1.5 text-white/35 hover:text-white/70 transition text-[10px] md:text-[11px] uppercase tracking-[0.18em]">
-                    <X className="h-3.5 w-3.5" /><span className="hidden md:inline">Back</span>
-                  </button>
-                </div>
-              </div>
+    {/* Navbar simulée */}
+<div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 md:px-6 pt-3 md:pt-4">
+  <img src={logo} alt="Lonara" className="h-14 md:h-20 w-auto opacity-90 mt-1 md:mt-2" />
+  <div className="flex items-center gap-2 md:gap-4">
+    {!isFuelOrVisual && (
+      <div className="flex items-center gap-0.5 md:gap-1 rounded-full border border-white/15 bg-white/[0.06] px-1 py-1 backdrop-blur-xl">
+        {['Lona', 'EngineA', 'Gummy'].map((char) => (
+          <div key={char} className={`rounded-full px-2 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[11px] uppercase tracking-[0.12em] md:tracking-[0.18em] ${char === slide.character ? 'bg-white/20 text-white' : 'text-white/40'}`}>{char}</div>
+        ))}
+      </div>
+    )}
+    <span className="hidden md:inline text-[11px] uppercase tracking-[0.18em] text-white/52">{navbarLabel}</span>
+    <button onClick={() => { setShowTour(false); setCurrentSlide(0) }}
+      className="flex items-center gap-1.5 text-white/35 hover:text-white/70 transition text-[10px] md:text-[11px] uppercase tracking-[0.18em]">
+      <X className="h-3.5 w-3.5" /><span className="hidden md:inline">Back</span>
+    </button>
+  </div>
+</div>
 
               {/* Bloc gauche simulé */}
               <div className="absolute left-0 top-0 bottom-[140px] w-[420px] hidden md:flex items-center z-10">
@@ -1252,18 +1283,19 @@ const badgeText = slide.id.startsWith('fuel') ? badgeTexts.fuel
                     {phrase}
                   </p>
                   <div className={`mt-4 h-px bg-gradient-to-r ${dividerColor}`} />
-                  <nav className="mt-3 flex flex-col">
-                    {['STATE', 'UNDERSTAND', 'OPTIMIZE', 'EVOLVE', 'CONNECT', 'NEW ASSESSMENT'].map((item) => {
-                      const isActive = item === slide.label.split(' — ')[0]
-                      return (
-                        <div key={item} className={`flex items-center gap-4 rounded-[0.8rem] px-4 py-1.5 relative ${isActive ? menuActiveBg : 'border border-transparent'}`}>
-                          {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
-                          <span className={`text-[12px] uppercase tracking-[0.24em] ${isActive ? menuActive : menuInactive}`}>{item}</span>
-                          {isActive && <span className={`ml-auto text-[10px] ${chevronColor}`}>›</span>}
-                        </div>
-                      )
-                    })}
-                  </nav>
+       <nav className="mt-3 flex flex-col">
+  {activeMenuSet.map((item) => {
+    const slideLabelPart = slide.label.includes(' — ') ? slide.label.split(' — ')[1] : slide.label
+    const isActive = item === slideLabelPart
+    return (
+      <div key={item} className={`flex items-center gap-4 rounded-[0.8rem] px-4 py-1.5 relative ${isActive ? menuActiveBg : 'border border-transparent'}`}>
+        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-[#C7AC60]" />}
+        <span className={`text-[12px] uppercase tracking-[0.24em] ${isActive ? menuActive : menuInactive}`}>{item}</span>
+        {isActive && <span className={`ml-auto text-[10px] ${chevronColor}`}>›</span>}
+      </div>
+    )
+  })}
+</nav>
                 </div>
               </div>
             </>

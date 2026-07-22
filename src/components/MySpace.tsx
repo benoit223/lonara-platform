@@ -675,19 +675,19 @@ const getDotColor = (num: number | null, idx: number) => {
   {greetingBase.replace(',', '')} <span className={`italic ${isNight ? 'text-white/90' : 'text-black/90'}`}>{greetingName}</span>
 </div>
             </h1>
-            <div className="mt-4 max-w-[385px] min-h-[44px]">
-              {phraseLoading ? (
-                <div className="space-y-2">
-                  <div className="h-2 w-full rounded-full bg-black/10 animate-pulse" />
-                  <div className="h-2 w-3/4 rounded-full bg-black/8 animate-pulse" />
-                </div>
-              ) : (
-                <p className={`text-[16px] lg:text-[17px] font-[450] leading-[1.75] tracking-[0.01em] italic ${isNight ? 'text-white/55' : 'text-black/55'}`}
-                  style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                  {phrase}
-                </p>
-              )}
-            </div>
+          <div className="mt-4 max-w-[385px] min-h-[44px]">
+  {phraseLoading ? (
+    <div className="space-y-2">
+      <div className="h-2 w-full rounded-full bg-black/10 animate-pulse" />
+      <div className="h-2 w-3/4 rounded-full bg-black/8 animate-pulse" />
+    </div>
+  ) : (
+    <p className={`text-[16px] lg:text-[17px] font-[450] leading-[1.75] tracking-[0.01em] italic line-clamp-2 overflow-hidden ${isNight ? 'text-white/55' : 'text-black/55'}`}
+      style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+      {phrase}
+    </p>
+  )}
+</div>
             <div className="mt-5 h-px bg-gradient-to-r from-black/15 to-transparent" />
    <nav className="mt-4 flex flex-col">
   {([...MENU_ITEMS, { id: 'new' as MenuItemOrNew, label: t('newAssessment') }] as { id: MenuItemOrNew; label: string }[]).map((item) => {
@@ -834,14 +834,14 @@ const getDotColor = (num: number | null, idx: number) => {
                   {greetingBase.replace(',', '')} <span className={`italic ${isNight ? 'text-white/90' : 'text-black/90'}`}>{greetingName}</span>
                 </span>
               </h1>
-              {phraseLoading ? (
-                <div className="mt-2 space-y-1.5">
-                  <div className="h-1.5 w-full rounded-full bg-black/10 animate-pulse" />
-                  <div className="h-1.5 w-3/4 rounded-full bg-black/8 animate-pulse" />
-                </div>
-              ) : (
-                <p className={`mt-2 text-[13px] font-light leading-[1.7] italic ${isNight ? 'text-white/55' : 'text-black/55'}`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>{phrase}</p>
-              )}
+            {phraseLoading ? (
+  <div className="mt-2 space-y-1.5">
+    <div className="h-1.5 w-full rounded-full bg-black/10 animate-pulse" />
+    <div className="h-1.5 w-3/4 rounded-full bg-black/8 animate-pulse" />
+  </div>
+) : (
+  <p className={`mt-2 text-[13px] font-light leading-[1.7] italic line-clamp-2 overflow-hidden ${isNight ? 'text-white/55' : 'text-black/55'}`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>{phrase}</p>
+)}
 
               {/* Séparateur */}
               <div className="mt-4 h-px bg-gradient-to-r from-black/15 to-transparent" />
