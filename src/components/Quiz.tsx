@@ -418,7 +418,7 @@ responses={responses}
                   className="text-[2rem] md:text-[3rem] leading-[0.95] font-medium capitalize tracking-[0.04em] text-[#EAE4D5]"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                 >
-                  {currentCategory}
+                  {t('domain_' + currentCategory)}
                 </h2>
 
                 <p className="mt-4 text-[#EAE4D5]/45 max-w-2xl leading-[1.9] text-[15px]">
@@ -851,7 +851,7 @@ responses={responses}
                         <div className="w-6 h-6 rounded-full border border-[#035AA8]/20 flex items-center justify-center text-[9px] text-[#5C96D8]/85 bg-[#035AA8]/[0.03]">
                           {String(Math.floor(sectionIndex / 12) * 12 + index + 1).padStart(2, '0')}
                         </div>
-                        <span className="text-[13px] text-[#EAE4D5]/75 capitalize">{label}</span>
+                        <span className="text-[13px] text-[#EAE4D5]/75 capitalize">{t('domain_' + label)}</span>
                       </div>
                       <span className="text-[12px] text-[#5C96D8]/85">{value}%</span>
                     </div>
